@@ -1,5 +1,7 @@
 import pygame,sys
 from pygame.locals import *
+import rts_helpers
+import rts_map_builder
 import random
 
 def init(data):
@@ -20,59 +22,7 @@ def init(data):
 		for j in range(data.cells):
 			newRow.append('field')
 		data.board.append(newRow)
-	populateForests(data)
-
-def populateForests(data):
-	forestSizes=[]
-	for i in range(data.numOfForests):
-		randX=random.randint(0,data.cells-1)
-		randY=random.randint(0,data.cells-1)
-		print('creating forest '+str(i),'at',randX,',',randY)
-		while(data.board[randX][randY]!='field'):
-			randX=random.randint(0,data.cells-1)
-			randY=random.randint(0,data.cells-1)
-		forestSize=random.randint(data.forestMinSize,data.forestMaxSize+1)
-		curTile=(randX,randY)
-		forestComplete=False
-		finalForestSize=0
-		while(finalForestSize<forestSize):
-			print('creating tree '+str(i),'at',randX,randY)
-			data.board[curTile[0]][curTile[1]]='forest'
-			print('tree created at',curTile)
-			finalForestSize+=1
-			directions=[(curTile[0]+1,curTile[1]),(curTile[0],curTile[1]-1),((curTile[0]-1,curTile[1])),((curTile[0],curTile[1]+1))]
-			randDir=random.choice(directions)
-			print('next tree location= ',randDir)
-			for i in randDir:
-				if(i>data.cells-1 or i<0):
-					directions.pop(directions.index(randDir))
-					if(len(directions)>0):
-						randDir=random.choice(directions)
-						print('Q next tree location= ',randDir)
-			curTileVal=data.board[randDir[0]][randDir[1]]
-			while(curTileVal=='forest'):
-				directions.pop(directions.index(randDir))
-				if(len(directions)>0):
-					curTileVal=data.board[randDir[0]][randDir[1]]
-					print('invalid tree location',randDir,'already a tree')
-					randDir=random.choice(directions)
-					print('next tree location= ',randDir)
-					for i in randDir:
-						if(i>data.cells-1 or i<0):
-							directions.pop(directions.index(randDir))
-							if(len(directions)>0):
-								randDir=random.choice(directions)
-								print('next tree location= ',randDir)
-				else:
-					forestComplete=True
-					break
-			directions=[(curTile[0]+1,curTile[1]),(curTile[0],curTile[1]-1),((curTile[0]-1,curTile[1])),((curTile[0],curTile[1]+1))]
-			if(forestComplete):
-				break
-			curTile=randDir
-		print('----------------------------created forest of size',finalForestSize,'--------------------------------')
-		forestSizes.append((finalForestSize,forestSize))
-	print(forestSizes)
+	rts_map_builder.populateForests(data)
 
 def mouseDown(event,data):
     if(event.button==5):
@@ -127,9 +77,9 @@ def drawGrid(display,data):
 				((xCoord)*.25*data.cellWidth+(yCoord+1)*.25*data.cellWidth)+data.gameY)
 			tileLabel=data.board[x][y]
 			if(tileLabel=='forest'):
-				pygame.draw.polygon(display,(26,13,0),(point0,point1,point2,point3),2)
+				pygame.draw.polygon(display,(26,13,0),(point0,point1,point2,point3))
 			else:
-				pygame.draw.polygon(display,(51,153,51),(point0,point1,point2,point3),2)
+				pygame.draw.polygon(display,(51,153,51),(point0,point1,point2,point3))
 
 def drawCursor(display,data):
 	yCoord=data.cursorY
@@ -145,11 +95,11 @@ def drawCursor(display,data):
 
 	point3=(((xCoord+1)*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
 		((xCoord)*.25*data.cellWidth+(yCoord+1)*.25*data.cellWidth)+data.gameY)
-	pygame.draw.polygon(display,(153,230,255),(point0,point1,point2,point3),2)
+	pygame.draw.polygon(display,(153,230,255),(point0,point1,point2,point3),4)
 	coordLabel=str(xCoord)+','+str(yCoord)
 	fontSize=int(20*data.zoom)
 	font=pygame.font.SysFont('Helvetica',fontSize)
-	textSurface=font.render(coordLabel,False,(0,0,0))
+	textSurface=font.render(coordLabel,False,(255,255,255))
 	display.blit(textSurface,((((point1[0]+point3[0])//2)-fontSize,((point0[1]+point2[1])//2)-.5*fontSize)))
 
 def redrawAll(display, data):
