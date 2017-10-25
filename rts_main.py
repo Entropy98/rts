@@ -1,5 +1,5 @@
-from tkinter import *
-import rts_helpers
+import pygame,sys
+from pygame.locals import *
 import random
 
 def init(data):
@@ -74,38 +74,42 @@ def populateForests(data):
 		forestSizes.append((finalForestSize,forestSize))
 	print(forestSizes)
 
+def mouseDown(event,data):
+    if(event.button==5):
+    	data.zoom-=.1
+    elif(event.button==4):
+    	data.zoom+=.1
+    data.cellWidth=data.maxCellWidth*data.zoom
 
-def mousePressed(event,data):
-	pass
+def mouseUp(event,data):
+    pass
 
-def onMouseWheel(event,data):
-	delta=event.delta/120
-	data.zoom+=(delta/10)
-	data.cellWidth=data.maxCellWidth*data.zoom
-
-def keyPressed(event,data):
-	if(event.keysym=='Down'):
+def keyDown(event,data):
+	if(event.key==274):#down
 		data.cursorY+=1
-	elif(event.keysym=='Up'):
+	elif(event.key==273):#up
 		data.cursorY-=1
-	elif(event.keysym=='Right'):
+	elif(event.key==275):#right
 		data.cursorX+=1
-	elif(event.keysym=='Left'):
+	elif(event.key==276):#left
 		data.cursorX-=1
 
-	if(event.keysym=='w'):
+	if(event.unicode=='w'):
 		data.gameY+=10/data.zoom
-	elif(event.keysym=='s'):
+	elif(event.unicode=='s'):
 		data.gameY-=10/data.zoom
-	elif(event.keysym=='d'):
+	elif(event.unicode=='d'):
 		data.gameX-=10/data.zoom
-	elif(event.keysym=='a'):
+	elif(event.unicode=='a'):
 		data.gameX+=10/data.zoom
 
-def timerFired(data):
-	pass
+def keyUp(event,data):
+   	pass
 
-def drawGrid(canvas,data):
+def timerFired(data):
+    pass
+
+def drawGrid(display,data):
 	for x in range(data.cells):
 		for y in range(data.cells):
 			xCoord=x
@@ -123,15 +127,11 @@ def drawGrid(canvas,data):
 				((xCoord)*.25*data.cellWidth+(yCoord+1)*.25*data.cellWidth)+data.gameY)
 			tileLabel=data.board[x][y]
 			if(tileLabel=='forest'):
-				canvas.create_polygon(point0,point1,point2,point3,width=2,fill='brown',outline='black')
+				pygame.draw.polygon(display,(26,13,0),(point0,point1,point2,point3),2)
 			else:
-				canvas.create_polygon(point0,point1,point2,point3,width=2,fill='green',outline='black')
-			#tileLabel=data.board[x][y]
-			#fontSize=str(int(20*data.zoom))
-			#canvas.create_text((point1[0]+point3[0])/2,(point0[1]+point2[1])/2,anchor='center',font='Helvetica '+fontSize,text=tileLabel)
+				pygame.draw.polygon(display,(51,153,51),(point0,point1,point2,point3),2)
 
-
-def drawCursor(canvas,data):
+def drawCursor(display,data):
 	yCoord=data.cursorY
 	xCoord=data.cursorX
 	point0=((xCoord*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
@@ -145,60 +145,76 @@ def drawCursor(canvas,data):
 
 	point3=(((xCoord+1)*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
 		((xCoord)*.25*data.cellWidth+(yCoord+1)*.25*data.cellWidth)+data.gameY)
-	canvas.create_polygon(point0,point1,point2,point3,width=2,fill='deep sky blue',outline='black')
+	pygame.draw.polygon(display,(153,230,255),(point0,point1,point2,point3),2)
 	coordLabel=str(xCoord)+','+str(yCoord)
-	fontSize=str(int(20*data.zoom))
-	canvas.create_text((point1[0]+point3[0])/2,(point0[1]+point2[1])/2,anchor='center',font='Helvetica '+fontSize,text=coordLabel)
+	fontSize=int(20*data.zoom)
+	font=pygame.font.SysFont('Helvetica',fontSize)
+	textSurface=font.render(coordLabel,False,(0,0,0))
+	display.blit(textSurface,((((point1[0]+point3[0])//2)-fontSize,((point0[1]+point2[1])//2)-.5*fontSize)))
 
-def redrawAll(canvas,data):
-	drawGrid(canvas,data)
-	drawCursor(canvas,data)
-	zoomLabel='Zoom: '+str(int(data.zoom*100))+'%'
-	canvas.create_text(data.width-20,20,anchor='ne',text=zoomLabel,font='Helvetica 10')
+def redrawAll(display, data):
+	drawGrid(display,data)
+	drawCursor(display,data)
 
 def run(width=300, height=300):
-	def redrawAllWrapper(canvas, data):
-		canvas.delete(ALL)
-		canvas.create_rectangle(0, 0, data.width, data.height,fill='white', width=0)
-		redrawAll(canvas, data)
-		canvas.update()    
+	def redrawAllWrapper(display, data):
+		display.fill((255,255,255))
+		redrawAll(display, data)
+		pygame.display.update()  
 
-	def mousePressedWrapper(event, canvas, data):
-		mousePressed(event, data)
-		redrawAllWrapper(canvas, data)
+	def mouseDownWrapper(event, display, data):
+		mouseDown(event, data)
+		redrawAllWrapper(display, data)
 
-	def onMouseWheelWrapper(event,canvas,data):
-		onMouseWheel(event,data)
-		redrawAllWrapper(canvas,data)
+	def mouseUpWrapper(event, display, data):
+		mouseUp(event, data)
+		redrawAllWrapper(display, data)
 
-	def keyPressedWrapper(event, canvas, data):
-		keyPressed(event, data)
-		redrawAllWrapper(canvas, data)
+	def keyDownWrapper(event, display, data):
+		keyDown(event,data)
+		redrawAllWrapper(display, data)
 
-	def timerFiredWrapper(canvas, data):
+	def keyUpWrapper(event, display, data):
+		keyUp(event,data)
+		redrawAllWrapper(display, data)
+
+	def quit():
+		pygame.quit()
+		sys.exit()
+
+	def timerFiredWrapper(display, data):
 		timerFired(data)
-		redrawAllWrapper(canvas, data)
-		# pause, then call timerFired again
-		canvas.after(data.timerDelay, timerFiredWrapper, canvas, data)
+		redrawAllWrapper(display, data)
+		data.fpsClock.tick(data.fps)
 
 	# Set up data and call init
 	class Struct(object): pass
 	data = Struct()
 	data.width = width
 	data.height = height
-	data.timerDelay = 100 # milliseconds
+	data.fps=30 #frames per second
+	data.fpsClock=pygame.time.Clock()
 	init(data)
 
-	# create the root and the canvas
-	root = Tk()
-	canvas = Canvas(root, width=data.width, height=data.height)
-	canvas.pack()
-	# set up events
-	root.bind("<Button-1>", lambda event:mousePressedWrapper(event, canvas, data))
-	root.bind("<Key>", lambda event:keyPressedWrapper(event, canvas, data))
-	root.bind('<MouseWheel>', lambda event:onMouseWheelWrapper(event,canvas,data))
-	timerFiredWrapper(canvas, data)
-	# and launch the app
-	root.mainloop()  # blocks until window is closed
+	# initialize module and display
+	pygame.init()
+	pygame.font.init()
+	display = pygame.display.set_mode((data.width,data.height))
+	pygame.display.set_caption('RTS')
+
+	#main loop
+	while(True):
+		for event in pygame.event.get():
+			if(event.type==QUIT):
+				quit()
+			if(event.type==KEYDOWN):
+				keyDownWrapper(event,display,data)
+			if(event.type==KEYUP):
+				keyUpWrapper(event,display,data)
+			if(event.type==MOUSEBUTTONDOWN):
+				mouseDownWrapper(event,display,data)
+			if(event.type==MOUSEBUTTONUP):
+				mouseUpWrapper(event,display,data)
+		timerFiredWrapper(display,data)
 
 run(600,600)
