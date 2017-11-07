@@ -68,7 +68,7 @@ def populateForests(data,forestNum=0,board=None,pos=None,treeCount=1):
 		pos=(randX,randY)
 	if(forestNum>data.numOfForests):#base case
 		print('Complete')
-		print('Compiling Tree Sprites...',end='')
+		print('Compiling Tree Sprites...')
 		for i in range(len(board)):
 			for j in range(len(board[0])):
 				if(board[i][j]=='forest'):
@@ -80,10 +80,13 @@ def populateForests(data,forestNum=0,board=None,pos=None,treeCount=1):
 		x,y=pos[0],pos[1]
 		moves=[
 			(x,y-1),(x+1,y-1),(x+1,y),(x+1,y+1),(x,y+1),(x-1,y+1),(x-1,y),(x-1,y-1)]
+		random.shuffle(moves)
 		for move in moves:
-			if(board[move[0]][move[1]]=='field'):
-				board[move[0]][move[1]]='forest'
-				if(populateForests(data,forestNum,board,move,treeCount+1)!=None):
-					return board
-				board[move[0]][move[1]]='field'
+			if(pos[0]>0 and pos[0]<data.cells-1):
+				if(pos[1]>0 and pos[1]<data.cells-1):
+					if(board[move[0]][move[1]]=='field'):
+						board[move[0]][move[1]]='forest'
+						if(populateForests(data,forestNum,board,move,treeCount+1)!=None):
+							return board
+						board[move[0]][move[1]]='field'
 		return None

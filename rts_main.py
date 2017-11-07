@@ -18,7 +18,7 @@ def init(data):
 	data.cursorY=data.cells//2
 	data.gameX=data.width//2
 	data.gameY=-data.height
-	data.numOfForests=15
+	data.numOfForests=25
 	data.forestSize=100
 	data.trees=pygame.sprite.Group()
 	data.board=[]
@@ -27,7 +27,7 @@ def init(data):
 		for j in range(data.cells):
 			newRow.append('field')
 		data.board.append(newRow)
-	print('Planting Trees...',end='')
+	print('Planting Trees...')
 	rts_map_builder.populateForests(data)
 	data.selectBox1=(None,None)
 	data.selectBox2=[0,0]
@@ -80,7 +80,6 @@ def keyDown(event,data):
 		data.cursorX=data.cells-1
 	if(data.cursorY>=data.cells):
 		data.cursorY=data.cells-1
-	print(data.board[data.cursorX][data.cursorY])
 
 	if(event.unicode=='w'):
 		data.gameY+=data.scrollSpeed/data.zoom
