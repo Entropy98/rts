@@ -68,3 +68,29 @@ def getTileCenterCoordinate(data,xCoord,yCoord):
     point3=(((xCoord+1)*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
         ((xCoord)*.25*data.cellWidth+(yCoord+1)*.25*data.cellWidth)+data.gameY)
     return (point1[0]+point3[0])//2,(point0[1]+point2[1])//2
+
+def moveUnit(x,y,destX,destY,speed):
+    dx=int(destX-x)
+    dy=int(destY-y)
+    mag=(destY**2+destX**2)**.5
+    i=(dx/mag)*speed
+    j=(dy/mag)*speed
+    return x+i,y+j
+
+#change anchor to 'tile' to receive 4 coordinates of tile instead of 2 of center
+def coord2Pos(data,xCoord,yCoord,anchor='center'):
+    point0=((xCoord*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
+        (xCoord*.25*data.cellWidth+yCoord*.25*data.cellWidth)+data.gameY)
+
+    point1=(((xCoord-1)*.5*data.cellWidth - (yCoord)*.5*data.cellWidth)+data.gameX,\
+        ((xCoord)*.25*data.cellWidth+(yCoord+1)*.25*data.cellWidth)+data.gameY)
+
+    point2=((xCoord*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
+        ((xCoord+1)*.25*data.cellWidth+(yCoord+1)*.25*data.cellWidth)+data.gameY)
+
+    point3=(((xCoord+1)*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
+        ((xCoord)*.25*data.cellWidth+(yCoord+1)*.25*data.cellWidth)+data.gameY)
+    if(anchor=='center'):
+        return (((point1[0]+point3[0])//2),((point0[1]+point2[1])//2))
+    elif(anchor=='tile'):
+        return (point0,point1,point2,point3)
