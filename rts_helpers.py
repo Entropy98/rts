@@ -1,5 +1,8 @@
 import math
 import rts_classes
+import rts_map_builder
+import pygame,sys
+from pygame.locals import *
 
 def maxItemLength(a):
     maxLen = 0
@@ -70,12 +73,60 @@ def moveUnit(x,y,destX,destY,speed,epsilon=6):
         j=speed*math.sin(theta)*yDir
         return (x+i,y+j)
 
+def legalPosition(data,unit):
+    collided=pygame.sprite.spritecollide(unit,rts_classes.player1.units,False)
+    if(len(collided)==0):
+        print('sprite collide')
+        return False
+    if(pointRhombusIntersect(unit.rect.center,*data.mapPos)==False):
+        print('map boundary')
+        return False
+    if(unit.flying==False):
+        coords=pos2Coord(data,*unit.rect.center)
+        if(data.board[coords[0]][coords[1]]!='field'):
+            print('terrain collide')
+            return False
+    return True
+
 def mapAdjustUnits(dx,dy):
     for unit in rts_classes.player1.units:
         curCoords=unit.rect.center
         unit.rect.center=(curCoords[0]+dx,curCoords[1]+dy)
         unit.desX+=dx
         unit.desY+=dy
+
+def updateMap(data,dx,dy):
+    mapAdjustUnits(dx,dy)
+    data.trees.update(data)
+    data.mapPos=rts_map_builder.generateMapPos(data)
+
+
+def pointRhombusIntersect(pos,point0,point1,point2,point3):
+    m01=(point0[1]-point1[1])/(point0[0]-point1[0])
+    m03=(point0[1]-point3[1])/(point0[0]-point3[0])
+    m21=(point2[1]-point1[1])/(point2[0]-point1[0])
+    m23=(point2[1]-point3[1])/(point2[0]-point3[0])
+
+    # print('TL',pos[1],'>',m21*pos[0]+point2[1]-m21*point2[0])
+    # print('TR',pos[1],'>',m23*pos[0]+point2[1]-m23*point2[0])
+    # print('BL',pos[1],'<',m01*pos[0]+point0[1]-m01*point0[0])
+    # print('BR',pos[1],'<',m03*pos[0]+point0[1]-m03*point0[0])
+
+    if(pos[1]>m21*pos[0]+point2[1]-m21*point2[0]):
+        return False
+    if(pos[1]>m23*pos[0]+point2[1]-m23*point2[0]):
+        return False
+    if(pos[1]<m01*pos[0]+point0[1]-m01*point0[0]):
+        return False
+    if(pos[1]<m03*pos[0]+point0[1]-m03*point0[0]):
+        return False
+    return True
+
+def pos2Coord(data,xPos,yPos):
+    for row in range(data.cells):
+        for col in range(data.cells):
+            if(pointRhombusIntersect((xPos,yPos),*coord2Pos(data,row,col,'tile'))):
+                return(row,col)
 
 #change anchor to 'tile' to receive 4 coordinates of tile instead of 2 of center
 def coord2Pos(data,xCoord,yCoord,anchor='center'):

@@ -41,3 +41,10 @@ def populateForests(data,forestNum=0,board=None,pos=None,treeCount=1):
 							return board
 						board[move[0]][move[1]]='field'
 		return None
+
+def generateMapPos(data):
+	point0=rts_helpers.coord2Pos(data,*data.mapCoords[0],'tile')[0]
+	point1=rts_helpers.coord2Pos(data,*data.mapCoords[1],'tile')[1]
+	point2=rts_helpers.coord2Pos(data,*data.mapCoords[2],'tile')[2]
+	point3=rts_helpers.coord2Pos(data,*data.mapCoords[3],'tile')[3]
+	return (point0,point1,point2,point3)

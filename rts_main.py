@@ -31,6 +31,8 @@ def init(data):
 	rts_map_builder.populateForests(data)
 	data.selectBox1=(None,None)
 	data.selectBox2=[0,0]
+	data.mapCoords=((0,0),(0,data.cells-1),(data.cells-1,data.cells-1),(data.cells-1,0))
+	data.mapPos=rts_map_builder.generateMapPos(data)
 
 def mouseDown(event,data):
     # if(event.button==5):
@@ -44,6 +46,7 @@ def mouseDown(event,data):
     	if(data.selectBox1==(None,None)):
     		rts_classes.player1.clearSelected()
     		data.selectBox1=event.pos
+
 
     if(event.button==3):
     	mouseX=event.pos[0]
@@ -84,20 +87,16 @@ def keyDown(event,data):
 
 	if(event.unicode=='w'):
 		data.gameY+=data.scrollSpeed/data.zoom
-		rts_helpers.mapAdjustUnits(0,data.scrollSpeed/data.zoom)
-		data.trees.update(data)
+		rts_helpers.updateMap(data,0,data.scrollSpeed/data.zoom)
 	elif(event.unicode=='s'):
 		data.gameY-=data.scrollSpeed/data.zoom
-		rts_helpers.mapAdjustUnits(0,-data.scrollSpeed/data.zoom)
-		data.trees.update(data)
+		rts_helpers.updateMap(data,0,-data.scrollSpeed/data.zoom)
 	elif(event.unicode=='d'):
 		data.gameX-=data.scrollSpeed/data.zoom
-		rts_helpers.mapAdjustUnits(-data.scrollSpeed/data.zoom,0)
-		data.trees.update(data)
+		rts_helpers.updateMap(data,-data.scrollSpeed/data.zoom,0)
 	elif(event.unicode=='a'):
 		data.gameX+=data.scrollSpeed/data.zoom
-		rts_helpers.mapAdjustUnits(data.scrollSpeed/data.zoom,0)
-		data.trees.update(data)
+		rts_helpers.updateMap(data,data.scrollSpeed/data.zoom,0)
 
 
 	if(event.unicode=='p'):

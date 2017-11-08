@@ -35,9 +35,13 @@ class Drone(pygame.sprite.Sprite):
 		self.desX=x
 		self.desY=y
 		self.selected=False
+		self.flying=True
 
 	def update(self,data):
+		ogCenter=self.rect.center
 		self.rect.center=rts_helpers.moveUnit(self.rect.center[0],self.rect.center[1],self.desX,self.desY,self.speed)
+		if(rts_helpers.legalPosition(data,self)==False):
+			self.rect.center=ogCenter
 		
 		
 	
