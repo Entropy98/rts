@@ -31,12 +31,13 @@ class Drone(pygame.sprite.Sprite):
 		self.image=pygame.Surface([10,10])
 		self.rect=self.image.get_rect()
 		self.speed=10
+		self.rect.center=(x,y)
+		self.desX=x
+		self.desY=y
 		self.selected=False
-		self.desX=None
-		self.desY=None
-		self.rect.x=x
-		self.rect.y=y
-		
+
+	def update(self,data):
+		self.rect.center=rts_helpers.moveUnit(self.rect.center[0],self.rect.center[1],self.desX,self.desY,self.speed)
 		
 		
 	

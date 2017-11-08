@@ -1,3 +1,6 @@
+import math
+import rts_classes
+
 def maxItemLength(a):
     maxLen = 0
     rows = len(a)
@@ -27,28 +30,6 @@ def print2dList(a):
         print(" ]", end="")
     print("]")
 
-# def rectanglesOverlap(x1, y1, w1, h1, x2, y2, w2, h2):
-#     p1=(x1,y1)
-#     p2=(x1+w1,y1+h1)
-#     p3=(x2,y2)
-#     p4=(x2+w2,y2+h2)
-
-#     r1Left=min(p1[0],p2[0])
-#     r1Right=max(p1[0],p2[0])
-#     r1Bottom=max(p1[1],p2[1])
-#     r1Top=min(p1[1],p2[1])
-
-#     r2Left=min(p3[0],p4[0])
-#     r2Right=max(p3[0],p4[0])
-#     r2Bottom=max(p3[1],p4[1])
-#     r2Top=min(p3[1],p4[1])
-
-#     if(r1Left<r2Right or r1Right>r2Left):
-#         return False
-#     if(r1Top>r2Bottom or r1Bottom<r2Top):
-#         return  False
-#     return True
-
 def rectanglesOverlap(x1, y1, w1, h1, x2, y2, w2, h2):
     if(((y2<=y1 and y1<=y2+h2) or (y2<=y1+h1 and y1+h1<=y2+h2))and
         ((x1<=x2 and x2<=x1+w1) or (x2<=x1+w1 and x1+w1<=x2+w2))):
@@ -69,13 +50,32 @@ def getTileCenterCoordinate(data,xCoord,yCoord):
         ((xCoord)*.25*data.cellWidth+(yCoord+1)*.25*data.cellWidth)+data.gameY)
     return (point1[0]+point3[0])//2,(point0[1]+point2[1])//2
 
-def moveUnit(x,y,destX,destY,speed):
-    dx=int(destX-x)
-    dy=int(destY-y)
-    mag=(destY**2+destX**2)**.5
-    i=(dx/mag)*speed
-    j=(dy/mag)*speed
-    return x+i,y+j
+def moveUnit(x,y,destX,destY,speed,epsilon=6):
+    dx=destX-x
+    dy=destY-y
+    xDir,yDir=1,1
+    if(dx<0):
+        xDir=-1
+    if(dy<0):
+        yDir=-1
+    if(dy<epsilon and dy>-epsilon and dx<epsilon and dx>-epsilon):
+        return (x,y)
+    elif(dy<epsilon and dy>-epsilon):
+        return (x+speed*xDir,y)
+    elif(dx<epsilon and dx>-epsilon):
+        return (x,y+speed*yDir)
+    else:
+        theta=abs(math.atan(dy/dx))
+        i=speed*math.cos(theta)*xDir
+        j=speed*math.sin(theta)*yDir
+        return (x+i,y+j)
+
+def mapAdjustUnits(dx,dy):
+    for unit in rts_classes.player1.units:
+        curCoords=unit.rect.center
+        unit.rect.center=(curCoords[0]+dx,curCoords[1]+dy)
+        unit.desX+=dx
+        unit.desY+=dy
 
 #change anchor to 'tile' to receive 4 coordinates of tile instead of 2 of center
 def coord2Pos(data,xCoord,yCoord,anchor='center'):

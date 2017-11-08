@@ -46,10 +46,11 @@ def mouseDown(event,data):
     		data.selectBox1=event.pos
 
     if(event.button==3):
-    	for unit in rts_classes.player1.units:
-    		if(unit['selected']==True):
-    			unit['destX']=event.pos[0]
-    			unit['destY']=event.pos[1]
+    	mouseX=event.pos[0]
+    	mouseY=event.pos[1]
+    	for unit in rts_classes.player1.selected:
+	    	unit.desX=mouseX
+	    	unit.desY=mouseY
 
 
 def mouseUp(event,data):
@@ -83,24 +84,20 @@ def keyDown(event,data):
 
 	if(event.unicode=='w'):
 		data.gameY+=data.scrollSpeed/data.zoom
+		rts_helpers.mapAdjustUnits(0,data.scrollSpeed/data.zoom)
 		data.trees.update(data)
-		for unit in rts_classes.player1.units:
-			unit['y']+=data.scrollSpeed/data.zoom
 	elif(event.unicode=='s'):
 		data.gameY-=data.scrollSpeed/data.zoom
+		rts_helpers.mapAdjustUnits(0,-data.scrollSpeed/data.zoom)
 		data.trees.update(data)
-		for unit in rts_classes.player1.units:
-			unit['y']-=data.scrollSpeed/data.zoom
 	elif(event.unicode=='d'):
 		data.gameX-=data.scrollSpeed/data.zoom
+		rts_helpers.mapAdjustUnits(-data.scrollSpeed/data.zoom,0)
 		data.trees.update(data)
-		for unit in rts_classes.player1.units:
-			unit['x']-=data.scrollSpeed/data.zoom
 	elif(event.unicode=='a'):
 		data.gameX+=data.scrollSpeed/data.zoom
+		rts_helpers.mapAdjustUnits(data.scrollSpeed/data.zoom,0)
 		data.trees.update(data)
-		for unit in rts_classes.player1.units:
-			unit['x']+=data.scrollSpeed/data.zoom
 
 
 	if(event.unicode=='p'):
@@ -113,19 +110,13 @@ def keyUp(event,data):
 def inSelectionBox(data):
 	if(data.selectBox1!=(None,None)):
 		for unit in rts_classes.player1.units:
-			#print(rts_helpers.rectanglesOverlap(data.selectBox1[0],data.selectBox1[1],data.selectBox2[0],data.selectBox2[1],unit['x'],unit['y'],unit['hitBoxX'],unit['hitBoxY']))
-			if(rts_helpers.rectanglesOverlap(data.selectBox1[0],data.selectBox1[1],data.selectBox2[0],data.selectBox2[1],unit['x'],unit['y'],unit['hitBoxX'],unit['hitBoxY'])):
-				rts_classes.player1.select(unit)
+			if(rts_helpers.rectanglesOverlap(data.selectBox1[0],data.selectBox1[1],data.selectBox2[0],data.selectBox2[1],\
+				unit.rect.left,unit.rect.top,unit.rect.width,unit.rect.height)):
+				rts_classes.player1.selectUnit(unit)
 
 def timerFired(data):
-    inSelectionBox(data)
-    for unit in rts_classes.player1.units:
-    	if(unit['destX']!=None or unit['destY']!=None):
-    		unit['x'],unit['y']=rts_helpers.moveUnit(unit['x'],unit['y'],unit['destX'],unit['destY'],unit['speed'])
-    		if(unit['x']>unit['destX']-5 and unit['x']<unit['destX']+5):
-    			unit['destX']=None
-    		if(unit['y']>unit['destY']-5 and unit['y']<unit['destY']+5):
-    			unit['destY']=None
+	rts_classes.player1.units.update(data)
+	inSelectionBox(data)
 
 # def drawGrid(display,data):
 # 	rts_images.displayMap(display,data,data.gameX-2500,data.gameY)
@@ -173,22 +164,12 @@ def drawSelectBox(display,data):
 		pygame.draw.rect(display,(153,230,255),(data.selectBox1[0],data.selectBox1[1],data.selectBox2[0],data.selectBox2[1]),1)
 
 def drawSelectedRing(display,data):
-	for unit in rts_classes.player1.units:
-		if(unit['selected']==True):
-			hitBoxX=(unit['hitBoxX']+2)*data.zoom
-			hitBoxY=(unit['hitBoxY']+2)*data.zoom
-			centerX=unit['x']-hitBoxX//2
-			centerY=(unit['y']-hitBoxY//2)+(unit['hitBoxY']//2)*data.zoom
-			pygame.draw.ellipse(display,(153,230,255),(centerX,centerY,hitBoxX,hitBoxY),2)
+	for unit in rts_classes.player1.selected:
+		pygame.draw.ellipse(display,(153,230,255),(unit.rect.left-2,unit.rect.top+2,unit.rect.width+4,unit.rect.width+4),2)
 
 def drawUnits(display,data):
 	player=rts_classes.player1
-	for unit in player.units:
-		hitBoxX=unit['hitBoxX']*data.zoom
-		hitBoxY=unit['hitBoxY']*data.zoom
-		centerX=unit['x']-hitBoxX//2
-		centerY=unit['y']-hitBoxY//2
-		pygame.draw.rect(display,(255,255,128),(centerX,centerY,hitBoxX,hitBoxY))
+	player.units.draw(display)
 
 
 def redrawAll(display, data):
