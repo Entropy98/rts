@@ -4,6 +4,7 @@ import rts_helpers
 import rts_map_builder
 import rts_classes
 import rts_images
+import rts_menus
 import random
 
 def init(data):
@@ -35,25 +36,22 @@ def init(data):
 	data.mapPos=rts_map_builder.generateMapPos(data)
 
 def mouseDown(event,data):
-    # if(event.button==5):
-    # 	data.zoom-=.1
-    # elif(event.button==4):
-    # 	data.zoom+=.1
-    # if(int(data.zoom*10)<=2):
-    # 	data.zoom=.2
-    data.cellWidth=data.maxCellWidth*data.zoom
-    if(event.button==1):
-    	if(data.selectBox1==(None,None)):
-    		rts_classes.player1.clearSelected()
-    		data.selectBox1=event.pos
+	if(event.pos[1]<data.height*.75):
+	    data.cellWidth=data.maxCellWidth*data.zoom
+	    if(event.button==1):
+	    	if(data.selectBox1==(None,None)):
+	    		rts_classes.player1.clearSelected()
+	    		data.selectBox1=event.pos
 
 
-    if(event.button==3):
-    	mouseX=event.pos[0]
-    	mouseY=event.pos[1]
-    	for unit in rts_classes.player1.selected:
-	    	unit.desX=mouseX
-	    	unit.desY=mouseY
+	    if(event.button==3):
+	    	mouseX=event.pos[0]
+	    	mouseY=event.pos[1]
+	    	for unit in rts_classes.player1.selected:
+		    	unit.desX=mouseX
+		    	unit.desY=mouseY
+	else:
+		print(rts_menus.menuButtonsPressed(event.pos,data))
 
 
 def mouseUp(event,data):
@@ -177,6 +175,7 @@ def redrawAll(display, data):
 	drawSelectedRing(display,data)
 	drawUnits(display,data)
 	drawSelectBox(display,data)
+	rts_menus.drawMenu(display,data)
 
 def run(width=300, height=300):
 	def redrawAllWrapper(display, data):

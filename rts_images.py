@@ -19,10 +19,10 @@ class Tree(pygame.sprite.Sprite):
 		self.image=image
 		self.rect=self.image.get_rect()
 		self.rect.center=rts_helpers.coord2Pos(data,x,y)
-		self.coods=(x,y)
+		self.coords=(x,y)
 
 	def update(self,data):
-		self.rect.center=rts_helpers.coord2Pos(data,self.coods[0]-1,self.coods[1]-2)
+		self.rect.center=rts_helpers.coord2Pos(data,self.coords[0]-1,self.coords[1]-2)
 
 class Drone(pygame.sprite.Sprite):
 	"""docstring for Drone"""
@@ -36,6 +36,7 @@ class Drone(pygame.sprite.Sprite):
 		self.desY=y
 		self.selected=False
 		self.flying=True
+		self.name='Drone'
 
 	def update(self,data):
 		ogCenter=self.rect.center

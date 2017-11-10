@@ -8,15 +8,17 @@ class Player(object):
 		self.wood=400
 		self.units=pygame.sprite.Group()
 		self.selected=pygame.sprite.Group()
+		self.firstSelect=None
 
 	def selectUnit(self,unit):
-		self.selected.add(unit)
+		if(self.firstSelect==None):
+			self.firstSelect=unit.name
+		if(len(self.selected)<=40):
+			self.selected.add(unit)
 
 	def clearSelected(self):
+		self.firstSelect=None
 		self.selected.empty()
-
-	def addUnit(self,unit):
-		self.units.append(unit)
 
 	def createDrone(self,x,y):
 		drone=rts_images.Drone(x,y)
