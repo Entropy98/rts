@@ -77,16 +77,13 @@ def moveUnit(x,y,destX,destY,speed,epsilon=6):
 
 def legalPosition(data,unit):
     collided=pygame.sprite.spritecollide(unit,rts_classes.player1.units,False)
-    if(len(collided)==0):
-        print('sprite collide')
+    if(len(collided)>1):
         return False
     if(pointRhombusIntersect(unit.rect.center,*data.mapPos)==False):
-        print('map boundary')
         return False
     if(unit.flying==False):
         coords=pos2Coord(data,*unit.rect.center)
         if(data.board[coords[0]][coords[1]]!='field'):
-            print('terrain collide')
             return False
     return True
 
