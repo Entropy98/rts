@@ -1,8 +1,10 @@
 import math
 import rts_classes
 import rts_map_builder
+import rts_images
 import pygame,sys
 from pygame.locals import *
+import os
 
 def maxItemLength(a):
     maxLen = 0
@@ -145,3 +147,22 @@ def coord2Pos(data,xCoord,yCoord,anchor='center'):
         return (((point1[0]+point3[0])//2),((point0[1]+point2[1])//2))
     elif(anchor=='tile'):
         return (point0,point1,point2,point3)
+
+def initializeMenu(data):
+    data.menuButtons=pygame.sprite.Group()
+
+    boxX=data.width*.65
+    boxY=data.height*.75+data.height*.013
+    iconBuffer=data.width*.025
+    iconWidth=45
+
+    data.menuButton1=rts_images.MenuButton1(boxX+iconBuffer*1.25,boxY+iconBuffer)
+    data.menuButton4=rts_images.MenuButton4(boxX+iconBuffer*1.25,boxY+iconBuffer+(iconWidth+iconBuffer))
+    data.menuButton6=rts_images.MenuButton6(boxX+iconBuffer*1.25+(iconWidth+iconBuffer)*2,boxY+iconBuffer+(iconWidth+iconBuffer))
+
+def updateMenuIcons(data):
+    if(rts_classes.player1.menuState=='Drone'):
+        mB1Image=pygame.image.load(os.path.join('rts_build_icon1.png'))
+        data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
+        mB4Image=pygame.image.load(os.path.join('rts_drone_action_icon.png'))
+        data.menuButton4.image=pygame.transform.scale(mB4Image,(45,45))

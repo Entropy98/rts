@@ -30,6 +30,7 @@ def init(data):
 		data.board.append(newRow)
 	print('Planting Trees...')
 	rts_map_builder.populateForests(data)
+	rts_helpers.initializeMenu(data)
 	data.selectBox1=(None,None)
 	data.selectBox2=[0,0]
 	data.mapCoords=((0,0),(0,data.cells-1),(data.cells-1,data.cells-1),(data.cells-1,0))
@@ -51,7 +52,7 @@ def mouseDown(event,data):
 		    	unit.desX=mouseX
 		    	unit.desY=mouseY
 	else:
-		print(rts_menus.menuButtonsPressed(event.pos,data))
+		rts_menus.menuButtonsPressed(event.pos,data)
 
 
 def mouseUp(event,data):
@@ -109,7 +110,7 @@ def inSelectionBox(data):
 		for unit in rts_classes.player1.units:
 			if(rts_helpers.rectanglesOverlap(data.selectBox1[0],data.selectBox1[1],data.selectBox2[0],data.selectBox2[1],\
 				unit.rect.left,unit.rect.top,unit.rect.width,unit.rect.height)):
-				rts_classes.player1.selectUnit(unit)
+				rts_classes.player1.selectUnit(data,unit)
 
 def timerFired(data):
 	rts_classes.player1.units.update(data)
