@@ -97,6 +97,8 @@ def mapAdjustUnits(dx,dy):
 def updateMap(data,dx,dy):
     mapAdjustUnits(dx,dy)
     data.trees.update(data)
+    rts_classes.player1.inConstruction.update(data)
+    rts_classes.player1.buildings.update(data)
     data.mapPos=rts_map_builder.generateMapPos(data)
 
 
@@ -147,6 +149,7 @@ def coord2Pos(data,xCoord,yCoord,anchor='center'):
 
 def initializeMenu(data):
     data.menuButtons=pygame.sprite.Group()
+    data.unitIcons=pygame.sprite.Group()
 
     boxX=data.width*.65
     boxY=data.height*.75+data.height*.013
@@ -163,6 +166,9 @@ def updateMenuIcons(data):
         data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
         mB4Image=pygame.image.load(os.path.join('rts_drone_action_icon.png'))
         data.menuButton4.image=pygame.transform.scale(mB4Image,(45,45))
+        mb6Image=pygame.image.load(os.path.join('rts_destroy_icon.png'))
+        data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
+    elif(rts_classes.player1.menuState=='CommandCenter'):
         mb6Image=pygame.image.load(os.path.join('rts_destroy_icon.png'))
         data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
 
@@ -192,7 +198,6 @@ def placeBuilding(data,building):
     buildingCenterY=len(building)//2
     buildingCenterX=len(building[0])//2
     buildingCenter=(buildingCenterX,buildingCenterY)
-    print2dList(building)
     for y in range(len(building)):
         for x in range(len(building[0])):
             if(building[x][y]):
@@ -212,3 +217,9 @@ def drawBuildStencils(display,data):
                         pygame.draw.polygon(display,(153,230,255),tile[1],3)
                     else:
                         pygame.draw.polygon(display,(255,77,77),tile[1],3)
+
+def collectUnitMats():
+    for unit in rts_classes.player1.units:
+        if(unit.name=='Drone'):
+            if(len(pygame.sprite.spritecollide(unit,rts_classes.player1.commandCenters,False))>0):
+                unit.dropOffMats()

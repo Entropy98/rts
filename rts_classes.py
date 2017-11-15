@@ -11,14 +11,15 @@ class Player(object):
 		self.selected=pygame.sprite.Group()
 		self.buildings=pygame.sprite.Group()
 		self.inConstruction=pygame.sprite.Group()
+		self.commandCenters=pygame.sprite.Group()
 		self.menuState=None
 
-	def selectUnit(self,data,unit):
+	def select(self,data,item):
 		if(self.menuState==None):
-			self.menuState=unit.name
+			self.menuState=item.name
 			rts_helpers.updateMenuIcons(data)
 		if(len(self.selected)<=40):
-			self.selected.add(unit)
+			self.selected.add(item)
 
 	def clearSelected(self):
 		self.menuState=None

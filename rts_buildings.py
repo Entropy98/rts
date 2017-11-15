@@ -9,7 +9,7 @@ class Building(pygame.sprite.Sprite):
 		self.x=x
 		self.y=y
 		self.coords=(x,y)
-		self.buildComplete=False
+		self.buildComplete=True
 
 	def update(self,data):
 		self.rect.center=rts_helpers.coord2Pos(data,self.coords[0],self.coords[1])
@@ -17,6 +17,7 @@ class Building(pygame.sprite.Sprite):
 			print('done Building')
 			rts_classes.player1.inConstruction.remove(self)
 			rts_classes.player1.buildings.add(self)
+			rts_classes.player1.commandCenters.add(self)
 
 	def build(self,startTime=0):
 		if(self.buildTime-(time.time()-startTime)<=0):
@@ -32,7 +33,10 @@ class CommandCenter(Building):
 		self.rect=self.image.get_rect()
 		self.rect.center=rts_helpers.coord2Pos(data,self.coords[0],self.coords[1])
 
+		self.name='CommandCenter'
+
 		self.buildTime=15
+		self.woodCost=400
 
 		self.stencil=[
 		[False,False,False,False,False],

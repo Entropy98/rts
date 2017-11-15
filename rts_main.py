@@ -48,6 +48,10 @@ def mouseDown(event,data):
 	    	if(data.selectBox1==(None,None)):
 	    		rts_classes.player1.clearSelected()
 	    		data.selectBox1=event.pos
+	    	for building in rts_classes.player1.buildings:
+	    		if(building.rect.collidepoint(event.pos)):
+	    			rts_classes.player1.clearSelected()
+	    			rts_classes.player1.select(building)
 
 
 	    if(event.button==3):
@@ -117,11 +121,10 @@ def inSelectionBox(data):
 		for unit in rts_classes.player1.units:
 			if(rts_helpers.rectanglesOverlap(data.selectBox1[0],data.selectBox1[1],data.selectBox2[0],data.selectBox2[1],\
 				unit.rect.left,unit.rect.top,unit.rect.width,unit.rect.height)):
-				rts_classes.player1.selectUnit(data,unit)
+				rts_classes.player1.select(data,unit)
 
 def timerFired(data):
-	rts_classes.player1.inConstruction.update(data)
-	rts_classes.player1.buildings.update(data)
+	rts_helpers.collectUnitMats()
 	rts_classes.player1.units.update(data)
 	inSelectionBox(data)
 
@@ -160,9 +163,9 @@ def drawBuildings(display,data):
 def redrawAll(display, data):
 	drawMap(display,data)
 	drawCursor(display,data)
-	drawSelectedRing(display,data)
 	rts_helpers.drawBuildStencils(display,data)
 	drawBuildings(display,data)
+	drawSelectedRing(display,data)
 	drawUnits(display,data)
 	drawSelectBox(display,data)
 	rts_menus.drawMenu(display,data)
@@ -216,6 +219,8 @@ def run(width=300, height=300):
 	pygame.font.init()
 	display = pygame.display.set_mode((data.width,data.height))
 	pygame.display.set_caption('RTS')
+
+	data.font=pygame.font.SysFont('helvetic',15)
 
 	#initialize Images
 	rts_images.loadImages(data)
