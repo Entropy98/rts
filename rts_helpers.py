@@ -163,3 +163,52 @@ def updateMenuIcons(data):
         data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
         mB4Image=pygame.image.load(os.path.join('rts_drone_action_icon.png'))
         data.menuButton4.image=pygame.transform.scale(mB4Image,(45,45))
+        mb6Image=pygame.image.load(os.path.join('rts_destroy_icon.png'))
+        data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
+
+#building is a 2D list with a True where a building will be built and a false elsewhere
+def compileBuildStencil(data,building):
+    stencil=[]
+    centerRhobusCoord=pos2Coord(data,data.mousePos[0],data.mousePos[1])
+    buildingCenterY=len(building)//2
+    buildingCenterX=len(building[0])//2
+    buildingCenter=(buildingCenterX,buildingCenterY)
+    for y in range(len(building)):
+        for x in range(len(building[0])):
+            newX=centerRhobusCoord[0]-(buildingCenterX-x)
+            newY=centerRhobusCoord[1]-(buildingCenterY-y)
+            if(building[x][y]):
+                if(data.board[newX][newY]!='field'):
+                    stencil.append([False,coord2Pos(data,newX,newY,'tile')])
+                else:
+                    stencil.append([True,coord2Pos(data,newX,newY,'tile')])
+            else:
+                stencil.append(['empty',coord2Pos(data,newX,newY,'tile')])
+                    
+    return stencil
+    
+def placeBuilding(data,building):
+    centerRhobusCoord=pos2Coord(data,data.mousePos[0],data.mousePos[1])
+    buildingCenterY=len(building)//2
+    buildingCenterX=len(building[0])//2
+    buildingCenter=(buildingCenterX,buildingCenterY)
+    print2dList(building)
+    for y in range(len(building)):
+        for x in range(len(building[0])):
+            if(building[x][y]):
+                newX=centerRhobusCoord[0]-(buildingCenterX-x)
+                newY=centerRhobusCoord[1]-(buildingCenterY-y)
+                data.board[newX][newY]='building'
+    return centerRhobusCoord
+
+def drawBuildStencils(display,data):
+    if(data.mousePos[1]<data.height*.75):
+        for unit in rts_classes.player1.selected:
+            if(unit.stencil!=None):
+                for tile in unit.stencil:
+                    if(tile[0]=='empty'):
+                        pygame.draw.polygon(display,(217,217,217),tile[1],1)
+                    elif(tile[0]):
+                        pygame.draw.polygon(display,(153,230,255),tile[1],3)
+                    else:
+                        pygame.draw.polygon(display,(255,77,77),tile[1],3)

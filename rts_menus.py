@@ -39,16 +39,15 @@ def drawCmdBox(display,data):
 		data.menuButtons.add(data.menuButton1)
 		data.menuButtons.add(data.menuButton4)
 		data.menuButtons.add(data.menuButton6)
-		# pygame.draw.rect(display,(0,0,0),(boxX+iconBuffer*1.25,boxY+iconBuffer,iconWidth,iconWidth))
-		# pygame.draw.rect(display,(0,0,0),(boxX+iconBuffer*1.25+(iconWidth+iconBuffer),boxY+iconBuffer,iconWidth,iconWidth))
-		# pygame.draw.rect(display,(0,0,0),(boxX+iconBuffer*1.25+(iconWidth+iconBuffer)*2,boxY+iconBuffer,iconWidth,iconWidth))
-		# pygame.draw.rect(display,(0,0,0),(boxX+iconBuffer*1.25+(iconWidth+iconBuffer),boxY+iconBuffer+(iconWidth+iconBuffer),iconWidth,iconWidth))
+	elif(rts_classes.player1.menuState=='Drone_b1'):
+		data.menuButtons.add(data.menuButton1)
+		data.menuButtons.add(data.menuButton6)
 	data.menuButtons.draw(display)
 
 def menuButtonsPressed(pos,data):
 	if(pos[0]>data.width*.68125 and pos[0]<data.width*.68125+45):
 		if(pos[1]>data.height*.763 and pos[1]<data.height*.763+45):
-			return data.menuButton1.pressed()
+			return data.menuButton1.pressed(data)
 	if(pos[0]>data.width*.68125+(data.width*.025+45) and pos[0]<data.width*.68125+45+(data.width*.025+45)):
 		if(pos[1]>data.height*.763 and pos[1]<data.height*.763+45):
 			return 2

@@ -17,6 +17,7 @@ def init(data):
 	data.scrollSpeed=40
 	data.cursorX=data.cells//2
 	data.cursorY=data.cells//2
+	data.mousePos=(0,0)
 	data.gameX=data.width//2
 	data.gameY=-data.height
 	data.numOfForests=25
@@ -35,11 +36,15 @@ def init(data):
 	data.selectBox2=[0,0]
 	data.mapCoords=((0,0),(0,data.cells-1),(data.cells-1,data.cells-1),(data.cells-1,0))
 	data.mapPos=rts_map_builder.generateMapPos(data)
+	data.buildStencil=None
 
 def mouseDown(event,data):
 	if(event.pos[1]<data.height*.75):
 	    data.cellWidth=data.maxCellWidth*data.zoom
 	    if(event.button==1):
+	    	for unit in rts_classes.player1.selected:
+	    		if(unit.buildState=='Select'):
+	    			unit.buildState='Place'
 	    	if(data.selectBox1==(None,None)):
 	    		rts_classes.player1.clearSelected()
 	    		data.selectBox1=event.pos
@@ -51,6 +56,7 @@ def mouseDown(event,data):
 	    	for unit in rts_classes.player1.selected:
 		    	unit.desX=mouseX
 		    	unit.desY=mouseY
+
 	else:
 		rts_menus.menuButtonsPressed(event.pos,data)
 
@@ -65,6 +71,7 @@ def mouseMotion(event,data):
 		dX,dY=event.rel[0],event.rel[1]
 		data.selectBox2[0]+=dX
 		data.selectBox2[1]+=dY
+	data.mousePos=event.pos
 
 def keyDown(event,data):
 	if(event.key==274):#down
@@ -113,35 +120,10 @@ def inSelectionBox(data):
 				rts_classes.player1.selectUnit(data,unit)
 
 def timerFired(data):
+	rts_classes.player1.inConstruction.update(data)
+	rts_classes.player1.buildings.update(data)
 	rts_classes.player1.units.update(data)
 	inSelectionBox(data)
-
-# def drawGrid(display,data):
-# 	rts_images.displayMap(display,data,data.gameX-2500,data.gameY)
-# 	for x in range(data.cells):
-# 		for y in range(data.cells):
-# 			xCoord=x
-# 			yCoord=y
-# 			point0=((xCoord*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
-# 				(xCoord*.25*data.cellWidth+yCoord*.25*data.cellWidth)+data.gameY)
-
-# 			point1=(((xCoord-1)*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
-# 				((xCoord)*.25*data.cellWidth+(yCoord+1)*.25*data.cellWidth)+data.gameY)
-
-# 			point2=((xCoord*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
-# 				((xCoord+1)*.25*data.cellWidth+(yCoord+1)*.25*data.cellWidth)+data.gameY)
-
-# 			point3=(((xCoord+1)*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
-# 				((xCoord)*.25*data.cellWidth+(yCoord+1)*.25*data.cellWidth)+data.gameY)
-# 			tileLabel=data.board[x][y]
-# 			# print(point2[1]-point0[1])
-# 			# print(point3[0]-point1[0])
-# 			#if(tileLabel=='forest'):
-# 				#rts_images.displayTallTile(display,point1[0],point2[1]-50,data.forest_tile)
-# 				#pygame.draw.polygon(display,(26,13,0),(point0,point1,point2,point3))
-# 			# else:
-# 			# 	rts_images.displayTile(display,point1[0],point2[1]-25,data.field_tile)
-# 			# 	#pygame.draw.polygon(display,(51,153,51),(point0,point1,point2,point3))
 
 def drawMap(display,data):
 	rts_images.displayMap(display,data,data.gameX-2500,data.gameY)
@@ -151,7 +133,8 @@ def drawCursor(display,data):
 	coords=rts_helpers.coord2Pos(data,data.cursorX,data.cursorY,'tile')
 	point0,point1,point2,point3=coords[0],coords[1],coords[2],coords[3]
 	pygame.draw.polygon(display,(153,230,255),(point0,point1,point2,point3),4)
-	coordLabel=str(data.cursorX)+','+str(data.cursorY)
+	#coordLabel=str(data.cursorX)+','+str(data.cursorY)
+	coordLabel=str(data.board[data.cursorX][data.cursorY])
 	fontSize=int(20*data.zoom)
 	font=pygame.font.SysFont('Helvetica',fontSize)
 	textSurface=font.render(coordLabel,False,(255,255,255))
@@ -169,11 +152,17 @@ def drawUnits(display,data):
 	player=rts_classes.player1
 	player.units.draw(display)
 
+def drawBuildings(display,data):
+	rts_classes.player1.inConstruction.draw(display)
+	rts_classes.player1.buildings.draw(display)
+
 
 def redrawAll(display, data):
 	drawMap(display,data)
 	drawCursor(display,data)
 	drawSelectedRing(display,data)
+	rts_helpers.drawBuildStencils(display,data)
+	drawBuildings(display,data)
 	drawUnits(display,data)
 	drawSelectBox(display,data)
 	rts_menus.drawMenu(display,data)

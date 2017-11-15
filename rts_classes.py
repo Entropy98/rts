@@ -9,6 +9,8 @@ class Player(object):
 		self.wood=400
 		self.units=pygame.sprite.Group()
 		self.selected=pygame.sprite.Group()
+		self.buildings=pygame.sprite.Group()
+		self.inConstruction=pygame.sprite.Group()
 		self.menuState=None
 
 	def selectUnit(self,data,unit):
