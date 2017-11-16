@@ -236,3 +236,7 @@ def collectUnitMats():
         if(unit.name=='Drone'):
             if(len(pygame.sprite.spritecollide(unit,rts_classes.player1.commandCenters,False))>0):
                 unit.dropOffMats()
+
+def buildBuildings():
+    for building in rts_classes.player1.inConstruction:
+        building.build()

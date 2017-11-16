@@ -35,7 +35,7 @@ def drawUnitBox(display,data):
 		for unit in rts_classes.player1.selected:
 			if(unit.name=='Drone'):
 				data.unitIcons.add(rts_images.DroneIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
-			elif(unit.name=='CommandCenter'):
+			elif(unit.name=='CommandCenter' or unit.name=='CommandCenterX'):
 				data.unitIcons.add(rts_images.CommandCenterIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 			else:
 				pygame.draw.rect(display,(0,0,0),(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
@@ -51,6 +51,11 @@ def drawUnitBox(display,data):
 				display.blit(nameLabel,(data.width//2-data.width*.1,data.height*.77))
 				woodLabel=data.font.render('Wood: '+str(unit.wood)+'/'+str(unit.woodCapacity),1,(20,20,20))
 				display.blit(woodLabel,(boxX+iconBuffer,data.height*.8))
+			elif(unit.name=='CommandCenterX'):
+				nameLabel=data.font.render('Command Center',1,(20,20,20))
+				display.blit(nameLabel,(data.width//2-data.width*.1,data.height*.77))
+				constructionLabel=data.font.render('Build Progress: '+str(int(unit.buildTimeLeft))+'/'+str(unit.buildTime),1,(20,20,20))
+				display.blit(constructionLabel,(boxX+iconBuffer,data.height*.8))
 
 def drawCmdBox(display,data):
 	data.menuButtons.empty()

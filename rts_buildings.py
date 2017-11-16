@@ -10,36 +10,40 @@ class Building(pygame.sprite.Sprite):
 		self.x=x
 		self.y=y
 		self.coords=(x,y)
-		self.buildComplete=True
+		self.startTime=0
 
 		self.rallyReset=False
 
 	def update(self,data):
 		self.rect.center=rts_helpers.coord2Pos(data,self.coords[0],self.coords[1])
-		if(self not in rts_classes.player1.buildings and self.buildComplete):
-			print('done Building')
+
+	def build(self):
+		if(self.startTime==0):
+			self.startTime=time.time()
+		self.buildTimeLeft=time.time()-self.startTime
+		if(self.buildTime-self.buildTimeLeft<=0):
+			self.buildComplete=True
+			self.name='CommandCenter'
+			self.image=pygame.image.load(os.path.join('rts_command_center.png'))
+			self.image=pygame.transform.scale(self.image,(125,84))
 			rts_classes.player1.inConstruction.remove(self)
 			rts_classes.player1.buildings.add(self)
 			rts_classes.player1.commandCenters.add(self)
-
-	def build(self,startTime=0):
-		if(self.buildTime-(time.time()-startTime)<=0):
-			self.buildComplete=True
 
 
 class CommandCenter(Building):
 	def __init__(self,data,x,y):
 		Building.__init__(self,x,y)
 
-		self.image=pygame.image.load(os.path.join('rts_command_center.png'))
+		self.image=pygame.image.load(os.path.join('rts_command_center_frame.png'))
 		self.image=pygame.transform.scale(self.image,(125,84))
 		self.rect=self.image.get_rect()
 		self.rect.center=rts_helpers.coord2Pos(data,self.coords[0],self.coords[1])
 
-		self.name='CommandCenter'
+		self.name='CommandCenterX'
 
 		self.rally_pointX=self.rect.center[0]
-		self.rally_pointY=self.rect.center[1]
+		self.rally_pointY=self.rect.center[1]+100
 
 		self.buildTime=15
 		self.woodCost=400

@@ -76,7 +76,7 @@ class Drone(pygame.sprite.Sprite):
 					self.building.coords=newCoords
 					self.building.rect.center=rts_helpers.coord2Pos(data,newCoords[0],newCoords[1])
 					self.building.rally_pointX=self.building.rect.center[0]
-					self.building.rally_pointY=self.building.rect.center[1]
+					self.building.rally_pointY=self.building.rect.center[1]+100
 					self.buildState='Build'
 					rts_classes.player1.inConstruction.add(self.building)
 					self.stencil=None
@@ -123,7 +123,6 @@ class MenuButton1(pygame.sprite.Sprite):
 			for building in rts_classes.player1.selected:
 				if(building.name=='CommandCenter'):
 					rts_classes.player1.createDrone(building.rect.center[0],building.rect.center[1],building.rally_pointX,building.rally_pointY)
-					print(building.rally_pointX,building.rally_pointY)
 					break
 
 class MenuButton4(pygame.sprite.Sprite):

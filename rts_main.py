@@ -30,7 +30,7 @@ def init(data):
 			newRow.append('field')
 		data.board.append(newRow)
 	print('Planting Trees...')
-	rts_map_builder.populateForests(data)
+	#rts_map_builder.populateForests(data)
 	rts_helpers.initializeMenu(data)
 	data.selectBox1=(None,None)
 	data.selectBox2=[0,0]
@@ -53,10 +53,12 @@ def mouseDown(event,data):
 	    	if(data.selectBox1==(None,None)):
 	    		rts_classes.player1.clearSelected()
 	    		data.selectBox1=event.pos
-	    	print(rts_classes.player1.buildings)
+	    	for building in rts_classes.player1.inConstruction:
+	    		if(building.rect.collidepoint(event.pos)):
+	    			rts_classes.player1.clearSelected()
+	    			rts_classes.player1.select(data,building)
 	    	for building in rts_classes.player1.buildings:
 	    		if(building.rect.collidepoint(event.pos)):
-	    			print('building clicked')
 	    			rts_classes.player1.clearSelected()
 	    			rts_classes.player1.select(data,building)
 
@@ -131,6 +133,7 @@ def inSelectionBox(data):
 				rts_classes.player1.select(data,unit)
 
 def timerFired(data):
+	rts_helpers.buildBuildings()
 	rts_helpers.collectUnitMats()
 	rts_classes.player1.units.update(data)
 	inSelectionBox(data)
