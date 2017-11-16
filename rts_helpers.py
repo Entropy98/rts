@@ -93,6 +93,9 @@ def mapAdjustUnits(dx,dy):
         unit.rect.center=(curCoords[0]+dx,curCoords[1]+dy)
         unit.desX+=dx
         unit.desY+=dy
+        if(unit.name=='CommandCenter'):
+            unit.rally_pointX+=dx
+            unit.rally_pointY+=dy
 
 def updateMap(data,dx,dy):
     mapAdjustUnits(dx,dy)
@@ -161,6 +164,7 @@ def initializeMenu(data):
     data.menuButton6=rts_images.MenuButton6(boxX+iconBuffer*1.25+(iconWidth+iconBuffer)*2,boxY+iconBuffer+(iconWidth+iconBuffer))
 
 def updateMenuIcons(data):
+    print(rts_classes.player1.menuState)
     if(rts_classes.player1.menuState=='Drone'):
         mB1Image=pygame.image.load(os.path.join('rts_build_icon1.png'))
         data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
@@ -168,7 +172,16 @@ def updateMenuIcons(data):
         data.menuButton4.image=pygame.transform.scale(mB4Image,(45,45))
         mb6Image=pygame.image.load(os.path.join('rts_destroy_icon.png'))
         data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
+    elif(rts_classes.player1.menuState=='Drone_b1'):
+        mB1Image=pygame.image.load(os.path.join('rts_build_command_center_icon.png'))
+        data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
+        mb6Image=pygame.image.load(os.path.join('rts_escape_icon.png'))
+        data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
     elif(rts_classes.player1.menuState=='CommandCenter'):
+        mb1Image=pygame.image.load(os.path.join('rts_build_drone_icon.png'))
+        data.menuButton1.image=pygame.transform.scale(mb1Image,(45,45))
+        mb4Image=pygame.image.load(os.path.join('rts_rally_point_icon.png'))
+        data.menuButton4.image=pygame.transform.scale(mb4Image,(45,45))
         mb6Image=pygame.image.load(os.path.join('rts_destroy_icon.png'))
         data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
 
@@ -209,7 +222,7 @@ def placeBuilding(data,building):
 def drawBuildStencils(display,data):
     if(data.mousePos[1]<data.height*.75):
         for unit in rts_classes.player1.selected:
-            if(unit.stencil!=None):
+            if(unit.name=='Drone' and unit.stencil!=None):
                 for tile in unit.stencil:
                     if(tile[0]=='empty'):
                         pygame.draw.polygon(display,(217,217,217),tile[1],1)

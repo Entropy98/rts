@@ -33,17 +33,17 @@ class Tree(pygame.sprite.Sprite):
 
 class Drone(pygame.sprite.Sprite):
 	"""docstring for Drone"""
-	def __init__(self,x,y):
+	def __init__(self,x,y,destX,destY):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_drone_dl1_yellow.png'))
 		self.image=pygame.transform.scale(self.image,(20,12))
 		self.rect=self.image.get_rect()
 		self.speed=10
 		self.rect.center=(x,y)
-		self.desX=x
-		self.desY=y
 		self.selected=False
 		self.flying=True
+		self.desX=destX
+		self.desY=destY
 		self.name='Drone'
 		self.wood=0
 		self.woodCapacity=25
@@ -65,16 +65,18 @@ class Drone(pygame.sprite.Sprite):
 
 	def build(self,data):
 		if(self.buildState=='Select'):
-			self.stencil=rts_helpers.compileBuildStencil(data,self.building.stencil)
+			self.stencil=rts_helpers.compileBuildStencil(data,self.building.layout)
 		elif(self.buildState=='Place'):
 			for tile in self.stencil:
 				if(tile[0]==False):
 					self.buildState='Select'
 			if(self.buildState=='Place'):
 				if(rts_classes.player1.wood>=self.building.woodCost):
-					newCoords=rts_helpers.placeBuilding(data,self.building.stencil)
+					newCoords=rts_helpers.placeBuilding(data,self.building.layout)
 					self.building.coords=newCoords
 					self.building.rect.center=rts_helpers.coord2Pos(data,newCoords[0],newCoords[1])
+					self.building.rally_pointX=self.building.rect.center[0]
+					self.building.rally_pointY=self.building.rect.center[1]
 					self.buildState='Build'
 					rts_classes.player1.inConstruction.add(self.building)
 					self.stencil=None
@@ -109,12 +111,19 @@ class MenuButton1(pygame.sprite.Sprite):
 	def pressed(self,data):
 		if(rts_classes.player1.menuState=='Drone'):
 			rts_classes.player1.menuState='Drone_b1'
+			rts_helpers.updateMenuIcons(data)
 		elif(rts_classes.player1.menuState=='Drone_b1'):
 			for unit in rts_classes.player1.selected:
 				if(unit.name=='Drone'):
 					building=rts_buildings.CommandCenter(data,-100,-100)
 					unit.buildState='Select'
 					unit.building=building
+					break
+		elif(rts_classes.player1.menuState=='CommandCenter'):
+			for building in rts_classes.player1.selected:
+				if(building.name=='CommandCenter'):
+					rts_classes.player1.createDrone(building.rect.center[0],building.rect.center[1],building.rally_pointX,building.rally_pointY)
+					print(building.rally_pointX,building.rally_pointY)
 					break
 
 class MenuButton4(pygame.sprite.Sprite):
@@ -129,6 +138,9 @@ class MenuButton4(pygame.sprite.Sprite):
 		for unit in rts_classes.player1.selected:
 			if(unit.name=='Drone'):
 				unit.woodGathering=True
+			elif(unit.name=='CommandCenter'):
+				unit.rallyReset=True
+				break
 
 class MenuButton6(pygame.sprite.Sprite):
 	def __init__(self,x,y):
@@ -145,11 +157,23 @@ class MenuButton6(pygame.sprite.Sprite):
 			rts_classes.player1.menuState=None
 		elif(rts_classes.player1.menuState=='Drone_b1'):
 			rts_classes.player1.menuState='Drone'
+		elif(rts_classes.player1.menuState=='CommandCenter'):
+			for unit in rts_classes.player1.selected:
+				unit.kill()
 
 class DroneIcon(pygame.sprite.Sprite):
 	def __init__(self,x,y,width,height):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_drone_icon.png'))
+		self.image=pygame.transform.scale(self.image,(width,height))
+		self.rect=self.image.get_rect()
+		self.rect.x=x
+		self.rect.y=y
+
+class CommandCenterIcon(pygame.sprite.Sprite):
+	def __init__(self,x,y,width,height):
+		pygame.sprite.Sprite.__init__(self)
+		self.image=pygame.image.load(os.path.join('rts_command_center_icon.png'))
 		self.image=pygame.transform.scale(self.image,(width,height))
 		self.rect=self.image.get_rect()
 		self.rect.x=x

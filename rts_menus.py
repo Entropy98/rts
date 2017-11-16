@@ -35,6 +35,8 @@ def drawUnitBox(display,data):
 		for unit in rts_classes.player1.selected:
 			if(unit.name=='Drone'):
 				data.unitIcons.add(rts_images.DroneIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
+			elif(unit.name=='CommandCenter'):
+				data.unitIcons.add(rts_images.CommandCenterIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 			else:
 				pygame.draw.rect(display,(0,0,0),(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 			x+=1
@@ -44,10 +46,11 @@ def drawUnitBox(display,data):
 		data.unitIcons.draw(display)
 	elif(len(rts_classes.player1.selected)==1):
 		for unit in rts_classes.player1.selected:
-			nameLabel=data.font.render(unit.name,1,(20,20,20))
-			display.blit(nameLabel,(data.width//2-data.width*.1,data.height*.77))
-			woodLabel=data.font.render('Wood: '+str(unit.wood)+'/'+str(unit.woodCapacity),1,(20,20,20))
-			display.blit(woodLabel,(boxX+iconBuffer,data.height*.8))
+			if(unit.name=='Drone'):
+				nameLabel=data.font.render(unit.name,1,(20,20,20))
+				display.blit(nameLabel,(data.width//2-data.width*.1,data.height*.77))
+				woodLabel=data.font.render('Wood: '+str(unit.wood)+'/'+str(unit.woodCapacity),1,(20,20,20))
+				display.blit(woodLabel,(boxX+iconBuffer,data.height*.8))
 
 def drawCmdBox(display,data):
 	data.menuButtons.empty()
@@ -65,6 +68,7 @@ def drawCmdBox(display,data):
 		data.menuButtons.add(data.menuButton6)
 	elif(rts_classes.player1.menuState=='CommandCenter'):
 		data.menuButtons.add(data.menuButton1)
+		data.menuButtons.add(data.menuButton4)
 		data.menuButtons.add(data.menuButton6)
 	data.menuButtons.draw(display)
 

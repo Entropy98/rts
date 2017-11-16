@@ -43,15 +43,22 @@ def mouseDown(event,data):
 	    data.cellWidth=data.maxCellWidth*data.zoom
 	    if(event.button==1):
 	    	for unit in rts_classes.player1.selected:
-	    		if(unit.buildState=='Select'):
+	    		if(unit.name=='CommandCenter' and unit.rallyReset==True):
+	    			unit.rally_pointX=event.pos[0]
+	    			unit.rally_pointY=event.pos[1]
+	    			unit.rallyReset=False
+	    			break
+	    		if(unit.name=='Drone' and unit.buildState=='Select'):
 	    			unit.buildState='Place'
 	    	if(data.selectBox1==(None,None)):
 	    		rts_classes.player1.clearSelected()
 	    		data.selectBox1=event.pos
+	    	print(rts_classes.player1.buildings)
 	    	for building in rts_classes.player1.buildings:
 	    		if(building.rect.collidepoint(event.pos)):
+	    			print('building clicked')
 	    			rts_classes.player1.clearSelected()
-	    			rts_classes.player1.select(building)
+	    			rts_classes.player1.select(data,building)
 
 
 	    if(event.button==3):
@@ -111,7 +118,7 @@ def keyDown(event,data):
 
 	if(event.unicode=='p'):
 		x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
-		rts_classes.player1.createDrone(x,y)
+		rts_classes.player1.createDrone(x,y,x,y)
 
 def keyUp(event,data):
    	pass
@@ -149,7 +156,7 @@ def drawSelectBox(display,data):
 
 def drawSelectedRing(display,data):
 	for unit in rts_classes.player1.selected:
-		pygame.draw.ellipse(display,(153,230,255),(unit.rect.left-2,unit.rect.top+2,unit.rect.width+4,unit.rect.width+4),2)
+		pygame.draw.ellipse(display,(153,230,255),(unit.rect.left-2,unit.rect.top+2,unit.rect.width+4,unit.rect.height+4),2)
 
 def drawUnits(display,data):
 	player=rts_classes.player1
@@ -162,12 +169,12 @@ def drawBuildings(display,data):
 
 def redrawAll(display, data):
 	drawMap(display,data)
-	drawCursor(display,data)
 	rts_helpers.drawBuildStencils(display,data)
-	drawBuildings(display,data)
 	drawSelectedRing(display,data)
+	drawBuildings(display,data)
 	drawUnits(display,data)
 	drawSelectBox(display,data)
+	drawCursor(display,data)
 	rts_menus.drawMenu(display,data)
 
 def run(width=300, height=300):

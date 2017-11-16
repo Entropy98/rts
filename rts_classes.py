@@ -25,8 +25,8 @@ class Player(object):
 		self.menuState=None
 		self.selected.empty()
 
-	def createDrone(self,x,y):
-		drone=rts_images.Drone(x,y)
+	def createDrone(self,x,y,rallyX,rallyY):
+		drone=rts_images.Drone(x,y,rallyX,rallyY)
 		self.units.add(drone)
 
 player1=Player('Player 1')

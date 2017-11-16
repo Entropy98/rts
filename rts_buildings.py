@@ -2,6 +2,7 @@ import pygame
 import time
 import rts_classes
 import rts_helpers
+import os
 
 class Building(pygame.sprite.Sprite):
 	def __init__(self,x,y):
@@ -10,6 +11,8 @@ class Building(pygame.sprite.Sprite):
 		self.y=y
 		self.coords=(x,y)
 		self.buildComplete=True
+
+		self.rallyReset=False
 
 	def update(self,data):
 		self.rect.center=rts_helpers.coord2Pos(data,self.coords[0],self.coords[1])
@@ -28,17 +31,20 @@ class CommandCenter(Building):
 	def __init__(self,data,x,y):
 		Building.__init__(self,x,y)
 
-		self.image=pygame.Surface([150,75])
-		self.image.fill((0,0,255))
+		self.image=pygame.image.load(os.path.join('rts_command_center.png'))
+		self.image=pygame.transform.scale(self.image,(125,84))
 		self.rect=self.image.get_rect()
 		self.rect.center=rts_helpers.coord2Pos(data,self.coords[0],self.coords[1])
 
 		self.name='CommandCenter'
 
+		self.rally_pointX=self.rect.center[0]
+		self.rally_pointY=self.rect.center[1]
+
 		self.buildTime=15
 		self.woodCost=400
 
-		self.stencil=[
+		self.layout=[
 		[False,False,False,False,False],
 		[False,True,True,True,False],
 		[False,True,True,True,False],
