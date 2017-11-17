@@ -17,7 +17,9 @@ def drawResourceBar(display,data):
 	woodLabel=data.font.render('Wood: '+str(rts_classes.player1.wood),1,(255,255,255))
 	display.blit(woodLabel,(data.width*.9,data.height*.01))
 	metalLabel=data.font.render('Metals: '+str(rts_classes.player1.metals),1,(255,255,255))
-	display.blit(metalLabel,(data.width*.7,data.height*.01))
+	display.blit(metalLabel,(data.width*.78,data.height*.01))
+	energyLabel=data.font.render('Energy: '+str(int(rts_classes.player1.energy))+'J/'+str(rts_classes.player1.powerCap)+'J',1,(255,255,255))
+	display.blit(energyLabel,(data.width*.6,data.height*.01))
 
 def drawMiniMap(display,data):
 	pygame.draw.rect(display,(20,20,20),(data.width*.0125,data.height*.75+data.height*.0125,data.width*.225,data.height*.225))
@@ -63,6 +65,8 @@ def drawUnitBox(display,data):
 				elif(unit.name=='CommandCenter'):
 					nameLabel=data.font.render('Command Center',1,(20,20,20))
 					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
+					energyLabel=data.font.render('Energy Produced: '+str(int(unit.energyProduced))+'J',1,(20,20,20))
+					display.blit(energyLabel,(boxX+iconBuffer,data.height*.8))
 					queueIconBuffer=data.width*.01
 					queueIconWidth=50
 					queueIconHeight=50
@@ -88,6 +92,16 @@ def drawUnitBox(display,data):
 						if(loadbarWidth>data.width*.4-data.width*.045):
 							loadbarWidth=data.width*.4-data.width*.045
 						pygame.draw.rect(display,(255,199,148),(boxX+data.width*.015,data.height*.841,loadbarWidth,data.height*.005))
+				elif(unit.name=='GeothermalGeneratorX'):
+					nameLabel=data.font.render('GeothermalGenerator',1,(20,20,20))
+					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
+					constructionLabel=data.font.render('Build Progress: '+str(int(unit.buildTimeLeft))+'/'+str(unit.buildTime),1,(20,20,20))
+					display.blit(constructionLabel,(boxX+iconBuffer,data.height*.8))
+				elif(unit.name=='GeothermalGenerator'):
+					nameLabel=data.font.render('GeothermalGenerator',1,(20,20,20))
+					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
+					energyLabel=data.font.render('Energy Produced: '+str(int(unit.energyProduced))+'J',1,(20,20,20))
+					display.blit(energyLabel,(boxX+iconBuffer,data.height*.8))
 		data.unitIcons.draw(display)
 	elif(rts_classes.player1.menuHover=='Drone_b1'):
 		nameLabel=data.font.render('Build Civilian Structures',1,(20,20,20))
@@ -99,16 +113,29 @@ def drawUnitBox(display,data):
 		display.blit(nameLabel,(data.width//2-data.width*.2,data.height*.77))
 		descLabel1=data.font.render('Primary Civilian Building Used for Building',1,(20,20,20))
 		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
-		descLabel2=data.font.render('Drones and Collecting Resources',1,(20,20,20))
+		descLabel2=data.font.render('Drones and Collecting Resources. Contains',1,(20,20,20))
 		display.blit(descLabel2,(boxX+iconBuffer,data.height*.82))
-		descLabel3=data.font.render('Wood Cost: 300  Metals Cost: 200',1,(20,20,20))
-		display.blit(descLabel3,(boxX+iconBuffer,data.height*.85))
+		descLabel3=data.font.render('Small Generator and Mid Sized Battery',1,(20,20,20))
+		display.blit(descLabel3,(boxX+iconBuffer,data.height*.84))
+		descLabel5=data.font.render('Produces: .01J  Stores: 100J',1,(20,20,20))
+		display.blit(descLabel5,(boxX+iconBuffer,data.height*.87))
+		descLabel5=data.font.render('Wood Cost: 300  Metals Cost: 200',1,(20,20,20))
+		display.blit(descLabel5,(boxX+iconBuffer,data.height*.9))
+	elif(rts_classes.player1.menuHover=='GeothermalGenerator'):
+		nameLabel=data.font.render('Build Geothermal Generator',1,(20,20,20))
+		display.blit(nameLabel,(data.width//2-data.width*.2,data.height*.77))
+		descLabel1=data.font.render('Basic Energy Building',1,(20,20,20))
+		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
+		descLabel2=data.font.render('Provides: .05J  Stores: 5J',1,(20,20,20))
+		display.blit(descLabel2,(boxX+iconBuffer,data.height*.83))
+		descLabel3=data.font.render('Wood Cost: 0  Metals Cost: 100',1,(20,20,20))
+		display.blit(descLabel3,(boxX+iconBuffer,data.height*.86))
 	elif(rts_classes.player1.menuHover=='Build_Drone'):
 		nameLabel=data.font.render('Build Drone',1,(20,20,20))
 		display.blit(nameLabel,(data.width//2-data.width*.2,data.height*.77))
 		descLabel1=data.font.render('Worker Unit',1,(20,20,20))
 		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
-		descLabel2=data.font.render('Wood Cost: 0  Metals Cost: 30',1,(20,20,20))
+		descLabel2=data.font.render('Wood Cost: 0  Metals Cost: 30  Energy Cost: 50',1,(20,20,20))
 		display.blit(descLabel2,(boxX+iconBuffer,data.height*.83))
 	elif(rts_classes.player1.menuHover=='Drone_Action'):
 		nameLabel=data.font.render('Harvest',1,(20,20,20))
@@ -149,6 +176,7 @@ def drawCmdBox(display,data):
 		data.menuButtons.add(data.menuButton6)
 	elif(rts_classes.player1.menuState=='Drone_b1'):
 		data.menuButtons.add(data.menuButton1)
+		data.menuButtons.add(data.menuButton2)
 		data.menuButtons.add(data.menuButton6)
 	elif(rts_classes.player1.menuState=='CommandCenter'):
 		data.menuButtons.add(data.menuButton1)
@@ -162,7 +190,7 @@ def menuButtonsPressed(pos,data):
 			return data.menuButton1.pressed(data)
 	if(pos[0]>data.width*.68125+(data.width*.025+45) and pos[0]<data.width*.68125+45+(data.width*.025+45)):
 		if(pos[1]>data.height*.763 and pos[1]<data.height*.763+45):
-			return 2
+			return data.menuButton2.pressed(data)
 	if(pos[0]>data.width*.68125+(data.width*.025+45)*2 and pos[0]<data.width*.68125+45+(data.width*.025+45)*2):
 		if(pos[1]>data.height*.763 and pos[1]<data.height*.763+45):
 			return 3
@@ -182,7 +210,7 @@ def menuButtonsHover(pos,data):
 			return data.menuButton1.hover(data)
 	if(pos[0]>data.width*.68125+(data.width*.025+45) and pos[0]<data.width*.68125+45+(data.width*.025+45)):
 		if(pos[1]>data.height*.763 and pos[1]<data.height*.763+45):
-			return 2
+			return data.menuButton2.hover(data)
 	if(pos[0]>data.width*.68125+(data.width*.025+45)*2 and pos[0]<data.width*.68125+45+(data.width*.025+45)*2):
 		if(pos[1]>data.height*.763 and pos[1]<data.height*.763+45):
 			return 3

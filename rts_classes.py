@@ -8,6 +8,8 @@ class Player(object):
 		self.username = username
 		self.wood=300
 		self.metals=200
+		self.energy=0
+		self.powerCap=0
 		self.units=pygame.sprite.Group()
 		self.selected=pygame.sprite.Group()
 		self.buildings=pygame.sprite.Group()

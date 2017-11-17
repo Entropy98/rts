@@ -72,6 +72,8 @@ def mouseDown(event,data):
 	    	for unit in rts_classes.player1.selected:
 		    	unit.desX=mouseX
 		    	unit.desY=mouseY
+		    	unit.rally_pointX=mouseX
+		    	unit.rally_pointY=mouseY
 
 	else:
 		rts_menus.menuButtonsPressed(event.pos,data)
@@ -140,6 +142,8 @@ def timerFired(data):
 	rts_helpers.buildBuildings(data)
 	rts_helpers.createUnits()
 	rts_helpers.collectUnitMats()
+	rts_helpers.collectEnergy()
+	rts_helpers.setPowerCap()
 	rts_classes.player1.units.update(data)
 	inSelectionBox(data)
 
@@ -152,7 +156,7 @@ def drawCursor(display,data):
 	coords=rts_helpers.coord2Pos(data,data.cursorX,data.cursorY,'tile')
 	point0,point1,point2,point3=coords[0],coords[1],coords[2],coords[3]
 	pygame.draw.polygon(display,(153,230,255),(point0,point1,point2,point3),4)
-	#coordLabel=str(data.cursorX)+','+str(data.cursorY)
+	coordLabel=str(data.cursorX)+','+str(data.cursorY)
 	coordLabel=str(data.board[data.cursorX][data.cursorY])
 	fontSize=int(20*data.zoom)
 	font=pygame.font.SysFont('Helvetica',fontSize)

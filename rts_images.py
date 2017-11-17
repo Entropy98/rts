@@ -83,6 +83,7 @@ class Drone(pygame.sprite.Sprite):
 		d={}
 		d['metals']=30
 		d['wood']=0
+		d['energy']=50
 		return d
 
 	def update(self,data):
@@ -119,6 +120,7 @@ class Drone(pygame.sprite.Sprite):
 					self.stencil=None
 					rts_classes.player1.metals-=self.building.metalCost
 					rts_classes.player1.wood-=self.building.woodCost
+					self.building.update(data)
 				else:
 					self.buildState=None
 					self.stencil=None
@@ -186,6 +188,27 @@ class MenuButton1(pygame.sprite.Sprite):
 			rts_classes.player1.menuHover='CommandCenter'
 		elif(rts_classes.player1.menuState=='CommandCenter'):
 			rts_classes.player1.menuHover='Build_Drone'
+
+class MenuButton2(pygame.sprite.Sprite):
+	def __init__(self,x,y):
+		pygame.sprite.Sprite.__init__(self)
+		self.image=pygame.Surface([45,45])
+		self.rect=self.image.get_rect()
+		self.rect.x=x
+		self.rect.y=y
+
+	def pressed(self,data):
+		if(rts_classes.player1.menuState=='Drone_b1'):
+			for unit in rts_classes.player1.selected:
+				if(unit.name=='Drone'):
+					building=rts_buildings.GeothermalGenerator(data,-100,-100)
+					unit.buildState='Select'
+					unit.building=building
+					break
+
+	def hover(self,data):
+		if(rts_classes.player1.menuState=='Drone_b1'):
+			rts_classes.player1.menuHover='GeothermalGenerator'
 
 class MenuButton4(pygame.sprite.Sprite):
 	def __init__(self,x,y):

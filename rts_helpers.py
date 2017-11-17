@@ -161,6 +161,7 @@ def initializeMenu(data):
     iconWidth=45
 
     data.menuButton1=rts_images.MenuButton1(boxX+iconBuffer*1.25,boxY+iconBuffer)
+    data.menuButton2=rts_images.MenuButton2(boxX+iconBuffer*1.25+(iconWidth+iconBuffer),boxY+iconBuffer)
     data.menuButton4=rts_images.MenuButton4(boxX+iconBuffer*1.25,boxY+iconBuffer+(iconWidth+iconBuffer))
     data.menuButton6=rts_images.MenuButton6(boxX+iconBuffer*1.25+(iconWidth+iconBuffer)*2,boxY+iconBuffer+(iconWidth+iconBuffer))
 
@@ -176,6 +177,8 @@ def updateMenuIcons(data):
     elif(rts_classes.player1.menuState=='Drone_b1'):
         mB1Image=pygame.image.load(os.path.join('rts_build_command_center_icon.png'))
         data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
+        mB2Image=pygame.image.load(os.path.join('rts_build_geothermal_generator_icon.png'))
+        data.menuButton2.image=pygame.transform.scale(mB2Image,(45,45))
         mb6Image=pygame.image.load(os.path.join('rts_escape_icon.png'))
         data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
     elif(rts_classes.player1.menuState=='CommandCenter'):
@@ -253,3 +256,16 @@ def createUnits():
             if(len(building.buildQueue)>0):
                 if(building.buildQueue[0]=='Drone'):
                     building.createDrone()
+
+def collectEnergy():
+    for building in rts_classes.player1.buildings:
+        rts_classes.player1.energy+=building.energy
+        building.energyProduced+=building.energy
+    if(rts_classes.player1.energy>=rts_classes.player1.powerCap):
+        rts_classes.player1.energy=rts_classes.player1.powerCap
+
+def setPowerCap():
+    TotalBattery=0
+    for building in rts_classes.player1.buildings:
+        TotalBattery+=building.battery
+    rts_classes.player1.powerCap=TotalBattery
