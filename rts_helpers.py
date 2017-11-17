@@ -100,6 +100,7 @@ def mapAdjustUnits(dx,dy):
 def updateMap(data,dx,dy):
     mapAdjustUnits(dx,dy)
     data.trees.update(data)
+    data.mines.update(data)
     rts_classes.player1.inConstruction.update(data)
     rts_classes.player1.buildings.update(data)
     data.mapPos=rts_map_builder.generateMapPos(data)
@@ -237,6 +238,18 @@ def collectUnitMats():
             if(len(pygame.sprite.spritecollide(unit,rts_classes.player1.commandCenters,False))>0):
                 unit.dropOffMats()
 
-def buildBuildings():
+def buildBuildings(data):
     for building in rts_classes.player1.inConstruction:
-        building.build()
+        building.build(data)
+
+def drawRallyLine(display,data):
+    for building in rts_classes.player1.selected:
+        if(building.name=='CommandCenter'):
+            pygame.draw.line(display,(153,230,255),(building.rect.center),(building.rally_pointX,building.rally_pointY))
+
+def createUnits():
+    for building in rts_classes.player1.buildings:
+        if(building.name=='CommandCenter'):
+            if(len(building.buildQueue)>0):
+                if(building.buildQueue[0]=='Drone'):
+                    building.createDrone()

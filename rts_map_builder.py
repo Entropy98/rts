@@ -1,6 +1,7 @@
 import random
 import rts_images
 import rts_helpers
+import time
 
 def populateForests(data,forestNum=0,board=None,pos=None,treeCount=1):
 	if(board==None):
@@ -41,6 +42,25 @@ def populateForests(data,forestNum=0,board=None,pos=None,treeCount=1):
 							return board
 						board[move[0]][move[1]]='field'
 		return None
+
+def populateMines(data):
+	print('Digging Mines...')
+	numOfMines=0
+	while(numOfMines<data.numOfMines):
+		randX=random.randint(0,data.cells-1)
+		randY=random.randint(0,data.cells-1)
+		while(data.board[randX][randY]!='field'):
+			randX=random.randint(0,data.cells-1)
+			randY=random.randint(0,data.cells-1)
+		data.board[randX][randY]='mine'
+		numOfMines+=1
+	print('Complete')
+	print('Compiling Mine Sprites...')
+	for i in range(len(data.board)):
+		for j in range(len(data.board[0])):
+			if(data.board[i][j]=='mine'):
+				data.mines.add(rts_images.Mine(data,i,j))
+	print('Complete')
 
 def generateMapPos(data):
 	point0=rts_helpers.coord2Pos(data,*data.mapCoords[0],'tile')[0]

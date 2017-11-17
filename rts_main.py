@@ -19,10 +19,12 @@ def init(data):
 	data.cursorY=data.cells//2
 	data.mousePos=(0,0)
 	data.gameX=data.width//2
-	data.gameY=-data.height
+	data.gameY=-1.75* data.height
 	data.numOfForests=25
 	data.forestSize=100
+	data.numOfMines=10
 	data.trees=pygame.sprite.Group()
+	data.mines=pygame.sprite.Group()
 	data.board=[]
 	for i in range(data.cells):
 		newRow=[]
@@ -30,7 +32,8 @@ def init(data):
 			newRow.append('field')
 		data.board.append(newRow)
 	print('Planting Trees...')
-	#rts_map_builder.populateForests(data)
+	rts_map_builder.populateForests(data)
+	rts_map_builder.populateMines(data)
 	rts_helpers.initializeMenu(data)
 	data.selectBox1=(None,None)
 	data.selectBox2=[0,0]
@@ -85,6 +88,7 @@ def mouseMotion(event,data):
 		data.selectBox2[0]+=dX
 		data.selectBox2[1]+=dY
 	data.mousePos=event.pos
+	rts_menus.menuButtonsHover(event.pos,data)
 
 def keyDown(event,data):
 	if(event.key==274):#down
@@ -133,13 +137,15 @@ def inSelectionBox(data):
 				rts_classes.player1.select(data,unit)
 
 def timerFired(data):
-	rts_helpers.buildBuildings()
+	rts_helpers.buildBuildings(data)
+	rts_helpers.createUnits()
 	rts_helpers.collectUnitMats()
 	rts_classes.player1.units.update(data)
 	inSelectionBox(data)
 
 def drawMap(display,data):
 	rts_images.displayMap(display,data,data.gameX-2500,data.gameY)
+	data.mines.draw(display)
 	data.trees.draw(display)
 
 def drawCursor(display,data):
@@ -175,6 +181,7 @@ def redrawAll(display, data):
 	rts_helpers.drawBuildStencils(display,data)
 	drawSelectedRing(display,data)
 	drawBuildings(display,data)
+	rts_helpers.drawRallyLine(display,data)
 	drawUnits(display,data)
 	drawSelectBox(display,data)
 	drawCursor(display,data)
