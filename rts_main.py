@@ -37,15 +37,6 @@ def init(data):
 	data.numOfMines=10
 	data.trees=pygame.sprite.Group()
 	data.mines=pygame.sprite.Group()
-	data.board=[]
-	for i in range(data.cells):
-		newRow=[]
-		for j in range(data.cells):
-			newRow.append('field')
-		data.board.append(newRow)
-	print('Planting Trees...')
-	rts_map_builder.populateForests(data)
-	rts_map_builder.populateMines(data)
 	rts_helpers.initializeMenu(data)
 	data.selectBox1=(None,None)
 	data.selectBox2=[0,0]
@@ -53,10 +44,11 @@ def init(data):
 	data.mapPos=rts_map_builder.generateMapPos(data)
 	data.buildStencil=None
 
-def startGame(data):
+def startGame(display,data):
 	data.startMenu=False
 	data.localPlayer=rts_classes.Player(data.usernameInput)
 	init(data)
+	rts_map_builder.buildMap(display,data)
 
 def mouseDown(event,data):
 	if(data.startMenu==False):
@@ -201,7 +193,7 @@ def keyDown(event,data):
 def keyUp(event,data):
    	pass
 
-def timerFired(data):
+def timerFired(display,data):
 	if(data.startMenu==False):
 		rts_helpers.buildBuildings(data)
 		rts_helpers.createUnits(data)
@@ -212,7 +204,7 @@ def timerFired(data):
 		rts_helpers.inSelectionBox(data)
 	else:
 		if(data.playButtonPressed):
-			startGame(data)
+			startGame(display,data)
 
 
 def redrawAll(display, data):
@@ -260,7 +252,7 @@ def run(width=300, height=300):
 		sys.exit()
 
 	def timerFiredWrapper(display, data):
-		timerFired(data)
+		timerFired(display,data)
 		redrawAllWrapper(display, data)
 		data.fpsClock.tick(data.fps)
 
