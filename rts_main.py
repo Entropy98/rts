@@ -6,6 +6,7 @@ import rts_classes
 import rts_images
 import rts_menus
 import random
+import math
 
 def init(data):
 	sys.setrecursionlimit(3000)
@@ -14,12 +15,12 @@ def init(data):
 	data.cellWidth=data.maxCellWidth
 	data.zoom=.5
 	data.cellWidth=data.maxCellWidth*data.zoom
-	data.scrollSpeed=40
-	data.cursorX=data.cells//2
-	data.cursorY=data.cells//2
+	data.scrollSpeed=3
+	data.cursorX=random.randint(0,data.cells-1)
+	data.cursorY=random.randint(0,data.cells-1)
 	data.mousePos=(0,0)
-	data.gameX=data.width//2
-	data.gameY=-1.75* data.height
+	data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+	data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
 	data.numOfForests=25
 	data.forestSize=100
 	data.numOfMines=10
@@ -32,7 +33,7 @@ def init(data):
 			newRow.append('field')
 		data.board.append(newRow)
 	print('Planting Trees...')
-	rts_map_builder.populateForests(data)
+	#rts_map_builder.populateForests(data)
 	rts_map_builder.populateMines(data)
 	rts_helpers.initializeMenu(data)
 	data.selectBox1=(None,None)
@@ -94,35 +95,65 @@ def mouseMotion(event,data):
 
 def keyDown(event,data):
 	if(event.key==274):#down
-		data.cursorY+=1
+		data.cursorY+=data.scrollSpeed
+		data.cursorX+=data.scrollSpeed
+		ogGameX=data.gameX
+		ogGameY=data.gameY
+		data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+		data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+		rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
 	elif(event.key==273):#up
-		data.cursorY-=1
+		data.cursorY-=data.scrollSpeed
+		data.cursorX-=data.scrollSpeed
+		ogGameX=data.gameX
+		ogGameY=data.gameY
+		data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+		data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+		rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
 	elif(event.key==275):#right
-		data.cursorX+=1
+		data.cursorX+=data.scrollSpeed
+		data.cursorY-=data.scrollSpeed
+		ogGameX=data.gameX
+		ogGameY=data.gameY
+		data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+		data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+		rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
 	elif(event.key==276):#left
-		data.cursorX-=1
+		data.cursorX-=data.scrollSpeed
+		data.cursorY+=data.scrollSpeed
+		ogGameX=data.gameX
+		ogGameY=data.gameY
+		data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+		data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+		rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
 	if(data.cursorX<0):
 		data.cursorX=0
+		ogGameX=data.gameX
+		ogGameY=data.gameY
+		data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+		data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+		rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
 	if(data.cursorY<0):
 		data.cursorY=0
+		ogGameX=data.gameX
+		ogGameY=data.gameY
+		data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+		data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+		rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
 	if(data.cursorX>=data.cells):
 		data.cursorX=data.cells-1
+		ogGameX=data.gameX
+		ogGameY=data.gameY
+		data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+		data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+		rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
 	if(data.cursorY>=data.cells):
 		data.cursorY=data.cells-1
-
-	if(event.unicode=='w'):
-		data.gameY+=data.scrollSpeed/data.zoom
-		rts_helpers.updateMap(data,0,data.scrollSpeed/data.zoom)
-	elif(event.unicode=='s'):
-		data.gameY-=data.scrollSpeed/data.zoom
-		rts_helpers.updateMap(data,0,-data.scrollSpeed/data.zoom)
-	elif(event.unicode=='d'):
-		data.gameX-=data.scrollSpeed/data.zoom
-		rts_helpers.updateMap(data,-data.scrollSpeed/data.zoom,0)
-	elif(event.unicode=='a'):
-		data.gameX+=data.scrollSpeed/data.zoom
-		rts_helpers.updateMap(data,data.scrollSpeed/data.zoom,0)
-
+		ogGameX=data.gameX
+		ogGameY=data.gameY
+		data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+		data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+		rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
 
 	if(event.unicode=='p'):
 		x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)

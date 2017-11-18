@@ -87,18 +87,18 @@ def legalPosition(data,unit):
             return False
     return True
 
-def mapAdjustUnits(dx,dy):
+def mapAdjustUnits(data,dx,dy):
     for unit in rts_classes.player1.units:
         curCoords=unit.rect.center
-        unit.rect.center=(curCoords[0]+dx,curCoords[1]+dy)
-        unit.desX+=dx
-        unit.desY+=dy
-        if(unit.name=='CommandCenter'):
-            unit.rally_pointX+=dx
-            unit.rally_pointY+=dy
+        unit.rect.center=(curCoords[0]-dx,curCoords[1]-dy)
+        unit.desX-=dx
+        unit.desY-=dy
+    for building in rts_classes.player1.buildings:
+        building.rally_pointX-=dx
+        building.rally_pointY-=dy
 
 def updateMap(data,dx,dy):
-    mapAdjustUnits(dx,dy)
+    mapAdjustUnits(data,dx,dy)
     data.trees.update(data)
     data.mines.update(data)
     rts_classes.player1.inConstruction.update(data)

@@ -18,11 +18,47 @@ def drawResourceBar(display,data):
 	display.blit(woodLabel,(data.width*.9,data.height*.01))
 	metalLabel=data.font.render('Metals: '+str(rts_classes.player1.metals),1,(255,255,255))
 	display.blit(metalLabel,(data.width*.78,data.height*.01))
-	energyLabel=data.font.render('Energy: '+str(int(rts_classes.player1.energy))+'J/'+str(rts_classes.player1.powerCap)+'J',1,(255,255,255))
+	energyLabel=data.font.render('Energy: '+str(int(rts_classes.player1.energy))+'J / '+str(rts_classes.player1.powerCap)+'J',1,(255,255,255))
 	display.blit(energyLabel,(data.width*.6,data.height*.01))
 
 def drawMiniMap(display,data):
-	pygame.draw.rect(display,(20,20,20),(data.width*.0125,data.height*.75+data.height*.0125,data.width*.225,data.height*.225))
+	boxX=data.width*.0125
+	boxY=data.height*.75+data.height*.0125
+	boXWidth=data.width*.225
+	boxHeight=data.height*.225
+	pygame.draw.rect(display,(20,20,20),(boxX,boxY,boXWidth,boxHeight))
+	point1=(boxX,boxY+boxHeight/2)
+	point3=(boxX+boXWidth,boxY+boxHeight/2)
+	point2=(boxX+boXWidth/2,boxY+boxHeight*.25)
+	point0=(boxX+boXWidth/2,boxY+boxHeight*.75)
+	pygame.draw.polygon(display,(38,77,0),(point0,point1,point2,point3))
+	cellWidth=boXWidth/100
+	for x in range(data.cells):
+		for y in range(data.cells):
+			xCoord=x
+			yCoord=y
+			miniPoint0=((xCoord*.5*cellWidth - yCoord*.5*cellWidth)+point2[0],\
+				(xCoord*.25*cellWidth+yCoord*.25*cellWidth)+point2[1])
+
+			miniPoint1=(((xCoord-1)*.5*cellWidth - yCoord*.5*cellWidth)+point2[0],\
+				((xCoord)*.25*cellWidth+(yCoord+1)*.25*cellWidth)+point2[1])
+
+			miniPoint2=((xCoord*.5*cellWidth - yCoord*.5*cellWidth)+point2[0],\
+				((xCoord+1)*.25*cellWidth+(yCoord+1)*.25*cellWidth)+point2[1])
+
+			miniPoint3=(((xCoord+1)*.5*cellWidth - yCoord*.5*cellWidth)+point2[0],\
+				((xCoord)*.25*cellWidth+(yCoord+1)*.25*cellWidth)+point2[1])
+			tileLabel=data.board[x][y]
+			if(tileLabel=='forest'):
+				pygame.draw.polygon(display,(153,102,0),(miniPoint0,miniPoint1,miniPoint2,miniPoint3))
+			elif(tileLabel=='mine'):
+				pygame.draw.polygon(display,(140,140,140),(miniPoint0,miniPoint1,miniPoint2,miniPoint3))
+			elif(tileLabel=='building'):
+				pygame.draw.polygon(display,(255,255,0),(miniPoint0,miniPoint1,miniPoint2,miniPoint3))
+			if(x==data.cursorX and y==data.cursorY):
+				cursorCenterX=(miniPoint1[0]+miniPoint3[0])/2
+				cursorCenterY=(miniPoint0[1]+miniPoint2[1])/2
+	pygame.draw.rect(display,(255,255,255),(cursorCenterX-8.1,cursorCenterY-6.075,16.2,12.15),1)
 
 def drawUnitBox(display,data):
 	data.unitIcons.empty()
@@ -42,6 +78,8 @@ def drawUnitBox(display,data):
 					data.unitIcons.add(rts_images.DroneIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 				elif(unit.name=='CommandCenter' or unit.name=='CommandCenterX'):
 					data.unitIcons.add(rts_images.CommandCenterIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
+				elif(unit.name=='GeothermalGenerator' or unit.name=='GeothermalGeneratorX'):
+					data.unitIcons.add(rts_images.GeothermalGeneratorIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 				else:
 					pygame.draw.rect(display,(0,0,0),(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 				x+=1
