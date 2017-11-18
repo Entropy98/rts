@@ -53,7 +53,7 @@ class CommandCenter(Building):
 		[False,False,False,False,False]
 		]
 
-	def createDrone(self):
+	def createDrone(self,data):
 		if(self.createStartTime==0):
 			self.createStartTime=time.time()
 		self.createTimeLeft=time.time()-self.createStartTime
@@ -62,13 +62,13 @@ class CommandCenter(Building):
 			woodCost=costs['wood']
 			metalCost=costs['metals']
 			energyCost=costs['energy']
-			if(rts_classes.player1.metals>=metalCost and rts_classes.player1.wood>=woodCost and rts_classes.player1.energy>=energyCost):
-				rts_classes.player1.createDrone(self.rect.center[0],self.rect.center[1],self.rally_pointX,self.rally_pointY)
+			if(data.localPlayer.metals>=metalCost and data.localPlayer.wood>=woodCost and data.localPlayer.energy>=energyCost):
+				data.localPlayer.createDrone(self.rect.center[0],self.rect.center[1],self.rally_pointX,self.rally_pointY)
 				self.buildQueue.pop(0)
 				self.createStartTime=0
-				rts_classes.player1.metals-=metalCost
-				rts_classes.player1.wood-=woodCost
-				rts_classes.player1.energy-=energyCost
+				data.localPlayer.metals-=metalCost
+				data.localPlayer.wood-=woodCost
+				data.localPlayer.energy-=energyCost
 
 	def build(self,data):
 		if(self.startTime==0):
@@ -79,10 +79,10 @@ class CommandCenter(Building):
 			self.name='CommandCenter'
 			self.image=pygame.image.load(os.path.join('rts_command_center.png'))
 			self.image=pygame.transform.scale(self.image,(125,84))
-			rts_classes.player1.inConstruction.remove(self)
-			rts_classes.player1.buildings.add(self)
-			rts_classes.player1.commandCenters.add(self)
-			rts_classes.player1.select(data,self)
+			data.localPlayer.inConstruction.remove(self)
+			data.localPlayer.buildings.add(self)
+			data.localPlayer.commandCenters.add(self)
+			data.localPlayer.select(data,self)
 			rts_helpers.updateMenuIcons(data)
 
 class GeothermalGenerator(Building):
@@ -121,9 +121,12 @@ class GeothermalGenerator(Building):
 			self.name='GeothermalGenerator'
 			self.image=pygame.image.load(os.path.join('rts_geothermal_generator.png'))
 			self.image=pygame.transform.scale(self.image,(25,50))
-			rts_classes.player1.inConstruction.remove(self)
-			rts_classes.player1.buildings.add(self)
-			rts_classes.player1.commandCenters.add(self)
-			rts_classes.player1.select(data,self)
+			data.localPlayer.inConstruction.remove(self)
+			data.localPlayer.buildings.add(self)
+			data.localPlayer.commandCenters.add(self)
+			data.localPlayer.select(data,self)
 			rts_helpers.updateMenuIcons(data)
 
+def drawBuildings(display,data):
+	data.localPlayer.inConstruction.draw(display)
+	data.localPlayer.buildings.draw(display)

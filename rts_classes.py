@@ -32,5 +32,3 @@ class Player(object):
 	def createDrone(self,x,y,rallyX,rallyY):
 		drone=rts_images.Drone(x,y,rallyX,rallyY)
 		self.units.add(drone)
-
-player1=Player('Player 1')

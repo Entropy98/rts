@@ -68,3 +68,8 @@ def generateMapPos(data):
 	point2=rts_helpers.coord2Pos(data,*data.mapCoords[2],'tile')[2]
 	point3=rts_helpers.coord2Pos(data,*data.mapCoords[3],'tile')[3]
 	return (point0,point1,point2,point3)
+
+def drawMap(display,data):
+	rts_images.displayMap(display,data,data.gameX-2500,data.gameY)
+	data.mines.draw(display)
+	data.trees.draw(display)

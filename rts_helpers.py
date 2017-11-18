@@ -76,7 +76,7 @@ def moveUnit(x,y,destX,destY,speed,epsilon=6):
         return (x+i,y+j)
 
 def legalPosition(data,unit):
-    collided=pygame.sprite.spritecollide(unit,rts_classes.player1.units,False)
+    collided=pygame.sprite.spritecollide(unit,data.localPlayer.units,False)
     if(len(collided)>1):
         return False
     if(pointRhombusIntersect(unit.rect.center,*data.mapPos)==False):
@@ -88,12 +88,12 @@ def legalPosition(data,unit):
     return True
 
 def mapAdjustUnits(data,dx,dy):
-    for unit in rts_classes.player1.units:
+    for unit in data.localPlayer.units:
         curCoords=unit.rect.center
         unit.rect.center=(curCoords[0]-dx,curCoords[1]-dy)
         unit.desX-=dx
         unit.desY-=dy
-    for building in rts_classes.player1.buildings:
+    for building in data.localPlayer.buildings:
         building.rally_pointX-=dx
         building.rally_pointY-=dy
 
@@ -101,8 +101,8 @@ def updateMap(data,dx,dy):
     mapAdjustUnits(data,dx,dy)
     data.trees.update(data)
     data.mines.update(data)
-    rts_classes.player1.inConstruction.update(data)
-    rts_classes.player1.buildings.update(data)
+    data.localPlayer.inConstruction.update(data)
+    data.localPlayer.buildings.update(data)
     data.mapPos=rts_map_builder.generateMapPos(data)
 
 
@@ -166,22 +166,22 @@ def initializeMenu(data):
     data.menuButton6=rts_images.MenuButton6(boxX+iconBuffer*1.25+(iconWidth+iconBuffer)*2,boxY+iconBuffer+(iconWidth+iconBuffer))
 
 def updateMenuIcons(data):
-    print(rts_classes.player1.menuState)
-    if(rts_classes.player1.menuState=='Drone'):
+    print(data.localPlayer.menuState)
+    if(data.localPlayer.menuState=='Drone'):
         mB1Image=pygame.image.load(os.path.join('rts_build_icon1.png'))
         data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
         mB4Image=pygame.image.load(os.path.join('rts_drone_action_icon.png'))
         data.menuButton4.image=pygame.transform.scale(mB4Image,(45,45))
         mb6Image=pygame.image.load(os.path.join('rts_destroy_icon.png'))
         data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
-    elif(rts_classes.player1.menuState=='Drone_b1'):
+    elif(data.localPlayer.menuState=='Drone_b1'):
         mB1Image=pygame.image.load(os.path.join('rts_build_command_center_icon.png'))
         data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
         mB2Image=pygame.image.load(os.path.join('rts_build_geothermal_generator_icon.png'))
         data.menuButton2.image=pygame.transform.scale(mB2Image,(45,45))
         mb6Image=pygame.image.load(os.path.join('rts_escape_icon.png'))
         data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
-    elif(rts_classes.player1.menuState=='CommandCenter'):
+    elif(data.localPlayer.menuState=='CommandCenter'):
         mb1Image=pygame.image.load(os.path.join('rts_build_drone_icon.png'))
         data.menuButton1.image=pygame.transform.scale(mb1Image,(45,45))
         mb4Image=pygame.image.load(os.path.join('rts_rally_point_icon.png'))
@@ -225,7 +225,7 @@ def placeBuilding(data,building):
 
 def drawBuildStencils(display,data):
     if(data.mousePos[1]<data.height*.75):
-        for unit in rts_classes.player1.selected:
+        for unit in data.localPlayer.selected:
             if(unit.name=='Drone' and unit.stencil!=None):
                 for tile in unit.stencil:
                     if(tile[0]=='empty'):
@@ -235,37 +235,67 @@ def drawBuildStencils(display,data):
                     else:
                         pygame.draw.polygon(display,(255,77,77),tile[1],3)
 
-def collectUnitMats():
-    for unit in rts_classes.player1.units:
+def collectUnitMats(data):
+    for unit in data.localPlayer.units:
         if(unit.name=='Drone'):
-            if(len(pygame.sprite.spritecollide(unit,rts_classes.player1.commandCenters,False))>0):
-                unit.dropOffMats()
+            if(len(pygame.sprite.spritecollide(unit,data.localPlayer.commandCenters,False))>0):
+                unit.dropOffMats(data)
 
 def buildBuildings(data):
-    for building in rts_classes.player1.inConstruction:
+    for building in data.localPlayer.inConstruction:
         building.build(data)
 
 def drawRallyLine(display,data):
-    for building in rts_classes.player1.selected:
+    for building in data.localPlayer.selected:
         if(building.name=='CommandCenter'):
             pygame.draw.line(display,(153,230,255),(building.rect.center),(building.rally_pointX,building.rally_pointY))
 
-def createUnits():
-    for building in rts_classes.player1.buildings:
+def createUnits(data):
+    for building in data.localPlayer.buildings:
         if(building.name=='CommandCenter'):
             if(len(building.buildQueue)>0):
                 if(building.buildQueue[0]=='Drone'):
-                    building.createDrone()
+                    building.createDrone(data)
 
-def collectEnergy():
-    for building in rts_classes.player1.buildings:
-        rts_classes.player1.energy+=building.energy
+def collectEnergy(data):
+    for building in data.localPlayer.buildings:
+        data.localPlayer.energy+=building.energy
         building.energyProduced+=building.energy
-    if(rts_classes.player1.energy>=rts_classes.player1.powerCap):
-        rts_classes.player1.energy=rts_classes.player1.powerCap
+    if(data.localPlayer.energy>=data.localPlayer.powerCap):
+        data.localPlayer.energy=data.localPlayer.powerCap
 
-def setPowerCap():
+def setPowerCap(data):
     TotalBattery=0
-    for building in rts_classes.player1.buildings:
+    for building in data.localPlayer.buildings:
         TotalBattery+=building.battery
-    rts_classes.player1.powerCap=TotalBattery
+    data.localPlayer.powerCap=TotalBattery
+
+def inSelectionBox(data):
+    if(data.selectBox1!=(None,None)):
+        for unit in data.localPlayer.units:
+            if(rectanglesOverlap(data.selectBox1[0],data.selectBox1[1],data.selectBox2[0],data.selectBox2[1],\
+                unit.rect.left,unit.rect.top,unit.rect.width,unit.rect.height)):
+                data.localPlayer.select(data,unit)
+
+def drawCursor(display,data):
+    coords=coord2Pos(data,data.cursorX,data.cursorY,'tile')
+    point0,point1,point2,point3=coords[0],coords[1],coords[2],coords[3]
+    pygame.draw.polygon(display,(153,230,255),(point0,point1,point2,point3),4)
+    coordLabel=str(data.cursorX)+','+str(data.cursorY)
+    coordLabel=str(data.board[data.cursorX][data.cursorY])
+    fontSize=int(20*data.zoom)
+    font=pygame.font.SysFont('Helvetica',fontSize)
+    textSurface=font.render(coordLabel,False,(255,255,255))
+    display.blit(textSurface,((((point1[0]+point3[0])//2)-fontSize,((point0[1]+point2[1])//2)-.5*fontSize)))
+
+def drawSelectBox(display,data):
+    if(data.selectBox1!=(None,None)):
+        pygame.draw.rect(display,(153,230,255),(data.selectBox1[0],data.selectBox1[1],data.selectBox2[0],data.selectBox2[1]),1)
+
+def drawSelectedRing(display,data):
+    for unit in data.localPlayer.selected:
+        pygame.draw.ellipse(display,(153,230,255),(unit.rect.left-2,unit.rect.top+2,unit.rect.width+4,unit.rect.height+4),2)
+
+def drawUnits(display,data):
+    player=data.localPlayer
+    player.units.draw(display)

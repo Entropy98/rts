@@ -11,14 +11,14 @@ def drawMenu(display,data):
 	drawResourceBar(display,data)
 
 def drawResourceBar(display,data):
-	pygame.draw.rect(display,(20,20,20),(0,0,data.width,data.height*.03))
-	nameLabel=data.font.render(rts_classes.player1.username,1,(255,255,255))
+	pygame.draw.rect(display,(20,20,20),(0,0,data.width,data.height*.04))
+	nameLabel=data.font.render(data.localPlayer.username,1,(255,255,255))
 	display.blit(nameLabel,(15,data.height*.01))
-	woodLabel=data.font.render('Wood: '+str(rts_classes.player1.wood),1,(255,255,255))
+	woodLabel=data.font.render('Wood: '+str(data.localPlayer.wood),1,(255,255,255))
 	display.blit(woodLabel,(data.width*.9,data.height*.01))
-	metalLabel=data.font.render('Metals: '+str(rts_classes.player1.metals),1,(255,255,255))
+	metalLabel=data.font.render('Metals: '+str(data.localPlayer.metals),1,(255,255,255))
 	display.blit(metalLabel,(data.width*.78,data.height*.01))
-	energyLabel=data.font.render('Energy: '+str(int(rts_classes.player1.energy))+'J / '+str(rts_classes.player1.powerCap)+'J',1,(255,255,255))
+	energyLabel=data.font.render('Energy: '+str(int(data.localPlayer.energy))+'J / '+str(data.localPlayer.powerCap)+'J',1,(255,255,255))
 	display.blit(energyLabel,(data.width*.6,data.height*.01))
 
 def drawMiniMap(display,data):
@@ -70,10 +70,10 @@ def drawUnitBox(display,data):
 	pygame.draw.rect(display,(255,153,51),(boxX,boxY,data.width*.4-data.width*.0125,data.height*.225))
 	x=0
 	y=0
-	if(rts_classes.player1.menuHover==None):
-		if(len(rts_classes.player1.selected)>1):
+	if(data.localPlayer.menuHover==None):
+		if(len(data.localPlayer.selected)>1):
 			#set max for 36 units
-			for unit in rts_classes.player1.selected:
+			for unit in data.localPlayer.selected:
 				if(unit.name=='Drone'):
 					data.unitIcons.add(rts_images.DroneIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 				elif(unit.name=='CommandCenter' or unit.name=='CommandCenterX'):
@@ -86,15 +86,15 @@ def drawUnitBox(display,data):
 				if(x>9):
 					x=0
 					y+=1
-		elif(len(rts_classes.player1.selected)==1):
-			for unit in rts_classes.player1.selected:
+		elif(len(data.localPlayer.selected)==1):
+			for unit in data.localPlayer.selected:
 				if(unit.name=='Drone'):
 					nameLabel=data.font.render(unit.name,1,(20,20,20))
 					display.blit(nameLabel,(data.width//2-data.width*.1,data.height*.77))
 					woodLabel=data.font.render('Wood: '+str(unit.wood)+'/'+str(unit.woodCapacity),1,(20,20,20))
 					display.blit(woodLabel,(boxX+iconBuffer,data.height*.8))
 					metalLabel=data.font.render('Metals: '+str(unit.metals)+'/'+str(unit.metalCapacity),1,(20,20,20))
-					display.blit(metalLabel,(boxX+iconBuffer,data.height*.82))
+					display.blit(metalLabel,(boxX+iconBuffer,data.height*.83))
 				elif(unit.name=='CommandCenterX'):
 					nameLabel=data.font.render('Command Center',1,(20,20,20))
 					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
@@ -141,60 +141,60 @@ def drawUnitBox(display,data):
 					energyLabel=data.font.render('Energy Produced: '+str(int(unit.energyProduced))+'J',1,(20,20,20))
 					display.blit(energyLabel,(boxX+iconBuffer,data.height*.8))
 		data.unitIcons.draw(display)
-	elif(rts_classes.player1.menuHover=='Drone_b1'):
+	elif(data.localPlayer.menuHover=='Drone_b1'):
 		nameLabel=data.font.render('Build Civilian Structures',1,(20,20,20))
 		display.blit(nameLabel,(data.width//2-data.width*.2,data.height*.77))
 		descLabel=data.font.render('Menu for Building Non-Military Structures',1,(20,20,20))
 		display.blit(descLabel,(boxX+iconBuffer,data.height*.8))
-	elif(rts_classes.player1.menuHover=='CommandCenter'):
+	elif(data.localPlayer.menuHover=='CommandCenter'):
 		nameLabel=data.font.render('Build Command Center',1,(20,20,20))
 		display.blit(nameLabel,(data.width//2-data.width*.2,data.height*.77))
 		descLabel1=data.font.render('Primary Civilian Building Used for Building',1,(20,20,20))
 		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
 		descLabel2=data.font.render('Drones and Collecting Resources. Contains',1,(20,20,20))
-		display.blit(descLabel2,(boxX+iconBuffer,data.height*.82))
+		display.blit(descLabel2,(boxX+iconBuffer,data.height*.83))
 		descLabel3=data.font.render('Small Generator and Mid Sized Battery',1,(20,20,20))
-		display.blit(descLabel3,(boxX+iconBuffer,data.height*.84))
+		display.blit(descLabel3,(boxX+iconBuffer,data.height*.86))
 		descLabel5=data.font.render('Produces: .01J  Stores: 100J',1,(20,20,20))
-		display.blit(descLabel5,(boxX+iconBuffer,data.height*.87))
-		descLabel5=data.font.render('Wood Cost: 300  Metals Cost: 200',1,(20,20,20))
 		display.blit(descLabel5,(boxX+iconBuffer,data.height*.9))
-	elif(rts_classes.player1.menuHover=='GeothermalGenerator'):
+		descLabel5=data.font.render('Wood Cost: 300  Metals Cost: 200',1,(20,20,20))
+		display.blit(descLabel5,(boxX+iconBuffer,data.height*.94))
+	elif(data.localPlayer.menuHover=='GeothermalGenerator'):
 		nameLabel=data.font.render('Build Geothermal Generator',1,(20,20,20))
 		display.blit(nameLabel,(data.width//2-data.width*.2,data.height*.77))
 		descLabel1=data.font.render('Basic Energy Building',1,(20,20,20))
 		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
 		descLabel2=data.font.render('Provides: .05J  Stores: 5J',1,(20,20,20))
-		display.blit(descLabel2,(boxX+iconBuffer,data.height*.83))
+		display.blit(descLabel2,(boxX+iconBuffer,data.height*.84))
 		descLabel3=data.font.render('Wood Cost: 0  Metals Cost: 100',1,(20,20,20))
-		display.blit(descLabel3,(boxX+iconBuffer,data.height*.86))
-	elif(rts_classes.player1.menuHover=='Build_Drone'):
+		display.blit(descLabel3,(boxX+iconBuffer,data.height*.88))
+	elif(data.localPlayer.menuHover=='Build_Drone'):
 		nameLabel=data.font.render('Build Drone',1,(20,20,20))
 		display.blit(nameLabel,(data.width//2-data.width*.2,data.height*.77))
 		descLabel1=data.font.render('Worker Unit',1,(20,20,20))
 		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
 		descLabel2=data.font.render('Wood Cost: 0  Metals Cost: 30  Energy Cost: 50',1,(20,20,20))
-		display.blit(descLabel2,(boxX+iconBuffer,data.height*.83))
-	elif(rts_classes.player1.menuHover=='Drone_Action'):
+		display.blit(descLabel2,(boxX+iconBuffer,data.height*.84))
+	elif(data.localPlayer.menuHover=='Drone_Action'):
 		nameLabel=data.font.render('Harvest',1,(20,20,20))
 		display.blit(nameLabel,(data.width//2-data.width*.2,data.height*.77))
 		descLabel1=data.font.render('Commands Drone to Harvest Wood or Metals',1,(20,20,20))
 		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
 		descLabel2=data.font.render('it is Interacting with',1,(20,20,20))
-		display.blit(descLabel2,(boxX+iconBuffer,data.height*.82))
-	elif(rts_classes.player1.menuHover=='Rally_Point'):
+		display.blit(descLabel2,(boxX+iconBuffer,data.height*.83))
+	elif(data.localPlayer.menuHover=='Rally_Point'):
 		nameLabel=data.font.render('Set Rally Point',1,(20,20,20))
 		display.blit(nameLabel,(data.width//2-data.width*.2,data.height*.77))
 		descLabel1=data.font.render('Click Button and then Click Elsewhere to',1,(20,20,20))
 		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
 		descLabel2=data.font.render("Reset Building's Rally Point",1,(20,20,20))
-		display.blit(descLabel2,(boxX+iconBuffer,data.height*.82))
-	elif(rts_classes.player1.menuHover=='Destroy'):
+		display.blit(descLabel2,(boxX+iconBuffer,data.height*.83))
+	elif(data.localPlayer.menuHover=='Destroy'):
 		nameLabel=data.font.render('Destroy',1,(20,20,20))
 		display.blit(nameLabel,(data.width//2-data.width*.2,data.height*.77))
 		descLabel1=data.font.render('Destroys Selected Units and Structures',1,(20,20,20))
 		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
-	elif(rts_classes.player1.menuHover=='Escape'):
+	elif(data.localPlayer.menuHover=='Escape'):
 		nameLabel=data.font.render('Destroy',1,(20,20,20))
 		display.blit(nameLabel,(data.width//2-data.width*.2,data.height*.77))
 		descLabel1=data.font.render('Returns to Previous Menu',1,(20,20,20))
@@ -208,15 +208,15 @@ def drawCmdBox(display,data):
 	iconBuffer=data.width*.025
 	iconWidth=45
 	pygame.draw.rect(display,(255,179,102),(boxX,boxY,data.width*.35-data.width*.0125,data.height*.225))
-	if(rts_classes.player1.menuState=='Drone'):
+	if(data.localPlayer.menuState=='Drone'):
 		data.menuButtons.add(data.menuButton1)
 		data.menuButtons.add(data.menuButton4)
 		data.menuButtons.add(data.menuButton6)
-	elif(rts_classes.player1.menuState=='Drone_b1'):
+	elif(data.localPlayer.menuState=='Drone_b1'):
 		data.menuButtons.add(data.menuButton1)
 		data.menuButtons.add(data.menuButton2)
 		data.menuButtons.add(data.menuButton6)
-	elif(rts_classes.player1.menuState=='CommandCenter'):
+	elif(data.localPlayer.menuState=='CommandCenter'):
 		data.menuButtons.add(data.menuButton1)
 		data.menuButtons.add(data.menuButton4)
 		data.menuButtons.add(data.menuButton6)
@@ -240,7 +240,7 @@ def menuButtonsPressed(pos,data):
 			return 5
 	if(pos[0]>data.width*.68125+(data.width*.025+45)*2 and pos[0]<data.width*.68125+45+(data.width*.025+45)*2):
 		if(pos[1]>data.height*.763+(data.width*.025+45) and pos[1]<data.height*.763+(data.width*.025+45)+45):
-			return data.menuButton6.pressed()
+			return data.menuButton6.pressed(data)
 
 def menuButtonsHover(pos,data):
 	if(pos[0]>data.width*.68125 and pos[0]<data.width*.68125+45):
@@ -262,4 +262,4 @@ def menuButtonsHover(pos,data):
 		if(pos[1]>data.height*.763+(data.width*.025+45) and pos[1]<data.height*.763+(data.width*.025+45)+45):
 			return data.menuButton6.hover(data)
 	else:
-		rts_classes.player1.menuHover=None
+		data.localPlayer.menuHover=None
