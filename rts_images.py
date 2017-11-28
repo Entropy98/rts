@@ -50,110 +50,6 @@ class Mine(pygame.sprite.Sprite):
 		if(self.metals<1):
 			self.kill()
 
-class Drone(pygame.sprite.Sprite):
-	"""docstring for Drone"""
-	def __init__(self,x,y,destX,destY):
-		pygame.sprite.Sprite.__init__(self)
-		self.image=pygame.image.load(os.path.join('rts_drone_dl1_yellow.png'))
-		self.image=pygame.transform.scale(self.image,(20,12))
-		self.rect=self.image.get_rect()
-		self.speed=10
-		self.rect.center=(x,y)
-		self.selected=False
-		self.flying=True
-		self.desX=destX
-		self.desY=destY
-		self.name='Drone'
-		self.wood=0
-		self.woodCapacity=25
-		self.woodGathering=False
-		self.metalMining=False
-		self.metalCapacity=15
-		self.metals=0
-		self.buildState=None
-		self.building=None
-		self.stencil=None
-
-	@staticmethod
-	def getBuildTime():
-		return 5
-
-	@staticmethod
-	def getBuildCost():
-		d={}
-		d['metals']=30
-		d['wood']=0
-		d['energy']=50
-		return d
-
-	def update(self,data):
-		ogCenter=self.rect.center
-		self.rect.center=rts_helpers.moveUnit(self.rect.center[0],self.rect.center[1],self.desX,self.desY,self.speed)
-		self.build(data)
-		if(rts_helpers.legalPosition(data,self)==False):
-			self.rect.center=ogCenter
-		if(self.woodGathering):
-			self.gatherWood(data)
-		if(self.wood>=self.woodCapacity):
-			self.woodGathering=False
-		if(self.metalMining):
-			self.mineMetals(data)
-		if(self.metals>=self.metalCapacity):
-			self.metalMining=False
-
-	def build(self,data):
-		if(self.buildState=='Select'):
-			self.stencil=rts_helpers.compileBuildStencil(data,self.building.layout)
-		elif(self.buildState=='Place'):
-			for tile in self.stencil:
-				if(tile[0]==False):
-					self.buildState='Select'
-			if(self.buildState=='Place'):
-				if(data.localPlayer.wood>=self.building.woodCost and data.localPlayer.metals>=self.building.metalCost):
-					newCoords=rts_helpers.placeBuilding(data,self.building.layout)
-					self.building.coords=newCoords
-					self.building.rect.center=rts_helpers.coord2Pos(data,newCoords[0],newCoords[1])
-					self.building.rally_pointX=self.building.rect.center[0]
-					self.building.rally_pointY=self.building.rect.center[1]+100
-					self.buildState='Build'
-					data.localPlayer.inConstruction.add(self.building)
-					self.stencil=None
-					data.localPlayer.metals-=self.building.metalCost
-					data.localPlayer.wood-=self.building.woodCost
-					self.building.update(data)
-				else:
-					self.buildState=None
-					self.stencil=None
-					self.building=None
-		elif(self.buildState=='Build'):
-			pass
-
-	def dropOffMats(self,data):
-		data.localPlayer.wood+=self.wood
-		self.wood=0
-		data.localPlayer.metals+=self.metals
-		self.metals=0
-
-	def gatherWood(self,data):
-		if(len(pygame.sprite.spritecollide(self,data.trees,None))>0):
-			self.metalMining=False
-			for tree in pygame.sprite.spritecollide(self,data.trees,None):
-				self.metals=0
-				tree.wood-=1
-				tree.updateResources(data)
-				self.wood+=1
-				break
-
-	def mineMetals(self,data):
-		if(len(pygame.sprite.spritecollide(self,data.mines,None))>0):
-			self.woodGathering=False
-			for mine in pygame.sprite.spritecollide(self,data.mines,None):
-				self.wood=0
-				mine.metals-=1
-				mine.updateResources(data)
-				self.metals+=1
-				break
-
 class MenuButton1(pygame.sprite.Sprite):
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
@@ -169,15 +65,28 @@ class MenuButton1(pygame.sprite.Sprite):
 		elif(data.localPlayer.menuState=='Drone_b1'):
 			for unit in data.localPlayer.selected:
 				if(unit.name=='Drone'):
-					building=rts_buildings.CommandCenter(data,-100,-100)
+					building=rts_buildings.CommandCenter(data,-100,-100,data.localPlayer.team)
+					unit.buildState='Select'
+					unit.building=building
+					break
+		elif(data.localPlayer.menuState=='Drone_b2'):
+			for unit in data.localPlayer.selected:
+				if(unit.name=='Drone'):
+					building=rts_buildings.Barracks(data,-100,-100,data.localPlayer.team)
 					unit.buildState='Select'
 					unit.building=building
 					break
 		elif(data.localPlayer.menuState=='CommandCenter'):
 			for building in data.localPlayer.selected:
 				if(building.name=='CommandCenter'):
-					if(len(building.buildQueue)<6):
+					if(len(building.buildQueue)<5):
 						building.buildQueue.append('Drone')
+					break
+		elif(data.localPlayer.menuState=='Barracks'):
+			for building in data.localPlayer.selected:
+				if(building.name=='Barracks'):
+					if(len(building.buildQueue)<5):
+						building.buildQueue.append('Militia')
 					break
 		data.localPlayer.menuHover=None
 
@@ -186,10 +95,49 @@ class MenuButton1(pygame.sprite.Sprite):
 			data.localPlayer.menuHover='Drone_b1'
 		elif(data.localPlayer.menuState=='Drone_b1'):
 			data.localPlayer.menuHover='CommandCenter'
+		elif(data.localPlayer.menuState=='Drone_b2'):
+			data.localPlayer.menuHover='Barracks'
 		elif(data.localPlayer.menuState=='CommandCenter'):
 			data.localPlayer.menuHover='Build_Drone'
+		elif(data.localPlayer.menuState=='Barracks'):
+			data.localPlayer.menuHover='Train_Militia'
 
 class MenuButton2(pygame.sprite.Sprite):
+	def __init__(self,x,y):
+		pygame.sprite.Sprite.__init__(self)
+		self.image=pygame.Surface([45,45])
+		self.rect=self.image.get_rect()
+		self.rect.x=x
+		self.rect.y=y
+
+	def pressed(self,data):
+		if(data.localPlayer.menuState=='Drone'):
+			data.localPlayer.menuState='Drone_b2'
+			rts_helpers.updateMenuIcons(data)
+		elif(data.localPlayer.menuState=='Drone_b1'):
+			for unit in data.localPlayer.selected:
+				if(unit.name=='Drone'):
+					building=rts_buildings.GeothermalGenerator(data,-100,-100,data.localPlayer.team)
+					unit.buildState='Select'
+					unit.building=building
+					break
+		elif(data.localPlayer.menuState=='Drone_b2'):
+			for unit in data.localPlayer.selected:
+				if(unit.name=='Drone'):
+					building=rts_buildings.WoodWall(data,-100,-100,data.localPlayer.team)
+					unit.buildState='Select'
+					unit.building=building
+					break
+
+	def hover(self,data):
+		if(data.localPlayer.menuState=='Drone'):
+			data.localPlayer.menuHover='Drone_b2'
+		elif(data.localPlayer.menuState=='Drone_b1'):
+			data.localPlayer.menuHover='GeothermalGenerator'
+		elif(data.localPlayer.menuState=='Drone_b2'):
+			data.localPlayer.menuHover='WoodWall'
+
+class MenuButton3(pygame.sprite.Sprite):
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.Surface([45,45])
@@ -201,14 +149,14 @@ class MenuButton2(pygame.sprite.Sprite):
 		if(data.localPlayer.menuState=='Drone_b1'):
 			for unit in data.localPlayer.selected:
 				if(unit.name=='Drone'):
-					building=rts_buildings.GeothermalGenerator(data,-100,-100)
+					building=rts_buildings.Farm(data,-100,-100,data.localPlayer.team)
 					unit.buildState='Select'
 					unit.building=building
 					break
 
 	def hover(self,data):
 		if(data.localPlayer.menuState=='Drone_b1'):
-			data.localPlayer.menuHover='GeothermalGenerator'
+			data.localPlayer.menuHover='Farm'
 
 class MenuButton4(pygame.sprite.Sprite):
 	def __init__(self,x,y):
@@ -226,6 +174,9 @@ class MenuButton4(pygame.sprite.Sprite):
 			elif(unit.name=='CommandCenter'):
 				unit.rallyReset=True
 				break
+			elif(unit.name=='Barracks'):
+				unit.rallyReset=True
+				break
 		data.localPlayer.menuHover=None
 
 	def hover(self,data):
@@ -233,6 +184,8 @@ class MenuButton4(pygame.sprite.Sprite):
 			if(unit.name=='Drone'):
 				data.localPlayer.menuHover='Drone_Action'
 			elif(unit.name=='CommandCenter'):
+				data.localPlayer.menuHover='Rally_Point'
+			elif(unit.name=='Barracks'):
 				data.localPlayer.menuHover='Rally_Point'
 
 class MenuButton6(pygame.sprite.Sprite):
@@ -243,14 +196,15 @@ class MenuButton6(pygame.sprite.Sprite):
 		self.rect.x=x
 		self.rect.y=y
 
-	def pressed(self):
+	def pressed(self,data):
 		if(data.localPlayer.menuState=='Drone'):
 			for unit in data.localPlayer.selected:
 				unit.kill()
 			data.localPlayer.menuState=None
-		elif(data.localPlayer.menuState=='Drone_b1'):
+		elif(data.localPlayer.menuState=='Drone_b1' or data.localPlayer.menuState=='Drone_b2'):
 			data.localPlayer.menuState='Drone'
-		elif(data.localPlayer.menuState=='CommandCenter'):
+			rts_helpers.updateMenuIcons(data)
+		elif(data.localPlayer.menuState=='CommandCenter' or data.localPlayer.menuState=='Barracks'):
 			for unit in data.localPlayer.selected:
 				unit.kill()
 		data.localPlayer.menuHover=None
@@ -258,9 +212,9 @@ class MenuButton6(pygame.sprite.Sprite):
 	def hover(self,data):
 		if(data.localPlayer.menuState=='Drone'):
 			data.localPlayer.menuHover='Destroy'
-		elif(data.localPlayer.menuState=='Drone_b1'):
+		elif(data.localPlayer.menuState=='Drone_b1' or data.localPlayer.menuState=='Drone_b2'):
 			data.localPlayer.menuHover='Escape'
-		elif(data.localPlayer.menuState=='CommandCenter'):
+		elif(data.localPlayer.menuState=='CommandCenter' or data.localPlayer.menuState=='Barracks'):
 			data.localPlayer.menuHover='Destroy'
 
 class DroneIcon(pygame.sprite.Sprite):

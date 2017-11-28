@@ -7,8 +7,15 @@ import rts_images
 import rts_menus
 import rts_buildings
 import rts_startmenu
+import rts_server_commands
 import random
 import math
+import subprocess
+import os
+import socket
+import threading
+from queue import Queue
+
 
 def initStartMenu(data):
 	data.startMenu=True
@@ -18,6 +25,29 @@ def initStartMenu(data):
 	data.singlePlayerTextBoxSelect=None
 	data.playButtonHover=False
 	data.playButtonPressed=False
+	data.multiplayerButtonHover=None
+	data.multiplayerTextBoxSelect=None
+	data.IPInput=''
+	data.multiplayerButtonsPressed=None
+
+def initMultiplayer(data):
+	print('initMultiplayer')
+	data.clientele = dict()
+	data.otherUsers=dict()
+	data.localPlayer=rts_classes.Player(data.usernameInput)
+	if(data.multiplayerButtonsPressed==1):
+		data.localPlayer.role='Host'
+		#subprocess.Popen(['cmd','-r',os.path.join('rts_server.py')])
+		threading.Thread(target = rts_server_commands.handleServerMsg, args = (data.server, data.serverMsg)).start()
+		rts_server_commands.joinServer(data,data.IPInput)
+		msg='newUsername %s \n'%data.usernameInput
+		data.server.send(msg.encode())
+	elif(data.multiplayerButtonsPressed==2):
+		data.localPlayer.role='Client'
+		threading.Thread(target = rts_server_commands.handleServerMsg, args = (data.server, data.serverMsg)).start()
+		rts_server_commands.joinServer(data,data.IPInput)
+		msg='newUsername %s \n'%data.usernameInput
+		data.server.send(msg.encode())
 
 def init(data):
 	sys.setrecursionlimit(3000)
@@ -43,6 +73,8 @@ def init(data):
 	data.mapCoords=((0,0),(0,data.cells-1),(data.cells-1,data.cells-1),(data.cells-1,0))
 	data.mapPos=rts_map_builder.generateMapPos(data)
 	data.buildStencil=None
+	data.board=[]
+	data.boardComplete=False
 
 def startGame(display,data):
 	data.startMenu=False
@@ -79,11 +111,17 @@ def mouseDown(event,data):
 		    if(event.button==3):
 		    	mouseX=event.pos[0]
 		    	mouseY=event.pos[1]
+		    	target=None
+		    	for building in data.localPlayer.buildings:
+		    		if(building.rect.collidepoint(event.pos)):
+		    			target=building
+		    			break
 		    	for unit in data.localPlayer.selected:
 			    	unit.desX=mouseX
 			    	unit.desY=mouseY
 			    	unit.rally_pointX=mouseX
 			    	unit.rally_pointY=mouseY
+			    	unit.target=target
 
 		else:
 			rts_menus.menuButtonsPressed(event.pos,data)
@@ -94,7 +132,20 @@ def mouseDown(event,data):
 			data.singlePlayerTextBoxSelect=rts_startmenu.singlePlayerTextBoxSelect(data,event.pos)
 			if(len(data.usernameInput)>0):
 				data.playButtonPressed=rts_startmenu.playButtonPressed(data,event.pos)
-
+		elif(data.startMenuState=='Multiplayer'):
+			data.multiplayerTextBoxSelect=rts_startmenu.multiplayerTextBoxSelect(data,event.pos)
+			if(len(data.IPInput)>0 and len(data.usernameInput)>0):
+				data.multiplayerButtonsPressed=rts_startmenu.multiplayerButtonsPressed(data,event.pos)
+				initMultiplayer(data)
+		elif(data.startMenuState=='Lobby'):
+			data.localPlayer.team=rts_startmenu.lobbyTeamButtonsPressed(data,event.pos)
+			msg=''
+			msg+='newTeam %s \n'%data.localPlayer.team
+			data.server.send(msg.encode())
+			if(data.localPlayer.role=='Host'):
+				data.playButtonPressed=rts_startmenu.playButtonPressed(data,event.pos)
+				msg+='startGame %s \n'%'test'
+				data.server.send(msg.encode())
 
 def mouseUp(event,data):
 	if(data.startMenu==False):
@@ -113,8 +164,10 @@ def mouseMotion(event,data):
 	else:
 		if(data.startMenuState=='Start'):
 			data.startMenuSelect=rts_startmenu.startMenuButtonHover(data,event.pos)
-		elif(data.startMenuState=='Singleplayer'):
+		elif(data.startMenuState=='Singleplayer' or (data.startMenuState=='Lobby' and data.localPlayer.role=='Host')):
 			data.playButtonHover=rts_startmenu.playButtonHover(data,event.pos)
+		elif(data.startMenuState=='Multiplayer'):
+			data.multiplayerButtonHover=rts_startmenu.multiplayerButtonsHover(data,event.pos)
 
 def keyDown(event,data):
 	if(data.startMenu==False):
@@ -183,28 +236,60 @@ def keyDown(event,data):
 			x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
 			data.localPlayer.createDrone(x,y,x,y)
 	else:
-		if(data.startMenuState=='Singleplayer'):
-			if(data.singlePlayerTextBoxSelect==1):
+		if(data.startMenuState=='Singleplayer' or data.startMenuState=='Multiplayer'):
+			if(data.singlePlayerTextBoxSelect==1 or data.multiplayerTextBoxSelect==1):
 				if(event.unicode.isalnum()):
 					data.usernameInput+=event.unicode
 				elif(event.key==8 and len(data.usernameInput)>0):
 					data.usernameInput=data.usernameInput[:-1]
+			if(data.multiplayerTextBoxSelect==2):
+				if(event.unicode.isdigit() or event.unicode=='.'):
+					data.IPInput+=event.unicode
+				elif(event.key==8 and len(data.IPInput)>0):
+					data.IPInput=data.IPInput[:-1]
 
 def keyUp(event,data):
    	pass
 
 def timerFired(display,data):
+	rts_server_commands.interpServerCommands(data)
 	if(data.startMenu==False):
 		rts_helpers.buildBuildings(data)
 		rts_helpers.createUnits(data)
 		rts_helpers.collectUnitMats(data)
 		rts_helpers.collectEnergy(data)
 		rts_helpers.setPowerCap(data)
+		rts_helpers.setSupplyCap(data)
 		data.localPlayer.units.update(data)
 		rts_helpers.inSelectionBox(data)
 	else:
 		if(data.playButtonPressed):
-			startGame(display,data)
+			if(data.startMenuState=='Singleplayer'):
+				startGame(display,data)
+			else:
+				if(data.localPlayer.role=='Host'):
+					init(data)
+					rts_map_builder.buildMap(display,data)
+					msg='board %s \n'%str(data.board)
+					data.server.send(msg.encode())
+					data.startMenu=False
+				else:
+					if(data.startMenuState=='Lobby'):
+						init(data)
+						data.startMenuState='syncMap'
+						for i in range(data.cells):
+							newRow=[]
+							for j in range(data.cells):
+								newRow.append('field')
+							data.board.append(newRow)
+					if(data.boardComplete):
+						print('making terrain')
+						rts_map_builder.drawLoadBar(display,data,'Compiling Tree Sprites...',0)
+						rts_map_builder.compileTreeSprites(display,data)
+						rts_map_builder.compileMineSprites(display,data)
+						data.startMenu=False
+
+
 
 
 def redrawAll(display, data):
@@ -215,13 +300,14 @@ def redrawAll(display, data):
 		rts_buildings.drawBuildings(display,data)
 		rts_helpers.drawRallyLine(display,data)
 		rts_helpers.drawUnits(display,data)
+		rts_helpers.drawHealthBars(display,data)
 		rts_helpers.drawSelectBox(display,data)
 		#rts_helpers.drawCursor(display,data)
 		rts_menus.drawMenu(display,data)
 	else:
 		rts_startmenu.drawMenu(display,data)
 
-def run(width=300, height=300):
+def run(width=300, height=300,serverMsg=None,server=None):
 	def redrawAllWrapper(display, data):
 		display.fill((255,255,255))
 		redrawAll(display, data)
@@ -259,6 +345,9 @@ def run(width=300, height=300):
 	# Set up data and call init
 	class Struct(object): pass
 	data = Struct()
+	data.multiplayerButtonsPressed=None
+	data.serverMsg=serverMsg
+	data.server=server
 	data.width = width
 	data.height = height
 	data.fps=30 #frames per second
@@ -269,7 +358,7 @@ def run(width=300, height=300):
 	pygame.init()
 	pygame.font.init()
 	display = pygame.display.set_mode((data.width,data.height))
-	pygame.display.set_caption('RTS')
+	pygame.display.set_caption('Second Earth')
 
 	data.font=pygame.font.SysFont('helvetica',14)
 	data.menuFont=pygame.font.SysFont('helvetica',30)
@@ -278,8 +367,11 @@ def run(width=300, height=300):
 	#initialize Images
 	rts_images.loadImages(data)
 
+	
 	#main loop
 	while(True):
+		#if(data.multiplayerButtonsPressed!=None and data.startMenuState=='Multiplayer'):
+
 		for event in pygame.event.get():
 			if(event.type==QUIT):
 				quit()
@@ -295,4 +387,6 @@ def run(width=300, height=300):
 				mouseMotionWrapper(event,display,data)
 		timerFiredWrapper(display,data)
 
-run(600,600)
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+serverMsg = Queue(100)
+run(600,600,serverMsg,server)

@@ -79,12 +79,22 @@ def legalPosition(data,unit):
     collided=pygame.sprite.spritecollide(unit,data.localPlayer.units,False)
     if(len(collided)>1):
         return False
+    if(unit.flying==False):
+        collided=pygame.sprite.spritecollide(unit,data.localPlayer.buildings,False)
+        if(len(collided)>1):
+            return False
+        collided=pygame.sprite.spritecollide(unit,data.trees,False)
+        if(len(collided)>1):
+            return False
+        collided=pygame.sprite.spritecollide(unit,data.mines,False)
+        if(len(collided)>1):
+            return False
     if(pointRhombusIntersect(unit.rect.center,*data.mapPos)==False):
         return False
-    if(unit.flying==False):
-        coords=pos2Coord(data,*unit.rect.center)
-        if(data.board[coords[0]][coords[1]]!='field'):
-            return False
+    # if(unit.flying==False):
+    #     coords=pos2Coord(data,*unit.rect.center)
+    #     if(data.board[coords[0]][coords[1]]!='field'):
+    #         return False
     return True
 
 def mapAdjustUnits(data,dx,dy):
@@ -162,6 +172,7 @@ def initializeMenu(data):
 
     data.menuButton1=rts_images.MenuButton1(boxX+iconBuffer*1.25,boxY+iconBuffer)
     data.menuButton2=rts_images.MenuButton2(boxX+iconBuffer*1.25+(iconWidth+iconBuffer),boxY+iconBuffer)
+    data.menuButton3=rts_images.MenuButton3(boxX+iconBuffer*1.25+(iconWidth+iconBuffer)*2,boxY+iconBuffer)
     data.menuButton4=rts_images.MenuButton4(boxX+iconBuffer*1.25,boxY+iconBuffer+(iconWidth+iconBuffer))
     data.menuButton6=rts_images.MenuButton6(boxX+iconBuffer*1.25+(iconWidth+iconBuffer)*2,boxY+iconBuffer+(iconWidth+iconBuffer))
 
@@ -170,6 +181,8 @@ def updateMenuIcons(data):
     if(data.localPlayer.menuState=='Drone'):
         mB1Image=pygame.image.load(os.path.join('rts_build_icon1.png'))
         data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
+        mB2Image=pygame.image.load(os.path.join('rts_queue_icon2.png'))
+        data.menuButton2.image=pygame.transform.scale(mB2Image,(45,45))
         mB4Image=pygame.image.load(os.path.join('rts_drone_action_icon.png'))
         data.menuButton4.image=pygame.transform.scale(mB4Image,(45,45))
         mb6Image=pygame.image.load(os.path.join('rts_destroy_icon.png'))
@@ -179,10 +192,26 @@ def updateMenuIcons(data):
         data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
         mB2Image=pygame.image.load(os.path.join('rts_build_geothermal_generator_icon.png'))
         data.menuButton2.image=pygame.transform.scale(mB2Image,(45,45))
+        mB3Image=pygame.image.load(os.path.join('rts_queue_icon3.png'))
+        data.menuButton3.image=pygame.transform.scale(mB3Image,(45,45))
+        mb6Image=pygame.image.load(os.path.join('rts_escape_icon.png'))
+        data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
+    elif(data.localPlayer.menuState=='Drone_b2'):
+        mB1Image=pygame.image.load(os.path.join('rts_queue_icon1.png'))
+        data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
+        mB2Image=pygame.image.load(os.path.join('rts_queue_icon2.png'))
+        data.menuButton2.image=pygame.transform.scale(mB2Image,(45,45))
         mb6Image=pygame.image.load(os.path.join('rts_escape_icon.png'))
         data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
     elif(data.localPlayer.menuState=='CommandCenter'):
         mb1Image=pygame.image.load(os.path.join('rts_build_drone_icon.png'))
+        data.menuButton1.image=pygame.transform.scale(mb1Image,(45,45))
+        mb4Image=pygame.image.load(os.path.join('rts_rally_point_icon.png'))
+        data.menuButton4.image=pygame.transform.scale(mb4Image,(45,45))
+        mb6Image=pygame.image.load(os.path.join('rts_destroy_icon.png'))
+        data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
+    elif(data.localPlayer.menuState=='Barracks'):
+        mb1Image=pygame.image.load(os.path.join('rts_queue_icon1.png'))
         data.menuButton1.image=pygame.transform.scale(mb1Image,(45,45))
         mb4Image=pygame.image.load(os.path.join('rts_rally_point_icon.png'))
         data.menuButton4.image=pygame.transform.scale(mb4Image,(45,45))
@@ -200,7 +229,7 @@ def compileBuildStencil(data,building):
         for x in range(len(building[0])):
             newX=centerRhobusCoord[0]-(buildingCenterX-x)
             newY=centerRhobusCoord[1]-(buildingCenterY-y)
-            if(building[x][y]):
+            if(building[y][x]):
                 if(data.board[newX][newY]!='field'):
                     stencil.append([False,coord2Pos(data,newX,newY,'tile')])
                 else:
@@ -217,7 +246,7 @@ def placeBuilding(data,building):
     buildingCenter=(buildingCenterX,buildingCenterY)
     for y in range(len(building)):
         for x in range(len(building[0])):
-            if(building[x][y]):
+            if(building[y][x]):
                 newX=centerRhobusCoord[0]-(buildingCenterX-x)
                 newY=centerRhobusCoord[1]-(buildingCenterY-y)
                 data.board[newX][newY]='building'
@@ -247,7 +276,7 @@ def buildBuildings(data):
 
 def drawRallyLine(display,data):
     for building in data.localPlayer.selected:
-        if(building.name=='CommandCenter'):
+        if(building.name=='CommandCenter' or building.name=='Barracks'):
             pygame.draw.line(display,(153,230,255),(building.rect.center),(building.rally_pointX,building.rally_pointY))
 
 def createUnits(data):
@@ -256,6 +285,10 @@ def createUnits(data):
             if(len(building.buildQueue)>0):
                 if(building.buildQueue[0]=='Drone'):
                     building.createDrone(data)
+        elif(building.name=='Barracks'):
+            if(len(building.buildQueue)>0):
+                if(building.buildQueue[0]=='Militia'):
+                    building.createMilitia(data)
 
 def collectEnergy(data):
     for building in data.localPlayer.buildings:
@@ -269,6 +302,13 @@ def setPowerCap(data):
     for building in data.localPlayer.buildings:
         TotalBattery+=building.battery
     data.localPlayer.powerCap=TotalBattery
+
+def setSupplyCap(data):
+    supply=0
+    for building in data.localPlayer.buildings:
+        if(building.name=='Farm'):
+            supply+=building.supply
+    data.localPlayer.supplyCap=supply
 
 def inSelectionBox(data):
     if(data.selectBox1!=(None,None)):
@@ -299,3 +339,35 @@ def drawSelectedRing(display,data):
 def drawUnits(display,data):
     player=data.localPlayer
     player.units.draw(display)
+
+def buildReqsMet(data,building):
+    if(data.localPlayer.wood>=building.woodCost and data.localPlayer.metals>=building.metalCost):
+        numOfReqs=len(building.prereqs)
+        reqsMet=set()
+        for built in data.localPlayer.buildings:
+            for req in building.prereqs:
+                if(built.name in building.prereqs):
+                    reqsMet.add(built.name)
+        if(numOfReqs>len(reqsMet)):
+            return False
+        return True
+    return False
+
+def drawHealthBars(display,data):
+    healthBarHeight=10
+    for unit in data.localPlayer.units:
+        if(unit.health<unit.maxHealth):
+            pygame.draw.rect(display,(255,0,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,unit.maxHealth//3,healthBarHeight))
+            pygame.draw.rect(display,(0,255,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,(unit.maxHealth//3)*(unit.health/unit.maxHealth),healthBarHeight))
+            pygame.draw.rect(display,(0,0,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,unit.maxHealth//3,healthBarHeight),1)
+            for i in range(unit.maxHealth//15):
+                pygame.draw.line(display,(0,0,0),(unit.rect.center[0]-unit.maxHealth//6+((unit.maxHealth//3)//(unit.maxHealth//15))*(i+1),unit.rect.y-healthBarHeight),\
+                    (unit.rect.center[0]-unit.maxHealth//6+((unit.maxHealth//3)//(unit.maxHealth//15))*(i+1),unit.rect.y),1)
+    for building in data.localPlayer.buildings:
+        if(building.health<building.maxHealth):
+            pygame.draw.rect(display,(255,0,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width,healthBarHeight))
+            pygame.draw.rect(display,(0,255,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width*(building.health/building.maxHealth),healthBarHeight))
+            pygame.draw.rect(display,(0,0,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width,healthBarHeight),1)
+            for i in range(building.maxHealth//100):
+                pygame.draw.line(display,(0,0,0),(building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y-healthBarHeight),\
+                    (building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y),1)
