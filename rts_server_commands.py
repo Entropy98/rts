@@ -1,7 +1,6 @@
 import socket
 import threading
 import rts_classes
-import ast
 from queue import Queue
 
 def joinServer(data,IP='',port=50003):
@@ -62,8 +61,7 @@ def interpServerCommands(data):
 			elif(command=='board'):
 				ID=msg[1]
 				board=msg[2]
-				data.board=ast.literal_eval(board)
-				print(data.board)
+				data.board=board
 				data.boardComplete=True
 
 		except:

@@ -14,6 +14,7 @@ import subprocess
 import os
 import socket
 import threading
+import ast
 from queue import Queue
 
 
@@ -144,8 +145,9 @@ def mouseDown(event,data):
 			data.server.send(msg.encode())
 			if(data.localPlayer.role=='Host'):
 				data.playButtonPressed=rts_startmenu.playButtonPressed(data,event.pos)
-				msg+='startGame %s \n'%'test'
-				data.server.send(msg.encode())
+				if(data.playButtonPressed==1):
+					msg+='startGame %s \n'%'test'
+					data.server.send(msg.encode())
 
 def mouseUp(event,data):
 	if(data.startMenu==False):
@@ -270,7 +272,9 @@ def timerFired(display,data):
 				if(data.localPlayer.role=='Host'):
 					init(data)
 					rts_map_builder.buildMap(display,data)
-					msg='board %s \n'%str(data.board)
+					boardmsg=str(data.board)
+					boardmsg=boardmsg.replace(' ','')
+					msg='board %s \n'%boardmsg
 					data.server.send(msg.encode())
 					data.startMenu=False
 				else:
@@ -283,6 +287,8 @@ def timerFired(display,data):
 								newRow.append('field')
 							data.board.append(newRow)
 					if(data.boardComplete):
+						print(data.board)
+						data.board=rts_helpers.eval2DListOfStrings(data.board)
 						print('making terrain')
 						rts_map_builder.drawLoadBar(display,data,'Compiling Tree Sprites...',0)
 						rts_map_builder.compileTreeSprites(display,data)

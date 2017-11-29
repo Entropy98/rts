@@ -371,3 +371,16 @@ def drawHealthBars(display,data):
             for i in range(building.maxHealth//100):
                 pygame.draw.line(display,(0,0,0),(building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y-healthBarHeight),\
                     (building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y),1)
+
+def eval2DListOfStrings(s):
+    newList=[]
+    for i in range(len(s)):
+        if(s[i]=='['):
+            if(s[i+1]!='['):
+                newList.append([])
+        elif(s[i]=="'" or s[i]=='"'):
+            if(s[i+1]!=',' and  s[i+1]!=']'):
+                newList[-1].append('')
+        elif(s[i].isalnum()):
+            newList[-1][-1]+=s[i]
+    return newList
