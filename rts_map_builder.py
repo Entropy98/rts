@@ -90,7 +90,7 @@ def buildMap(display,data):
 			newRow.append('field')
 		data.board.append(newRow)
 	drawLoadBar(display,data,'Planting Trees...',0)
-	populateForests(display,data)
+	#populateForests(display,data)
 	populateMines(display,data)
 
 def drawLoadBar(display,data,msg,progress):

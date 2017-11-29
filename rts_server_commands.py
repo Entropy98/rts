@@ -1,6 +1,8 @@
 import socket
 import threading
 import rts_classes
+import rts_helpers
+import rts_buildings
 from queue import Queue
 
 def joinServer(data,IP='',port=50003):
@@ -28,43 +30,83 @@ def handleServerMsg(server, serverMsg):
 def interpServerCommands(data):
 	if (data.serverMsg.qsize() > 0):
 		msg = data.serverMsg.get(False)
-		try:
-			print("received: ", msg, "\n")
-			msg = msg.split()
-			command = msg[0]
+		#try:
+		print("received: ", msg, "\n")
+		msg = msg.split()
+		command = msg[0]
 
-			if (command == "myIDis"):
-				ID = msg[1]
-				data.localPlayer.ID=ID
+		if (command == "myIDis"):
+			ID = msg[1]
+			data.localPlayer.ID=ID
 
-			elif(command=='newPlayer'):
-				ID=msg[1]
-				data.otherUsers[ID]=rts_classes.Player(data.usernameInput)
-				update=''
-				update+='newUsername %s \n'%data.usernameInput
-				update+='newTeam %s \n'%data.localPlayer.team
-				data.server.send(update.encode())
+		elif(command=='newPlayer'):
+			ID=msg[1]
+			data.otherUsers[ID]=rts_classes.Player(data.usernameInput)
+			update=''
+			update+='newUsername %s \n'%data.usernameInput
+			update+='newTeam %s \n'%data.localPlayer.team
+			data.server.send(update.encode())
 
-			elif(command=='newUsername'):
-				ID=msg[1]
-				username=msg[2]
-				data.otherUsers[ID].username=username
+		elif(command=='newUsername'):
+			ID=msg[1]
+			username=msg[2]
+			data.otherUsers[ID].username=username
 
-			elif(command=='newTeam'):
-				ID=msg[1]
-				team=msg[2]
-				data.otherUsers[ID].team=team
+		elif(command=='newTeam'):
+			ID=msg[1]
+			team=msg[2]
+			data.otherUsers[ID].team=team
 
-			elif(command=='startGame'):
-				data.playButtonPressed=True
+		elif(command=='startGame'):
+			data.playButtonPressed=True
 
-			elif(command=='board'):
-				ID=msg[1]
-				board=msg[2]
-				data.board=board
-				data.boardComplete=True
+		elif(command=='board'):
+			ID=msg[1]
+			board=msg[2]
+			data.board=board
+			data.boardComplete=True
 
-		except:
-			print("failed")
+		elif(command=='createDrone'):
+			ID=msg[1]
+			x=int(msg[2])
+			y=int(msg[3])
+			coord=rts_helpers.coord2Pos(data,x,y)
+			desX=int(msg[4])
+			desY=int(msg[5])
+			desCoord=rts_helpers.coord2Pos(data,desX,desY)
+			unitID=eval(msg[6])
+			user=data.otherUsers[ID]
+			user.createDrone(data,coord[0],coord[1],desCoord[0],desCoord[1],True,unitID)
+
+		elif(command=='moveUnit'):
+			ID=msg[1]
+			desX=int(msg[2])
+			desY=int(msg[3])
+			unitID=eval(msg[4])
+			for unit in data.otherUsers[ID].units:
+				if(unit.ID==unitID):
+					unit.desX=unit.rect.center[0]-desX
+					unit.desY=unit.rect.center[1]-desY
+
+		elif(command=='buildBuilding'):
+			ID=msg[1]
+			building=msg[2]
+			xCoord=int(msg[3])
+			yCoord=int(msg[4])
+			user=data.otherUsers[ID]
+			if(building=='CommandCenterX'):
+				user.inConstruction.add(rts_buildings.CommandCenter(data,xCoord,yCoord,user.team))
+			elif(building=='GeothermalGeneratorX'):
+				user.inConstruction.add(rts_buildings.GeothermalGenerator(data,xCoord,yCoord,user.team))
+			elif(building=='FarmX'):
+				user.inConstruction.add(rts_buildings.Farm(data,xCoord,yCoord,user.team))
+			elif(building=='BarracksX'):
+				user.inConstruction.add(rts_buildings.Barracks(data,xCoord,yCoord,user.team))
+			elif(building=='WoodWallX'):
+				user.inConstruction.add(rts_buildings.WoodWallX(data,xCoord,yCoord,user.team))
+
+
+		# except:
+		# 	print("failed")
 		data.serverMsg.task_done()
 

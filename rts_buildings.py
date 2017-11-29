@@ -73,7 +73,7 @@ class CommandCenter(Building):
 			metalCost=costs['metals']
 			energyCost=costs['energy']
 			if(data.localPlayer.metals>=metalCost and data.localPlayer.wood>=woodCost and data.localPlayer.energy>=energyCost):
-				data.localPlayer.createDrone(self.rect.center[0],self.rect.center[1],self.rally_pointX,self.rally_pointY)
+				data.localPlayer.createDrone(data,self.rect.center[0],self.rect.center[1],self.rally_pointX,self.rally_pointY)
 				self.buildQueue.pop(0)
 				self.createStartTime=0
 				data.localPlayer.metals-=metalCost
@@ -344,3 +344,8 @@ class WoodWall(Building):
 def drawBuildings(display,data):
 	data.localPlayer.inConstruction.draw(display)
 	data.localPlayer.buildings.draw(display)
+	if(data.startMenuState!='Singleplayer'):
+		for ID in data.otherUsers:
+			player=data.otherUsers[ID]
+			player.inConstruction.draw(display)
+			player.buildings.draw(display)

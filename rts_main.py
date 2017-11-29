@@ -118,11 +118,14 @@ def mouseDown(event,data):
 		    			target=building
 		    			break
 		    	for unit in data.localPlayer.selected:
+		    		msg=''#transmit change in position and unit ID
 			    	unit.desX=mouseX
 			    	unit.desY=mouseY
+			    	msg+='moveUnit %d %d %d \n'%(unit.rect.center[0]-mouseX,unit.rect.center[1]-mouseY,unit.ID)
 			    	unit.rally_pointX=mouseX
 			    	unit.rally_pointY=mouseY
 			    	unit.target=target
+			    	data.server.send(msg.encode())
 
 		else:
 			rts_menus.menuButtonsPressed(event.pos,data)
@@ -236,7 +239,7 @@ def keyDown(event,data):
 
 		if(event.unicode=='p'):
 			x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
-			data.localPlayer.createDrone(x,y,x,y)
+			data.localPlayer.createDrone(data,x,y,x,y)
 	else:
 		if(data.startMenuState=='Singleplayer' or data.startMenuState=='Multiplayer'):
 			if(data.singlePlayerTextBoxSelect==1 or data.multiplayerTextBoxSelect==1):
@@ -263,6 +266,10 @@ def timerFired(display,data):
 		rts_helpers.setPowerCap(data)
 		rts_helpers.setSupplyCap(data)
 		data.localPlayer.units.update(data)
+		if(data.startMenuState!='Singleplayer'):
+			for ID in data.otherUsers:
+				player=data.otherUsers[ID]
+				player.units.update(data)
 		rts_helpers.inSelectionBox(data)
 	else:
 		if(data.playButtonPressed):

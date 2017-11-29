@@ -3,6 +3,7 @@ from pygame.locals import *
 import rts_images
 import rts_helpers
 import rts_units
+import random
 
 class Player(object):
 	def __init__(self, username):
@@ -34,9 +35,18 @@ class Player(object):
 		self.menuState=None
 		self.selected.empty()
 
-	def createDrone(self,x,y,rallyX,rallyY):
+	def createDrone(self,data,x,y,rallyX,rallyY,client=False,ID=None):
 		drone=rts_units.Drone(x,y,rallyX,rallyY,self.team)
+		if(ID==None):
+			drone.ID=random.randint(1000000,9999999)
+		else:
+			drone.ID=ID
 		self.units.add(drone)
+		if(data.startMenuState!='Singleplayer' and client==False):
+			coord=rts_helpers.pos2Coord(data,x,y)
+			rallyCoord=rts_helpers.pos2Coord(data,rallyX,rallyY)
+			msg='createDrone %d %d %d %d %d \n'%(coord[0],coord[1],rallyCoord[0],rallyCoord[1],drone.ID)
+			data.server.send(msg.encode())
 
 	def createMilitia(self,x,y,rallyX,rallyY):
 		militia=rts_units.Militia(x,y,rallyX,rallyY,self.team)

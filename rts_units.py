@@ -168,6 +168,8 @@ class Drone(pygame.sprite.Sprite):
 					data.localPlayer.metals-=self.building.metalCost
 					data.localPlayer.wood-=self.building.woodCost
 					self.building.update(data)
+					msg='buildBuilding %s %d %d \n'%(self.building.name,self.building.coords[0],self.building.coords[1])
+					data.server.send(msg.encode())
 				else:
 					self.buildState=None
 					self.stencil=None

@@ -103,6 +103,14 @@ def mapAdjustUnits(data,dx,dy):
         unit.rect.center=(curCoords[0]-dx,curCoords[1]-dy)
         unit.desX-=dx
         unit.desY-=dy
+    if(data.startMenuState!='Singleplayer'):
+        for ID in data.otherUsers:
+            player=data.otherUsers[ID]
+            for unit in player.units:
+                curCoords=unit.rect.center
+                unit.rect.center=(curCoords[0]-dx,curCoords[1]-dy)
+                unit.desX-=dx
+                unit.desY-=dy
     for building in data.localPlayer.buildings:
         building.rally_pointX-=dx
         building.rally_pointY-=dy
@@ -273,6 +281,11 @@ def collectUnitMats(data):
 def buildBuildings(data):
     for building in data.localPlayer.inConstruction:
         building.build(data)
+    if(data.startMenuState!='Singleplayer'):
+        for ID in data.otherUsers:
+            player=data.otherUsers[ID]
+            for building in player.inConstruction:
+                building.build(data)
 
 def drawRallyLine(display,data):
     for building in data.localPlayer.selected:
@@ -289,6 +302,18 @@ def createUnits(data):
             if(len(building.buildQueue)>0):
                 if(building.buildQueue[0]=='Militia'):
                     building.createMilitia(data)
+    if(data.startMenuState!='Singleplayer'):
+        for ID in data.otherUsers:
+            player=data.otherUsers[ID]
+            for building in player.buildings:
+                if(building.name=='CommandCenter'):
+                    if(len(building.buildQueue)>0):
+                        if(building.buildQueue[0]=='Drone'):
+                            building.createDrone(data)
+                elif(building.name=='Barracks'):
+                    if(len(building.buildQueue)>0):
+                        if(building.buildQueue[0]=='Militia'):
+                            building.createMilitia(data)
 
 def collectEnergy(data):
     for building in data.localPlayer.buildings:
@@ -337,8 +362,11 @@ def drawSelectedRing(display,data):
         pygame.draw.ellipse(display,(153,230,255),(unit.rect.left-2,unit.rect.top+2,unit.rect.width+4,unit.rect.height+4),2)
 
 def drawUnits(display,data):
-    player=data.localPlayer
-    player.units.draw(display)
+    data.localPlayer.units.draw(display)
+    if(data.startMenuState!='Singleplayer'):
+        for ID in data.otherUsers:
+            player=data.otherUsers[ID]
+            player.units.draw(display)
 
 def buildReqsMet(data,building):
     if(data.localPlayer.wood>=building.woodCost and data.localPlayer.metals>=building.metalCost):
