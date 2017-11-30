@@ -90,6 +90,10 @@ def drawUnitBox(display,data):
 					data.unitIcons.add(rts_images.CommandCenterIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 				elif(unit.name=='GeothermalGenerator' or unit.name=='GeothermalGeneratorX'):
 					data.unitIcons.add(rts_images.GeothermalGeneratorIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
+				elif(unit.name=='Farm' or unit.name=='FarmX'):
+					data.unitIcons.add(rts_images.FarmIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
+				elif(unit.name=='WoodWall' or unit.name=='WoodWallX'):
+					data.unitIcons.add(rts_images.WoodWallIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 				else:
 					pygame.draw.rect(display,(0,0,0),(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 				x+=1

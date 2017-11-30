@@ -1,5 +1,6 @@
 import pygame
 import rts_helpers
+import random
 import os
 
 class Militia(pygame.sprite.Sprite):
@@ -39,6 +40,9 @@ class Militia(pygame.sprite.Sprite):
 				self.desX=self.rect.center[0]
 				self.desY=self.rect.center[1]
 				self.target.health-=self.damage
+				msg='damageDealt %d %d \n'%(self.target.ID,self.damage)
+				if(data.startMenuState!='Singleplayer'):
+					data.server.send(msg.encode())
 				self.target.update(data)
 				if(self.target.health<=0):
 					self.target=None
@@ -142,6 +146,9 @@ class Drone(pygame.sprite.Sprite):
 				self.desY=self.rect.center[1]
 				self.target.health-=self.damage
 				self.target.update(data)
+				msg='damageDealt %d %d \n'%(self.target.ID,self.damage)
+				if(data.startMenuState!='Singleplayer'):
+					data.server.send(msg.encode())
 				if(self.target.health<=0):
 					self.target=None
 			else:
@@ -168,8 +175,11 @@ class Drone(pygame.sprite.Sprite):
 					data.localPlayer.metals-=self.building.metalCost
 					data.localPlayer.wood-=self.building.woodCost
 					self.building.update(data)
-					msg='buildBuilding %s %d %d \n'%(self.building.name,self.building.coords[0],self.building.coords[1])
-					data.server.send(msg.encode())
+					buildingID=random.randint(1000000,9999999)
+					self.building.ID=buildingID
+					msg='buildBuilding %s %d %d %d \n'%(self.building.name,self.building.coords[0],self.building.coords[1],buildingID)
+					if(data.startMenuState!='Singleplayer'):
+						data.server.send(msg.encode())
 				else:
 					self.buildState=None
 					self.stencil=None

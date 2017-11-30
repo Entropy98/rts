@@ -16,6 +16,9 @@ class Building(pygame.sprite.Sprite):
 		self.startTime=0
 		self.energyProduced=0
 
+		self.rally_pointX=0
+		self.rally_pointY=0
+
 		self.rallyReset=False
 
 	def update(self,data):
@@ -99,7 +102,6 @@ class CommandCenter(Building):
 			data.localPlayer.inConstruction.remove(self)
 			data.localPlayer.buildings.add(self)
 			data.localPlayer.commandCenters.add(self)
-			data.localPlayer.select(data,self)
 			rts_helpers.updateMenuIcons(data)
 
 class GeothermalGenerator(Building):
@@ -151,7 +153,6 @@ class GeothermalGenerator(Building):
 			self.image=pygame.transform.scale(self.image,(25,50))
 			data.localPlayer.inConstruction.remove(self)
 			data.localPlayer.buildings.add(self)
-			data.localPlayer.select(data,self)
 			rts_helpers.updateMenuIcons(data)
 
 
@@ -159,9 +160,10 @@ class Farm(Building):
 	def __init__(self,data,x,y,team):
 		Building.__init__(self,x,y,team)
 
-		self.image=pygame.Surface([50,50])
+		self.image=pygame.image.load(os.path.join('rts_farm_frame.png'))
+		self.image=pygame.transform.scale(self.image,(50,50))
 		self.rect=self.image.get_rect()
-		self.xTileOffset=-.8
+		self.xTileOffset=-1
 		self.yTileOffset=-.8
 		self.rect.center=rts_helpers.coord2Pos(data,self.coords[0]+self.xTileOffset,self.coords[1]+self.yTileOffset)
 
@@ -183,7 +185,6 @@ class Farm(Building):
 		self.layout=[
 		[False,False,False,False],
 		[False,True,True,False],
-		[False,True,True,False],
 		[False,False,False,False]
 		]
 
@@ -195,20 +196,19 @@ class Farm(Building):
 			self.buildComplete=True
 			self.name='Farm'
 			if(self.team=='yellow'):
-				self.image=pygame.Surface([50,50])
-				self.image.fill((255,255,0))
+				self.image=pygame.image.load(os.path.join('rts_farm_yellow.png'))
+				self.image=pygame.transform.scale(self.image,(50,50))
 			elif(self.team=='blue'):
-				self.image=pygame.Surface([50,50])
-				self.image.fill((0,0,255))
+				self.image=pygame.image.load(os.path.join('rts_farm_blue.png'))
+				self.image=pygame.transform.scale(self.image,(50,50))
 			elif(self.team=='red'):
-				self.image=pygame.Surface([50,50])
-				self.image.fill((255,0,0))
+				self.image=pygame.image.load(os.path.join('rts_farm_red.png'))
+				self.image=pygame.transform.scale(self.image,(50,50))
 			elif(self.team=='green'):
-				self.image=pygame.Surface([50,50])
-				self.image.fill((0,255,0))
+				self.image=pygame.image.load(os.path.join('rts_farm_green.png'))
+				self.image=pygame.transform.scale(self.image,(50,50))
 			data.localPlayer.inConstruction.remove(self)
 			data.localPlayer.buildings.add(self)
-			data.localPlayer.select(data,self)
 			rts_helpers.updateMenuIcons(data)
 
 class Barracks(Building):
@@ -267,7 +267,6 @@ class Barracks(Building):
 				self.image.fill((0,255,0))
 			data.localPlayer.inConstruction.remove(self)
 			data.localPlayer.buildings.add(self)
-			data.localPlayer.select(data,self)
 			rts_helpers.updateMenuIcons(data)
 
 	def createMilitia(self,data):
@@ -280,7 +279,7 @@ class Barracks(Building):
 			metalCost=costs['metals']
 			energyCost=costs['energy']
 			if(data.localPlayer.metals>=metalCost and data.localPlayer.wood>=woodCost and data.localPlayer.energy>=energyCost):
-				data.localPlayer.createMilitia(self.rect.center[0],self.rect.center[1]+self.rect.height//2,self.rally_pointX,self.rally_pointY)
+				data.localPlayer.createMilitia(data,self.rect.center[0],self.rect.center[1]+self.rect.height//2,self.rally_pointX,self.rally_pointY)
 				self.buildQueue.pop(0)
 				self.createStartTime=0
 				data.localPlayer.metals-=metalCost
@@ -291,10 +290,11 @@ class WoodWall(Building):
 	def __init__(self,data,x,y,team):
 		Building.__init__(self,x,y,team)
 
-		self.image=pygame.Surface([25,50])
+		self.image=pygame.image.load(os.path.join('rts_wood_wall.png'))
+		self.image=pygame.transform.scale(self.image,(30,90))
 		self.rect=self.image.get_rect()
-		self.xTileOffset=-.8
-		self.yTileOffset=-.8
+		self.xTileOffset=-1.6
+		self.yTileOffset=-1.6
 		self.rect.center=rts_helpers.coord2Pos(data,self.coords[0]+self.xTileOffset,self.coords[1]+self.yTileOffset)
 
 		self.name='WoodWallX'
@@ -324,21 +324,8 @@ class WoodWall(Building):
 		if(self.buildTime-self.buildTimeLeft<=0):
 			self.buildComplete=True
 			self.name='WoodWall'
-			if(self.team=='yellow'):
-				self.image=pygame.Surface([25,50])
-				self.image.fill((255,255,0))
-			elif(self.team=='blue'):
-				self.image=pygame.Surface([25,50])
-				self.image.fill((0,0,255))
-			elif(self.team=='red'):
-				self.image=pygame.Surface([25,50])
-				self.image.fill((255,0,0))
-			elif(self.team=='green'):
-				self.image=pygame.Surface([25,50])
-				self.image.fill((0,255,0))
 			data.localPlayer.inConstruction.remove(self)
 			data.localPlayer.buildings.add(self)
-			data.localPlayer.select(data,self)
 			rts_helpers.updateMenuIcons(data)
 
 def drawBuildings(display,data):

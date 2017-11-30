@@ -121,6 +121,11 @@ def updateMap(data,dx,dy):
     data.mines.update(data)
     data.localPlayer.inConstruction.update(data)
     data.localPlayer.buildings.update(data)
+    if(data.startMenuState!='Singleplayer'):
+        for ID in data.otherUsers:
+            player=data.otherUsers[ID]
+            player.buildings.update(data)
+            player.inConstruction.update(data)
     data.mapPos=rts_map_builder.generateMapPos(data)
 
 
@@ -189,7 +194,7 @@ def updateMenuIcons(data):
     if(data.localPlayer.menuState=='Drone'):
         mB1Image=pygame.image.load(os.path.join('rts_build_icon1.png'))
         data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
-        mB2Image=pygame.image.load(os.path.join('rts_queue_icon2.png'))
+        mB2Image=pygame.image.load(os.path.join('rts_build_military_structures_icon.png'))
         data.menuButton2.image=pygame.transform.scale(mB2Image,(45,45))
         mB4Image=pygame.image.load(os.path.join('rts_drone_action_icon.png'))
         data.menuButton4.image=pygame.transform.scale(mB4Image,(45,45))
@@ -200,14 +205,14 @@ def updateMenuIcons(data):
         data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
         mB2Image=pygame.image.load(os.path.join('rts_build_geothermal_generator_icon.png'))
         data.menuButton2.image=pygame.transform.scale(mB2Image,(45,45))
-        mB3Image=pygame.image.load(os.path.join('rts_queue_icon3.png'))
+        mB3Image=pygame.image.load(os.path.join('rts_build_farm_icon.png'))
         data.menuButton3.image=pygame.transform.scale(mB3Image,(45,45))
         mb6Image=pygame.image.load(os.path.join('rts_escape_icon.png'))
         data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
     elif(data.localPlayer.menuState=='Drone_b2'):
         mB1Image=pygame.image.load(os.path.join('rts_queue_icon1.png'))
         data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
-        mB2Image=pygame.image.load(os.path.join('rts_queue_icon2.png'))
+        mB2Image=pygame.image.load(os.path.join('rts_build_wood_wall_icon.png'))
         data.menuButton2.image=pygame.transform.scale(mB2Image,(45,45))
         mb6Image=pygame.image.load(os.path.join('rts_escape_icon.png'))
         data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
@@ -412,3 +417,19 @@ def eval2DListOfStrings(s):
         elif(s[i].isalnum()):
             newList[-1][-1]+=s[i]
     return newList
+
+def findUnitByID(data,ID):
+    for unit in data.localPlayer.units:
+        if(unit.ID==ID):
+            return unit
+    for building in data.localPlayer.buildings:
+        if(building.ID==ID):
+            return building
+    for ID in data.otherUsers:
+        player=data.otherUsers[ID]
+        for unit in player.units:
+            if(unit.ID==ID):
+                return unit
+        for building in player.buildings:
+            if(building.ID==ID):
+                return building

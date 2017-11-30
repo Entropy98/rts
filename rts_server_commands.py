@@ -93,17 +93,39 @@ def interpServerCommands(data):
 			building=msg[2]
 			xCoord=int(msg[3])
 			yCoord=int(msg[4])
+			buildingID=int(msg[5])
 			user=data.otherUsers[ID]
 			if(building=='CommandCenterX'):
-				user.inConstruction.add(rts_buildings.CommandCenter(data,xCoord,yCoord,user.team))
+				newBuilding=rts_buildings.CommandCenter(data,xCoord,yCoord,user.team)
 			elif(building=='GeothermalGeneratorX'):
-				user.inConstruction.add(rts_buildings.GeothermalGenerator(data,xCoord,yCoord,user.team))
+				newBuilding=rts_buildings.GeothermalGenerator(data,xCoord,yCoord,user.team)
 			elif(building=='FarmX'):
-				user.inConstruction.add(rts_buildings.Farm(data,xCoord,yCoord,user.team))
+				newBuilding=rts_buildings.Farm(data,xCoord,yCoord,user.team)
 			elif(building=='BarracksX'):
-				user.inConstruction.add(rts_buildings.Barracks(data,xCoord,yCoord,user.team))
+				newBuilding=rts_buildings.Barracks(data,xCoord,yCoord,user.team)
 			elif(building=='WoodWallX'):
-				user.inConstruction.add(rts_buildings.WoodWallX(data,xCoord,yCoord,user.team))
+				newBuilding=rts_buildings.WoodWallX(data,xCoord,yCoord,user.team)
+			newBuilding.ID=buildingID
+			user.inConstruction.add(newBuilding)
+
+		elif(command=='newTarget'):
+			ID=msg[1]
+			unitID=int(msg[2])
+			targetID=eval(msg[3])
+			user=data.otherUsers[ID]
+			for unit in user.units:
+				if(unit.ID==unitID):
+					if(targetID!=None):
+						unit.target=rts_helpers.findUnitByID(data,targetID)
+					else:
+						unit.target=None
+
+		elif(command=='damageDealt'):
+			ID=msg[1]
+			unitID=int(msg[2])
+			damage=int(msg[3])
+			unit=rts_helpers.findUnitByID(data,unitID)
+			unit.health-=damage
 
 
 		# except:

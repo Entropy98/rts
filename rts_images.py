@@ -244,6 +244,24 @@ class GeothermalGeneratorIcon(pygame.sprite.Sprite):
 		self.rect.x=x
 		self.rect.y=y
 
+class FarmIcon(pygame.sprite.Sprite):
+	def __init__(self,x,y,width,height):
+		pygame.sprite.Sprite.__init__(self)
+		self.image=pygame.image.load(os.path.join('rts_farm_icon.png'))
+		self.image=pygame.transform.scale(self.image,(width,height))
+		self.rect=self.image.get_rect()
+		self.rect.x=x
+		self.rect.y=y
+
+class WoodWallIcon(pygame.sprite.Sprite):
+	def __init__(self,x,y,width,height):
+		pygame.sprite.Sprite.__init__(self)
+		self.image=pygame.image.load(os.path.join('rts_wood_wall_icon.png'))
+		self.image=pygame.transform.scale(self.image,(width,height))
+		self.rect=self.image.get_rect()
+		self.rect.x=x
+		self.rect.y=y
+
 class QueueIcon1(pygame.sprite.Sprite):
 	def __init__(self,x,y,width,height):
 		pygame.sprite.Sprite.__init__(self)

@@ -115,8 +115,23 @@ def mouseDown(event,data):
 		    	target=None
 		    	for building in data.localPlayer.buildings:
 		    		if(building.rect.collidepoint(event.pos)):
-		    			target=building
-		    			break
+    					target=building
+    					break
+		    	for unit in data.localPlayer.units:
+    				if(unit.rect.collidepoint(event.pos)):
+    					target=unit
+    					break
+		    	if(data.startMenuState!='Singleplayer'):
+		    		for ID in data.otherUsers:
+		    			player=data.otherUsers[ID]
+		    			for building in player.buildings:
+		    				if(building.rect.collidepoint(event.pos)):
+		    					target=building
+		    					break
+		    			for unit in player.units:
+		    				if(unit.rect.collidepoint(event.pos)):
+		    					target=unit
+		    					break
 		    	for unit in data.localPlayer.selected:
 		    		msg=''#transmit change in position and unit ID
 			    	unit.desX=mouseX
@@ -125,7 +140,12 @@ def mouseDown(event,data):
 			    	unit.rally_pointX=mouseX
 			    	unit.rally_pointY=mouseY
 			    	unit.target=target
-			    	data.server.send(msg.encode())
+			    	if(target==None):
+			    		msg+='newTarget %d None \n'%(unit.ID)
+			    	else:
+			    		msg+='newTarget %d %d \n'%(unit.ID,target.ID)
+			    	if(data.startMenuState!='Singleplayer'):
+			    		data.server.send(msg.encode())
 
 		else:
 			rts_menus.menuButtonsPressed(event.pos,data)

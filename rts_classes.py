@@ -25,11 +25,12 @@ class Player(object):
 		self.ID=None
 
 	def select(self,data,item):
-		if(self.menuState==None):
-			self.menuState=item.name
-			rts_helpers.updateMenuIcons(data)
-		if(len(self.selected)<=40):
-			self.selected.add(item)
+		if(item in self.units or item in self.buildings or item in self.inConstruction):
+			if(self.menuState==None):
+				self.menuState=item.name
+				rts_helpers.updateMenuIcons(data)
+			if(len(self.selected)<=40):
+				self.selected.add(item)
 
 	def clearSelected(self):
 		self.menuState=None
@@ -48,7 +49,16 @@ class Player(object):
 			msg='createDrone %d %d %d %d %d \n'%(coord[0],coord[1],rallyCoord[0],rallyCoord[1],drone.ID)
 			data.server.send(msg.encode())
 
-	def createMilitia(self,x,y,rallyX,rallyY):
+	def createMilitia(self,data,x,y,rallyX,rallyY,client=False,ID=None):
 		militia=rts_units.Militia(x,y,rallyX,rallyY,self.team)
+		if(ID==None):
+			militia.ID=random.randint(1000000,9999999)
+		else:
+			militia.ID=ID
 		militia.rect.center=(militia.rect.center[0],militia.rect.center[1]+militia.rect.height//2)
 		self.units.add(militia)
+		if(data.startMenuState!='Singleplayer' and client==False):
+			coord=rts_helpers.pos2Coord(data,x,y)
+			rallyCoord=rts_helpers.pos2Coord(data,rallyX,rallyY)
+			msg='createMilitia %d %d %d %d %d \n'%(coord[0],coord[1],rallyCoord[0],rallyCoord[1],militia.ID)
+			data.server.send(msg.encode())
