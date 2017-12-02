@@ -3,8 +3,10 @@ import rts_images
 import rts_helpers
 import pygame
 import time
+from rts_dev_debug import optimizationCheck
 
 #function is recursive backtracking and creates forest paths from seed. Compiles sprites when done
+@optimizationCheck
 def populateForests(display,data,startTime,forestNum=0,board=None,pos=None,treeCount=1,timeout=3):
 	#check if board has been set. Serves same purpose as wrapper
 	if(board==None):
@@ -55,6 +57,7 @@ def populateForests(display,data,startTime,forestNum=0,board=None,pos=None,treeC
 
 #function finds all tree locations and builds a sprite at that location
 ###SLOW BECAUSE OF 2500+ TREE SPRITES COMPILED AT ONCE###
+@optimizationCheck
 def compileTreeSprites(display,data):
 	drawLoadBar(display,data,'Compiling Tree Sprites...',0)
 	iterations=0
@@ -68,6 +71,7 @@ def compileTreeSprites(display,data):
 				data.trees.add(tree)
 
 #function places mines at random unfilled locations
+@optimizationCheck
 def populateMines(display,data):
 	drawLoadBar(display,data,'Digging Mines...',0)
 	numOfMines=0
@@ -83,6 +87,7 @@ def populateMines(display,data):
 	compileMineSprites(display,data)
 
 #function finds all mine locations and builds sprite at location
+@optimizationCheck
 def compileMineSprites(display,data):
 	for i in range(len(data.board)):
 		for j in range(len(data.board[0])):
@@ -90,6 +95,7 @@ def compileMineSprites(display,data):
 				data.mines.add(rts_images.Mine(data,i,j))
 
 #function gets the position of the entire map as a single rhombus
+@optimizationCheck
 def generateMapPos(data):
 	point0=rts_helpers.coord2Pos(data,*data.mapCoords[0],'tile')[0]
 	point1=rts_helpers.coord2Pos(data,*data.mapCoords[1],'tile')[1]
@@ -98,6 +104,7 @@ def generateMapPos(data):
 	return (point0,point1,point2,point3)
 
 #uses mine and forest compilers to build 100x100 tile map
+@optimizationCheck
 def buildMap(display,data):
 	drawLoadBar(display,data,'Constructing Board...',0)
 	iterations=0
@@ -124,6 +131,7 @@ def buildMap(display,data):
 	populateMines(display,data)
 
 #creates load bar without use of redraw all so that it can occur within a loop
+@optimizationCheck
 def drawLoadBar(display,data,msg,progress):
 	display.fill((20,20,20))
 	loadmessage=data.font.render(msg+str(int(progress*100))+'%',1,(153,230,255))
@@ -133,6 +141,7 @@ def drawLoadBar(display,data,msg,progress):
 	pygame.display.update() 
 
 #draws all map sprites
+@optimizationCheck
 def drawMap(display,data):
 	rts_images.displayMap(display,data,data.gameX-2500,data.gameY)
 	data.mines.draw(display)

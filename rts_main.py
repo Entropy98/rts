@@ -8,6 +8,8 @@ import rts_menus
 import rts_buildings
 import rts_startmenu
 import rts_server_commands
+from rts_dev_debug import optimizationCheck
+from rts_data import data
 import random
 import math
 import subprocess
@@ -17,7 +19,7 @@ import threading
 import ast
 from queue import Queue
 
-
+@optimizationCheck
 def initStartMenu(data):
 	data.startMenu=True
 	data.startMenuState='Start'
@@ -35,6 +37,7 @@ def initStartMenu(data):
 	data.backButton.add(rts_images.MenuBackButton(30,30))
 	data.backButtonHover=False
 
+@optimizationCheck
 def initMultiplayer(data):
 	data.clientele = dict()
 	data.otherUsers=dict()
@@ -67,6 +70,7 @@ def initMultiplayer(data):
 			msg='newUsername %s \n'%data.usernameInput
 			data.server.send(msg.encode())
 
+@optimizationCheck
 def init(data):
 	sys.setrecursionlimit(3000)
 	data.cells=100
@@ -94,14 +98,29 @@ def init(data):
 	data.board=[]
 	data.boardComplete=False
 
-def startGame(display,data):
+@optimizationCheck
+def startSingleplayerGame(display,data):
 	data.startMenu=False
 	data.localPlayer=rts_classes.Player(data.usernameInput)
+	data.otherUsers=dict()
+	data.otherUsers['AI']=rts_classes.Player('AI')
+	data.otherUsers['AI'].team='red'
+	numOfCommandCenters=random.randint(3,5)
 	init(data)
 	rts_map_builder.buildMap(display,data)
+	for i in range(numOfCommandCenters):
+		x=random.randint(5,data.cells-6)
+		y=random.randint(5,data.cells-6)
+		commandCenter=rts_buildings.CommandCenter(data,x,y,data.otherUsers['AI'].team)
+		buildingID=random.randint(1000000,9999999)
+		data.otherUsers['AI'].IDs.add(buildingID)
+		commandCenter.ID=buildingID
+		rts_helpers.placeBuildingAtCoord(data,commandCenter,x,y)
+		data.otherUsers['AI'].inConstruction.add(commandCenter)
 	x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
 	data.localPlayer.createDrone(data,x,y,x,y)
 
+@optimizationCheck
 def mouseDown(event,data):
 	if(data.startMenu==False):
 		if(data.localPlayer.winCondition=='play'):
@@ -141,17 +160,16 @@ def mouseDown(event,data):
 	    				if(unit.rect.collidepoint(event.pos)):
 	    					target=unit
 	    					break
-			    	if(data.startMenuState!='Singleplayer'):
-			    		for ID in data.otherUsers:
-			    			player=data.otherUsers[ID]
-			    			for building in player.buildings:
-			    				if(building.rect.collidepoint(event.pos)):
-			    					target=building
-			    					break
-			    			for unit in player.units:
-			    				if(unit.rect.collidepoint(event.pos)):
-			    					target=unit
-			    					break
+		    		for ID in data.otherUsers:
+		    			player=data.otherUsers[ID]
+		    			for building in player.buildings:
+		    				if(building.rect.collidepoint(event.pos)):
+		    					target=building
+		    					break
+		    			for unit in player.units:
+		    				if(unit.rect.collidepoint(event.pos)):
+		    					target=unit
+		    					break
 			    	for unit in data.localPlayer.selected:
 			    		msg=''#transmit change in position and unit ID
 				    	unit.desX=mouseX
@@ -165,8 +183,8 @@ def mouseDown(event,data):
 					    		msg+='newTarget %d None \n'%(unit.ID)
 					    	else:
 					    		msg+='newTarget %d %d \n'%(unit.ID,target.ID)
-					    	if(data.startMenuState!='Singleplayer'):
-					    		data.server.send(msg.encode())
+				    	if(data.startMenuState!='Singleplayer'):
+				    		data.server.send(msg.encode())
 
 			else:
 				rts_menus.menuButtonsPressed(event.pos,data)
@@ -199,12 +217,14 @@ def mouseDown(event,data):
 					msg+='startGame %s \n'%'test'
 					data.server.send(msg.encode())
 
+@optimizationCheck
 def mouseUp(event,data):
 	if(data.startMenu==False):
 	    if(data.selectBox1!=(None,None)):
 	   		data.selectBox1=(None,None)
 	   		data.selectBox2=[0,0]
 
+@optimizationCheck
 def mouseMotion(event,data):
 	if(data.startMenu==False):
 		if(data.localPlayer.winCondition=='play'):
@@ -232,6 +252,7 @@ def mouseMotion(event,data):
 			else:
 				data.backButtonHover=False
 
+@optimizationCheck
 def keyDown(event,data):
 	if(data.startMenu==False):
 		if(data.localPlayer.winCondition=='play'):
@@ -301,6 +322,8 @@ def keyDown(event,data):
 		if(event.unicode=='p'):
 			x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
 			data.localPlayer.createMilitia(data,x,y,x,y)
+		elif(event.unicode=='`'):
+			rts_helpers.printOptimizationResults(data)
 	else:
 		if(data.startMenuState=='Singleplayer' or data.startMenuState=='Multiplayer'):
 			if(event.key==9):
@@ -321,9 +344,11 @@ def keyDown(event,data):
 				elif(event.key==8 and len(data.IPInput)>0):
 					data.IPInput=data.IPInput[:-1]
 
+@optimizationCheck
 def keyUp(event,data):
    	pass
 
+@optimizationCheck
 def timerFired(display,data):
 	rts_server_commands.interpServerCommands(data)
 	if(data.startMenu==False):
@@ -334,16 +359,15 @@ def timerFired(display,data):
 		rts_helpers.setPowerCap(data)
 		rts_helpers.setSupplyCap(data)
 		data.localPlayer.units.update(data)
-		if(data.startMenuState!='Singleplayer'):
-			for ID in data.otherUsers:
-				player=data.otherUsers[ID]
-				player.units.update(data)
+		for ID in data.otherUsers:
+			player=data.otherUsers[ID]
+			player.units.update(data)
 		rts_helpers.inSelectionBox(data)
 		rts_helpers.checkWinConditions(data)
 	else:
 		if(data.playButtonPressed):
 			if(data.startMenuState=='Singleplayer'):
-				startGame(display,data)
+				startSingleplayerGame(display,data)
 			else:
 				if(data.localPlayer.role=='Host'):
 					init(data)
@@ -375,7 +399,7 @@ def timerFired(display,data):
 
 
 
-
+@optimizationCheck
 def redrawAll(display, data):
 	if(data.startMenu==False):
 		rts_map_builder.drawMap(display,data)
@@ -430,8 +454,6 @@ def run(width=300, height=300,serverMsg=None,server=None):
 		data.fpsClock.tick(data.fps)
 
 	# Set up data and call init
-	class Struct(object): pass
-	data = Struct()
 	data.multiplayerButtonsPressed=None
 	data.serverMsg=serverMsg
 	data.server=server
@@ -439,6 +461,7 @@ def run(width=300, height=300,serverMsg=None,server=None):
 	data.height = height
 	data.fps=30 #frames per second
 	data.fpsClock=pygame.time.Clock()
+	data.functions=dict()
 	initStartMenu(data)
 
 	# initialize module and display

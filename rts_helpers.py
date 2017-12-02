@@ -5,8 +5,11 @@ import rts_images
 import pygame,sys
 from pygame.locals import *
 import os
+import time
+from rts_dev_debug import optimizationCheck
 
 #helper function of print2DList, borrowed from 15-112 class notes
+@optimizationCheck
 def maxItemLength(a):
     maxLen = 0
     rows = len(a)
@@ -17,6 +20,7 @@ def maxItemLength(a):
     return maxLen
 
 #function for printing 2D lists for debugging, borrowed from 15-112 class notes
+@optimizationCheck
 def print2dList(a):
     if (a == []):
         # So we don't crash accessing a[0]
@@ -38,6 +42,7 @@ def print2dList(a):
     print("]")
 
 #BROKEN? works well with bottom right corner of rect1
+@optimizationCheck
 def rectanglesOverlap(x1, y1, w1, h1, x2, y2, w2, h2):
     if(((y2<=y1 and y1<=y2+h2) or (y2<=y1+h1 and y1+h1<=y2+h2))and
         ((x1<=x2 and x2<=x1+w1) or (x2<=x1+w1 and x1+w1<=x2+w2))):
@@ -45,6 +50,7 @@ def rectanglesOverlap(x1, y1, w1, h1, x2, y2, w2, h2):
     return False
 
 #returns the center position of the rhombus at the given coordinate
+@optimizationCheck
 def getTileCenterCoordinate(data,xCoord,yCoord):
     point0=((xCoord*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
         (xCoord*.25*data.cellWidth+yCoord*.25*data.cellWidth)+data.gameY)
@@ -60,6 +66,7 @@ def getTileCenterCoordinate(data,xCoord,yCoord):
     return (point1[0]+point3[0])//2,(point0[1]+point2[1])//2
 
 #returns the location of a given unit with the added unit vector towards its destination
+@optimizationCheck
 def moveUnit(x,y,destX,destY,speed,epsilon=6):
     dx=destX-x
     dy=destY-y
@@ -81,6 +88,7 @@ def moveUnit(x,y,destX,destY,speed,epsilon=6):
         return (x+i,y+j),(xDir,yDir)
 
 #determines if a unit is allowed to be at it's current position
+@optimizationCheck
 def legalPosition(data,unit):
     collided=pygame.sprite.spritecollide(unit,data.localPlayer.units,False)
     if(len(collided)>1):
@@ -105,39 +113,40 @@ def legalPosition(data,unit):
     return True
 
 #keep units pegged to map as opposed to window
+@optimizationCheck
 def mapAdjustUnits(data,dx,dy):
     for unit in data.localPlayer.units:
         curCoords=unit.rect.center
         unit.rect.center=(curCoords[0]-dx,curCoords[1]-dy)
         unit.desX-=dx
         unit.desY-=dy
-    if(data.startMenuState!='Singleplayer'):
-        for ID in data.otherUsers:
-            player=data.otherUsers[ID]
-            for unit in player.units:
-                curCoords=unit.rect.center
-                unit.rect.center=(curCoords[0]-dx,curCoords[1]-dy)
-                unit.desX-=dx
-                unit.desY-=dy
+    for ID in data.otherUsers:
+        player=data.otherUsers[ID]
+        for unit in player.units:
+            curCoords=unit.rect.center
+            unit.rect.center=(curCoords[0]-dx,curCoords[1]-dy)
+            unit.desX-=dx
+            unit.desY-=dy
     for building in data.localPlayer.buildings:
         building.rally_pointX-=dx
         building.rally_pointY-=dy
 
 #update all items on the map as it scrolls
+@optimizationCheck
 def updateMap(data,dx,dy):
     mapAdjustUnits(data,dx,dy)
     data.trees.update(data)
     data.mines.update(data)
     data.localPlayer.inConstruction.update(data)
     data.localPlayer.buildings.update(data)
-    if(data.startMenuState!='Singleplayer'):
-        for ID in data.otherUsers:
-            player=data.otherUsers[ID]
-            player.buildings.update(data)
-            player.inConstruction.update(data)
+    for ID in data.otherUsers:
+        player=data.otherUsers[ID]
+        player.buildings.update(data)
+        player.inConstruction.update(data)
     data.mapPos=rts_map_builder.generateMapPos(data)
 
 #function determines if a given point is inside of a rhombus
+@optimizationCheck
 def pointRhombusIntersect(pos,point0,point1,point2,point3):
     m01=(point0[1]-point1[1])/(point0[0]-point1[0])
     m03=(point0[1]-point3[1])/(point0[0]-point3[0])
@@ -160,6 +169,7 @@ def pointRhombusIntersect(pos,point0,point1,point2,point3):
     return True
 
 #function takes in a position relative to the window and gives the nearest coordinate on the map
+@optimizationCheck
 def pos2Coord(data,xPos,yPos):
     for row in range(data.cells):
         for col in range(data.cells):
@@ -168,6 +178,7 @@ def pos2Coord(data,xPos,yPos):
 
 #change anchor to 'tile' to receive 4 coordinates of tile instead of 2 of center
 #function takes in a coordinate on the map and gives the position relative to the window
+@optimizationCheck
 def coord2Pos(data,xCoord,yCoord,anchor='center'):
     point0=((xCoord*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
         (xCoord*.25*data.cellWidth+yCoord*.25*data.cellWidth)+data.gameY)
@@ -186,6 +197,7 @@ def coord2Pos(data,xCoord,yCoord,anchor='center'):
         return (point0,point1,point2,point3)
 
 #initializes the button locations in the command menu at the bottom left
+@optimizationCheck
 def initializeMenu(data):
     data.menuButtons=pygame.sprite.Group()
     data.unitIcons=pygame.sprite.Group()
@@ -202,6 +214,7 @@ def initializeMenu(data):
     data.menuButton6=rts_images.MenuButton6(boxX+iconBuffer*1.25+(iconWidth+iconBuffer)*2,boxY+iconBuffer+(iconWidth+iconBuffer))
 
 #updates the icons for the different menu buttons between menues
+@optimizationCheck
 def updateMenuIcons(data):
     if(data.localPlayer.menuState=='Drone'):
         mB1Image=pygame.image.load(os.path.join('rts_build_icon1.png'))
@@ -242,9 +255,16 @@ def updateMenuIcons(data):
         data.menuButton4.image=pygame.transform.scale(mb4Image,(45,45))
         mb6Image=pygame.image.load(os.path.join('rts_destroy_icon.png'))
         data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
+    elif(data.localPlayer.menuState=='WoodWall' or data.localPlayer.menuState=='GeothermalGenerator' or data.localPlayer.menuState=='Farm'):
+        mb6Image=pygame.image.load(os.path.join('rts_destroy_icon.png'))
+        data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
+    elif(data.localPlayer.menuState=='Militia'):
+        mb6Image=pygame.image.load(os.path.join('rts_destroy_icon.png'))
+        data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
 
 #building is a 2D list with a True where a building will be built and a false elsewhere
 #stencils have a 1 tile outline to allow proper line ups with other structures
+@optimizationCheck
 def compileBuildStencil(data,building):
     stencil=[]
     centerRhobusCoord=pos2Coord(data,data.mousePos[0],data.mousePos[1])
@@ -266,20 +286,39 @@ def compileBuildStencil(data,building):
     return stencil
     
 #plades building at highlighted stencil location
+@optimizationCheck
 def placeBuilding(data,building):
+    layout=building.layout
     centerRhobusCoord=pos2Coord(data,data.mousePos[0],data.mousePos[1])
-    buildingCenterY=len(building)//2
-    buildingCenterX=len(building[0])//2
+    buildingCenterY=len(layout)//2
+    buildingCenterX=len(layout[0])//2
     buildingCenter=(buildingCenterX,buildingCenterY)
-    for y in range(len(building)):
-        for x in range(len(building[0])):
-            if(building[y][x]):
+    for y in range(len(layout)):
+        for x in range(len(layout[0])):
+            if(layout[y][x]):
                 newX=centerRhobusCoord[0]-(buildingCenterX-x)
                 newY=centerRhobusCoord[1]-(buildingCenterY-y)
-                data.board[newX][newY]='building'
+                data.board[newX][newY]=data.localPlayer.team
+                building.tiles.append((newX,newY))
     return centerRhobusCoord
 
+@optimizationCheck
+def placeBuildingAtCoord(data,building,xCoord,yCoord):
+    layout=building.layout
+    centerRhobusCoord=(xCoord,yCoord)
+    buildingCenterY=len(layout)//2
+    buildingCenterX=len(layout[0])//2
+    buildingCenter=(buildingCenterX,buildingCenterY)
+    for y in range(len(layout)):
+        for x in range(len(layout[0])):
+            if(layout[y][x]):
+                newX=centerRhobusCoord[0]-(buildingCenterX-x)
+                newY=centerRhobusCoord[1]-(buildingCenterY-y)
+                data.board[newX][newY]=data.localPlayer.team
+                building.tiles.append((newX,newY))
+
 #draws stencil for building around cursor position
+@optimizationCheck
 def drawBuildStencils(display,data):
     if(data.mousePos[1]<data.height*.75):
         for unit in data.localPlayer.selected:
@@ -293,6 +332,7 @@ def drawBuildStencils(display,data):
                         pygame.draw.polygon(display,(255,77,77),tile[1],3)
 
 #collect all materials dropped off by drones and store them in player
+@optimizationCheck
 def collectUnitMats(data):
     for unit in data.localPlayer.units:
         if(unit.name=='Drone'):
@@ -300,22 +340,24 @@ def collectUnitMats(data):
                 unit.dropOffMats(data)
 
 #progress in building buildings being builts
+@optimizationCheck
 def buildBuildings(data):
     for building in data.localPlayer.inConstruction:
         building.build(data)
-    if(data.startMenuState!='Singleplayer'):
-        for ID in data.otherUsers:
-            player=data.otherUsers[ID]
-            for building in player.inConstruction:
-                building.build(data)
+    for ID in data.otherUsers:
+        player=data.otherUsers[ID]
+        for building in player.inConstruction:
+            building.build(data)
 
 #draw line which units built by this building will follow
+@optimizationCheck
 def drawRallyLine(display,data):
     for building in data.localPlayer.selected:
         if(building.name=='CommandCenter' or building.name=='Barracks'):
             pygame.draw.line(display,(153,230,255),(building.rect.center),(building.rally_pointX,building.rally_pointY))
 
 #progress units being created by buildings
+@optimizationCheck
 def createUnits(data):
     for building in data.localPlayer.buildings:
         if(building.name=='CommandCenter'):
@@ -340,6 +382,7 @@ def createUnits(data):
                             building.createMilitia(data)
 
 #collect energy from all structures which produce it
+@optimizationCheck
 def collectEnergy(data):
     for building in data.localPlayer.buildings:
         data.localPlayer.energy+=building.energy
@@ -348,6 +391,7 @@ def collectEnergy(data):
         data.localPlayer.energy=data.localPlayer.powerCap
 
 #calculate dynamic energy cap based on energy storing buildings
+@optimizationCheck
 def setPowerCap(data):
     TotalBattery=0
     for building in data.localPlayer.buildings:
@@ -355,6 +399,7 @@ def setPowerCap(data):
     data.localPlayer.powerCap=TotalBattery
 
 #calulate dynamic supply cap based on energy stored in buildings
+@optimizationCheck
 def setSupplyCap(data):
     supply=0
     for building in data.localPlayer.buildings:
@@ -363,6 +408,7 @@ def setSupplyCap(data):
     data.localPlayer.supplyCap=supply
 
 #determines if units are to be selected
+@optimizationCheck
 def inSelectionBox(data):
     if(data.selectBox1!=(None,None)):
         for unit in data.localPlayer.units:
@@ -371,6 +417,7 @@ def inSelectionBox(data):
                 data.localPlayer.select(data,unit)
 
 #primarily for debugging purposes but shows tile type and binds center of screen
+@optimizationCheck
 def drawCursor(display,data):
     coords=coord2Pos(data,data.cursorX,data.cursorY,'tile')
     point0,point1,point2,point3=coords[0],coords[1],coords[2],coords[3]
@@ -383,24 +430,27 @@ def drawCursor(display,data):
     display.blit(textSurface,((((point1[0]+point3[0])//2)-fontSize,((point0[1]+point2[1])//2)-.5*fontSize)))
 
 #draw box players use to select their units
+@optimizationCheck
 def drawSelectBox(display,data):
     if(data.selectBox1!=(None,None)):
         pygame.draw.rect(display,(153,230,255),(data.selectBox1[0],data.selectBox1[1],data.selectBox2[0],data.selectBox2[1]),1)
 
 #highlight units to indicate that they are selected
+@optimizationCheck
 def drawSelectedRing(display,data):
     for unit in data.localPlayer.selected:
         pygame.draw.ellipse(display,(153,230,255),(unit.rect.left-2,unit.rect.top+2,unit.rect.width+4,unit.rect.height+4),2)
 
 #draw all units from all players
+@optimizationCheck
 def drawUnits(display,data):
     data.localPlayer.units.draw(display)
-    if(data.startMenuState!='Singleplayer'):
-        for ID in data.otherUsers:
-            player=data.otherUsers[ID]
-            player.units.draw(display)
+    for ID in data.otherUsers:
+        player=data.otherUsers[ID]
+        player.units.draw(display)
 
 #determine if buildings can be built whether it be resources or previously built infrastructure
+@optimizationCheck
 def buildReqsMet(data,building):
     if(data.localPlayer.wood>=building.woodCost and data.localPlayer.metals>=building.metalCost):
         numOfReqs=len(building.prereqs)
@@ -415,6 +465,7 @@ def buildReqsMet(data,building):
     return False
 
 #draw health bars for units and buildings depending on whether or not they have full health
+@optimizationCheck
 def drawHealthBars(display,data):
     healthBarHeight=10
     #draws black line every 15 health
@@ -435,28 +486,28 @@ def drawHealthBars(display,data):
             for i in range(building.maxHealth//100):
                 pygame.draw.line(display,(0,0,0),(building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y-healthBarHeight),\
                     (building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y),1)
-    if(data.startMenuState!='Singleplayer'):
-        for ID in data.otherUsers:
-            player=data.otherUsers[ID]
-            for unit in player.units:
-                if(unit.health<unit.maxHealth):
-                    pygame.draw.rect(display,(255,0,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,unit.maxHealth//3,healthBarHeight))
-                    pygame.draw.rect(display,(0,255,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,(unit.maxHealth//3)*(unit.health/unit.maxHealth),healthBarHeight))
-                    pygame.draw.rect(display,(0,0,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,unit.maxHealth//3,healthBarHeight),1)
-                    for i in range(unit.maxHealth//15):
-                        pygame.draw.line(display,(0,0,0),(unit.rect.center[0]-unit.maxHealth//6+((unit.maxHealth//3)//(unit.maxHealth//15))*(i+1),unit.rect.y-healthBarHeight),\
-                            (unit.rect.center[0]-unit.maxHealth//6+((unit.maxHealth//3)//(unit.maxHealth//15))*(i+1),unit.rect.y),1)
-            #draws black line every 100 health
-            for building in player.buildings:
-                if(building.health<building.maxHealth):
-                    pygame.draw.rect(display,(255,0,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width,healthBarHeight))
-                    pygame.draw.rect(display,(0,255,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width*(building.health/building.maxHealth),healthBarHeight))
-                    pygame.draw.rect(display,(0,0,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width,healthBarHeight),1)
-                    for i in range(building.maxHealth//100):
-                        pygame.draw.line(display,(0,0,0),(building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y-healthBarHeight),\
-                            (building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y),1)
+    for ID in data.otherUsers:
+        player=data.otherUsers[ID]
+        for unit in player.units:
+            if(unit.health<unit.maxHealth):
+                pygame.draw.rect(display,(255,0,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,unit.maxHealth//3,healthBarHeight))
+                pygame.draw.rect(display,(0,255,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,(unit.maxHealth//3)*(unit.health/unit.maxHealth),healthBarHeight))
+                pygame.draw.rect(display,(0,0,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,unit.maxHealth//3,healthBarHeight),1)
+                for i in range(unit.maxHealth//15):
+                    pygame.draw.line(display,(0,0,0),(unit.rect.center[0]-unit.maxHealth//6+((unit.maxHealth//3)//(unit.maxHealth//15))*(i+1),unit.rect.y-healthBarHeight),\
+                        (unit.rect.center[0]-unit.maxHealth//6+((unit.maxHealth//3)//(unit.maxHealth//15))*(i+1),unit.rect.y),1)
+        #draws black line every 100 health
+        for building in player.buildings:
+            if(building.health<building.maxHealth):
+                pygame.draw.rect(display,(255,0,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width,healthBarHeight))
+                pygame.draw.rect(display,(0,255,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width*(building.health/building.maxHealth),healthBarHeight))
+                pygame.draw.rect(display,(0,0,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width,healthBarHeight),1)
+                for i in range(building.maxHealth//100):
+                    pygame.draw.line(display,(0,0,0),(building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y-healthBarHeight),\
+                        (building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y),1)
 
 #special eval used for interpretting 2D list. normal eval works but does not handle string abnormalities like spaces
+@optimizationCheck
 def eval2DListOfStrings(s):
     newList=[]
     for i in range(len(s)):
@@ -471,6 +522,7 @@ def eval2DListOfStrings(s):
     return newList
 
 #check all units in game for their unique ID to determine which is being called
+@optimizationCheck
 def findUnitByID(data,ID):
     for unit in data.localPlayer.units:
         if(unit.ID==ID):
@@ -487,11 +539,15 @@ def findUnitByID(data,ID):
             if(building.ID==ID):
                 return building
 
+@optimizationCheck
 def checkWinConditions(data):
     msg=''
     if(len(data.localPlayer.units)==0 and len(data.localPlayer.buildings)==0):
         data.localPlayer.winCondition='defeat'
         msg+='winCondition defeat \n'
+    if('AI' in data.otherUsers):
+        if(len(data.otherUsers['AI'].units)==0 and len(data.otherUsers['AI'].buildings)==0 and len(data.otherUsers['AI'].inConstruction)==0):
+            data.otherUsers['AI'].winCondition='defeat'
 
     defeatedPlayers=0
     for ID in data.otherUsers:
@@ -503,9 +559,11 @@ def checkWinConditions(data):
     if(defeatedPlayers>=len(data.otherUsers)):
         msg+='winCondition win \n'
         data.localPlayer.winCondition='win'
-    if(data.localPlayer.winCondition=='play'):
-        data.server.send(msg.encode())
+    if(data.startMenuState!='Singleplayer'):
+        if(data.localPlayer.winCondition=='play'):
+            data.server.send(msg.encode())
 
+@optimizationCheck
 def drawEndScreen(display,data):
     if(data.localPlayer.winCondition=='win'):
         endMessage=data.titleFont.render('VICTORY',1,(0,0,255))
@@ -516,3 +574,19 @@ def drawEndScreen(display,data):
     pygame.draw.rect(display,(20,20,20),(data.width*.4,data.height*.6,data.width*.2,40))
     pygame.draw.rect(display,(153,230,255),(data.width*.4,data.height*.6,data.width*.2,40),3)
     display.blit(homeButtonLabel,(data.width*.42,data.height*.6))
+
+@optimizationCheck
+def printOptimizationResults(data):
+    print('In '+str(time.time()))
+    risk=[]
+    for function in data.functions:
+        avgTime=data.functions[function]['avgTime']
+        if(avgTime>.05):
+            risk.append(function)
+        occur=data.functions[function]['occur']
+        print(str(function).split()[1]+' occured '+str(occur)+' times and averaged '+str(avgTime)+'s')
+    print('--------------HIGHLY INEFFICIENT--------------')
+    for function in risk:
+        avgTime=data.functions[function]['avgTime']
+        occur=data.functions[function]['occur']
+        print(str(function).split()[1]+' occured '+str(occur)+' times and averaged '+str(avgTime)+'s')

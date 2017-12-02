@@ -5,8 +5,10 @@ import rts_helpers
 import os
 import rts_images
 import rts_units
+from rts_dev_debug import optimizationCheck
 
 class Building(pygame.sprite.Sprite):
+	@optimizationCheck
 	def __init__(self,x,y,team):
 		pygame.sprite.Sprite.__init__(self)
 		self.x=x
@@ -21,12 +23,18 @@ class Building(pygame.sprite.Sprite):
 
 		self.rallyReset=False
 
+		self.tiles=[]
+
+	@optimizationCheck
 	def update(self,data):
 		self.rect.center=rts_helpers.coord2Pos(data,self.coords[0]+self.xTileOffset,self.coords[1]+self.yTileOffset)
 		if(self.health<=0):
+			for tile in self.tiles:
+				data.board[tile[0]][tile[1]]='field'
 			self.kill()
 
 class CommandCenter(Building):
+	@optimizationCheck
 	def __init__(self,data,x,y,team):
 		Building.__init__(self,x,y,team)
 
@@ -66,6 +74,7 @@ class CommandCenter(Building):
 		[False,False,False,False,False,False]
 		]
 
+	@optimizationCheck
 	def createDrone(self,data):
 		if(self.createStartTime==0):
 			self.createStartTime=time.time()
@@ -83,6 +92,7 @@ class CommandCenter(Building):
 				data.localPlayer.wood-=woodCost
 				data.localPlayer.energy-=energyCost
 
+	@optimizationCheck
 	def build(self,data):
 		if(self.startTime==0):
 			self.startTime=time.time()
@@ -105,6 +115,7 @@ class CommandCenter(Building):
 			rts_helpers.updateMenuIcons(data)
 
 class GeothermalGenerator(Building):
+	@optimizationCheck
 	def __init__(self,data,x,y,team):
 		Building.__init__(self,x,y,team)
 
@@ -135,6 +146,7 @@ class GeothermalGenerator(Building):
 		[False,False,False]
 		]
 
+	@optimizationCheck
 	def build(self,data):
 		if(self.startTime==0):
 			self.startTime=time.time()
@@ -157,6 +169,7 @@ class GeothermalGenerator(Building):
 
 
 class Farm(Building):
+	@optimizationCheck
 	def __init__(self,data,x,y,team):
 		Building.__init__(self,x,y,team)
 
@@ -188,6 +201,7 @@ class Farm(Building):
 		[False,False,False,False]
 		]
 
+	@optimizationCheck
 	def build(self,data):
 		if(self.startTime==0):
 			self.startTime=time.time()
@@ -212,6 +226,7 @@ class Farm(Building):
 			rts_helpers.updateMenuIcons(data)
 
 class Barracks(Building):
+	@optimizationCheck
 	def __init__(self,data,x,y,team):
 		Building.__init__(self,x,y,team)
 
@@ -246,6 +261,7 @@ class Barracks(Building):
 		[False,False,False,False,False]
 		]
 
+	@optimizationCheck
 	def build(self,data):
 		if(self.startTime==0):
 			self.startTime=time.time()
@@ -269,6 +285,7 @@ class Barracks(Building):
 			data.localPlayer.buildings.add(self)
 			rts_helpers.updateMenuIcons(data)
 
+	@optimizationCheck
 	def createMilitia(self,data):
 		if(self.createStartTime==0):
 			self.createStartTime=time.time()
@@ -287,6 +304,7 @@ class Barracks(Building):
 				data.localPlayer.energy-=energyCost
 
 class WoodWall(Building):
+	@optimizationCheck
 	def __init__(self,data,x,y,team):
 		Building.__init__(self,x,y,team)
 
@@ -317,6 +335,7 @@ class WoodWall(Building):
 		[False,False,False]
 		]
 
+	@optimizationCheck
 	def build(self,data):
 		if(self.startTime==0):
 			self.startTime=time.time()
@@ -328,11 +347,11 @@ class WoodWall(Building):
 			data.localPlayer.buildings.add(self)
 			rts_helpers.updateMenuIcons(data)
 
+@optimizationCheck
 def drawBuildings(display,data):
 	data.localPlayer.inConstruction.draw(display)
 	data.localPlayer.buildings.draw(display)
-	if(data.startMenuState!='Singleplayer'):
-		for ID in data.otherUsers:
-			player=data.otherUsers[ID]
-			player.inConstruction.draw(display)
-			player.buildings.draw(display)
+	for ID in data.otherUsers:
+		player=data.otherUsers[ID]
+		player.inConstruction.draw(display)
+		player.buildings.draw(display)

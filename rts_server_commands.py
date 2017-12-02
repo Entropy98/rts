@@ -7,9 +7,11 @@ import threading
 import rts_classes
 import rts_helpers
 import rts_buildings
+from rts_dev_debug import optimizationCheck
 from queue import Queue
 
 #function connects user to server using default port and given IP
+@optimizationCheck
 def joinServer(data,IP='',port=50003):
 	HOST = IP # put your IP address here if playing on multiple computers
 	PORT = port
@@ -18,6 +20,7 @@ def joinServer(data,IP='',port=50003):
 	print("connected to server")
 
 #background process for receiving serever messages and preparing them for interpretation
+@optimizationCheck
 def handleServerMsg(server, serverMsg):
 	print('called')
 	server.setblocking(1)
@@ -33,6 +36,7 @@ def handleServerMsg(server, serverMsg):
 			command = msg.split("\n")
 
 #various actions for specific server commands
+@optimizationCheck
 def interpServerCommands(data):
 	if (data.serverMsg.qsize() > 0):
 		msg = data.serverMsg.get(False)
@@ -121,6 +125,8 @@ def interpServerCommands(data):
 				xCoord=int(msg[3])
 				yCoord=int(msg[4])
 				buildingID=int(msg[5])
+				#evals string of list of tuples
+				tiles=eval(msg[6])
 				user=data.otherUsers[ID]
 				if(building=='CommandCenterX'):
 					newBuilding=rts_buildings.CommandCenter(data,xCoord,yCoord,user.team)
@@ -133,7 +139,10 @@ def interpServerCommands(data):
 				elif(building=='WoodWallX'):
 					newBuilding=rts_buildings.WoodWallX(data,xCoord,yCoord,user.team)
 				newBuilding.ID=buildingID
+				newBuilding.tiles=tiles
 				user.inConstruction.add(newBuilding)
+				for tile in tiles:
+					data.board[tile[0]][tile[1]]=user.team
 
 			#whenever player right clicks
 			elif(command=='newTarget'):
@@ -152,6 +161,23 @@ def interpServerCommands(data):
 				ID=msg[1]
 				condition=msg[2]
 				data.otherUsers[ID].winCondition=condition
+
+			elif(command=='destroyBuilding'):
+				ID=msg[1]
+				unitID=int(msg[2])
+				#evals string of list of tuples
+				tiles=eval(msg[3])
+				for tile in tiles:
+					data.board[tile[0]][tile[1]]='field'
+				unit=rts_helpers.findUnitByID(data,unitID)
+				unit.kill()
+
+			elif(command=='destroyUnit'):
+				ID=msg[1]
+				unitID=int(msg[2])
+				unit=rts_helpers.findUnitByID(data,unitID)
+				unit.kill()
+
 
 			#whenever a unit/building is dealt damage
 			# elif(command=='damageDealt'):

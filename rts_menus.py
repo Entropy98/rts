@@ -3,8 +3,10 @@ from pygame.locals import *
 import rts_classes
 import rts_images
 import rts_units
+from rts_dev_debug import optimizationCheck
 
 #draws all aspects of menu
+@optimizationCheck
 def drawMenu(display,data):
 	pygame.draw.rect(display,(20,20,20),(0,data.height*.75,data.width,data.height*.25))
 	drawMiniMap(display,data)
@@ -13,6 +15,7 @@ def drawMenu(display,data):
 	drawResourceBar(display,data)
 
 #draw top resource bar
+@optimizationCheck
 def drawResourceBar(display,data):
 	pygame.draw.rect(display,(20,20,20),(0,0,data.width,data.height*.04))
 	nameLabel=data.font.render(data.localPlayer.username,1,(255,255,255))
@@ -27,6 +30,7 @@ def drawResourceBar(display,data):
 	display.blit(supplyLabel,(data.width*.48,data.height*.01))
 
 #draws botton right mini map
+@optimizationCheck
 def drawMiniMap(display,data):
 	boxX=data.width*.0125
 	boxY=data.height*.75+data.height*.0125
@@ -59,21 +63,21 @@ def drawMiniMap(display,data):
 				pygame.draw.polygon(display,(46,117,76),(miniPoint0,miniPoint1,miniPoint2,miniPoint3))
 			elif(tileLabel=='mine'):
 				pygame.draw.polygon(display,(7,74,139),(miniPoint0,miniPoint1,miniPoint2,miniPoint3))
-			elif(tileLabel=='building'):
-				if(data.localPlayer.team=='yellow'):
-					pygame.draw.polygon(display,(255,255,0),(miniPoint0,miniPoint1,miniPoint2,miniPoint3))
-				elif(data.localPlayer.team=='red'):
-					pygame.draw.polygon(display,(255,0,0),(miniPoint0,miniPoint1,miniPoint2,miniPoint3))
-				elif(data.localPlayer.team=='green'):
-					pygame.draw.polygon(display,(0,255,0),(miniPoint0,miniPoint1,miniPoint2,miniPoint3))
-				elif(data.localPlayer.team=='blue'):
-					pygame.draw.polygon(display,(0,0,255),(miniPoint0,miniPoint1,miniPoint2,miniPoint3))
+			elif(tileLabel=='yellow'):
+				pygame.draw.polygon(display,(255,255,0),(miniPoint0,miniPoint1,miniPoint2,miniPoint3))
+			elif(tileLabel=='red'):
+				pygame.draw.polygon(display,(255,0,0),(miniPoint0,miniPoint1,miniPoint2,miniPoint3))
+			elif(tileLabel=='green'):
+				pygame.draw.polygon(display,(0,255,0),(miniPoint0,miniPoint1,miniPoint2,miniPoint3))
+			elif(tileLabel=='blue'):
+				pygame.draw.polygon(display,(0,0,255),(miniPoint0,miniPoint1,miniPoint2,miniPoint3))
 			if(x==data.cursorX and y==data.cursorY):
 				cursorCenterX=(miniPoint1[0]+miniPoint3[0])/2
 				cursorCenterY=(miniPoint0[1]+miniPoint2[1])/2
 	pygame.draw.rect(display,(255,255,255),(cursorCenterX-8.1,cursorCenterY-6.075,16.2,12.15),1)
 
 #draws middle box containing selected units as well as information about units
+@optimizationCheck
 def drawUnitBox(display,data):
 	data.unitIcons.empty()
 	boxX=data.width*.25
@@ -109,13 +113,17 @@ def drawUnitBox(display,data):
 				if(unit.name=='Drone'):
 					nameLabel=data.font.render(unit.name,1,(153,230,255))
 					display.blit(nameLabel,(data.width//2-data.width*.1,data.height*.77))
+					healthLabel=data.font.render(str(unit.health)+' / '+str(unit.maxHealth),1,(153,230,255))
+					display.blit(healthLabel,(data.width*.36,data.height*.79))
 					woodLabel=data.font.render('Wood: '+str(unit.wood)+'/'+str(unit.woodCapacity),1,(153,230,255))
-					display.blit(woodLabel,(boxX+iconBuffer,data.height*.8))
+					display.blit(woodLabel,(boxX+iconBuffer,data.height*.82))
 					metalLabel=data.font.render('Metals: '+str(unit.metals)+'/'+str(unit.metalCapacity),1,(153,230,255))
-					display.blit(metalLabel,(boxX+iconBuffer,data.height*.83))
+					display.blit(metalLabel,(boxX+iconBuffer,data.height*.85))
 				if(unit.name=='Militia'):
 					nameLabel=data.font.render(unit.name,1,(153,230,255))
 					display.blit(nameLabel,(data.width//2-data.width*.1,data.height*.77))
+					healthLabel=data.font.render(str(unit.health)+' / '+str(unit.maxHealth),1,(153,230,255))
+					display.blit(healthLabel,(data.width*.36,data.height*.79))
 				elif(unit.name=='CommandCenterX'):
 					nameLabel=data.font.render('Command Center',1,(153,230,255))
 					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
@@ -124,8 +132,10 @@ def drawUnitBox(display,data):
 				elif(unit.name=='CommandCenter'):
 					nameLabel=data.font.render('Command Center',1,(153,230,255))
 					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
+					healthLabel=data.font.render(str(unit.health)+' / '+str(unit.maxHealth),1,(153,230,255))
+					display.blit(healthLabel,(data.width*.36,data.height*.79))
 					energyLabel=data.font.render('Energy Produced: '+str(int(unit.energyProduced))+'J',1,(153,230,255))
-					display.blit(energyLabel,(boxX+iconBuffer,data.height*.8))
+					display.blit(energyLabel,(boxX+iconBuffer,data.height*.81))
 					queueIconBuffer=data.width*.01
 					queueIconWidth=50
 					queueIconHeight=50
@@ -159,6 +169,8 @@ def drawUnitBox(display,data):
 				elif(unit.name=='Barracks'):
 					nameLabel=data.font.render('Barracks',1,(153,230,255))
 					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
+					healthLabel=data.font.render(str(unit.health)+' / '+str(unit.maxHealth),1,(153,230,255))
+					display.blit(healthLabel,(data.width*.36,data.height*.79))
 					queueIconBuffer=data.width*.01
 					queueIconWidth=50
 					queueIconHeight=50
@@ -192,8 +204,10 @@ def drawUnitBox(display,data):
 				elif(unit.name=='GeothermalGenerator'):
 					nameLabel=data.font.render('GeothermalGenerator',1,(153,230,255))
 					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
+					healthLabel=data.font.render(str(unit.health)+' / '+str(unit.maxHealth),1,(153,230,255))
+					display.blit(healthLabel,(data.width*.36,data.height*.79))
 					energyLabel=data.font.render('Energy Produced: '+str(int(unit.energyProduced))+'J',1,(153,230,255))
-					display.blit(energyLabel,(boxX+iconBuffer,data.height*.8))
+					display.blit(energyLabel,(boxX+iconBuffer,data.height*.82))
 				elif(unit.name=='FarmX'):
 					nameLabel=data.font.render('Farm',1,(153,230,255))
 					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
@@ -202,6 +216,8 @@ def drawUnitBox(display,data):
 				elif(unit.name=='Farm'):
 					nameLabel=data.font.render('Farm',1,(153,230,255))
 					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
+					healthLabel=data.font.render(str(unit.health)+' / '+str(unit.maxHealth),1,(153,230,255))
+					display.blit(healthLabel,(data.width*.36,data.height*.79))
 				elif(unit.name=='WoodWallX'):
 					nameLabel=data.font.render('Wood Wall',1,(153,230,255))
 					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
@@ -210,6 +226,8 @@ def drawUnitBox(display,data):
 				elif(unit.name=='WoodWall'):
 					nameLabel=data.font.render('Wood Wall',1,(153,230,255))
 					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
+					healthLabel=data.font.render(str(unit.health)+' / '+str(unit.maxHealth),1,(153,230,255))
+					display.blit(healthLabel,(data.width*.36,data.height*.79))
 		data.unitIcons.draw(display)
 	elif(data.localPlayer.menuHover=='Drone_b1'):
 		nameLabel=data.font.render('Build Civilian Structures',1,(153,230,255))
@@ -312,6 +330,7 @@ def drawUnitBox(display,data):
 		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
 
 #draws left hand command box
+@optimizationCheck
 def drawCmdBox(display,data):
 	data.menuButtons.empty()
 	boxX=data.width*.65
@@ -341,9 +360,14 @@ def drawCmdBox(display,data):
 		data.menuButtons.add(data.menuButton1)
 		data.menuButtons.add(data.menuButton4)
 		data.menuButtons.add(data.menuButton6)
+	elif(data.localPlayer.menuState=='Militia'):
+		data.menuButtons.add(data.menuButton6)
+	elif(data.localPlayer.menuState=='WoodWall'):
+		data.menuButtons.add(data.menuButton6)
 	data.menuButtons.draw(display)
 
 #activates button pressed if mouse if clicked within given field
+@optimizationCheck
 def menuButtonsPressed(pos,data):
 	if(pos[0]>data.width*.68125 and pos[0]<data.width*.68125+45):
 		if(pos[1]>data.height*.763 and pos[1]<data.height*.763+45):
@@ -365,6 +389,7 @@ def menuButtonsPressed(pos,data):
 			return data.menuButton6.pressed(data)
 
 #activates button hover if mouse moves within given field
+@optimizationCheck
 def menuButtonsHover(pos,data):
 	if(pos[0]>data.width*.68125 and pos[0]<data.width*.68125+45):
 		if(pos[1]>data.height*.763 and pos[1]<data.height*.763+45):
