@@ -1,5 +1,6 @@
 import pygame
 import rts_helpers
+import rts_images
 import random
 import os
 
@@ -7,20 +8,25 @@ class Militia(pygame.sprite.Sprite):
 	def __init__(self,x,y,destX,destY,team):
 		pygame.sprite.Sprite.__init__(self)
 		self.team=team
+		self.ssPos=(0,0)
+		self.ssX=4
+		self.ssY=12
+		self.ssXGap=6
+		self.ssYGap=10
+		self.spriteWidth=52
+		self.spriteHeight=47
 		if(self.team=='yellow'):
-			self.image=pygame.Surface([15,25])
-			self.image.fill((255,255,0))
+			self.spritesheet=rts_images.SpriteSheet('rts_yellow_marine_sheet.png')
 		elif(self.team=='blue'):
-			self.image=pygame.Surface([15,25])
-			self.image.fill((0,0,255))
+			self.spritesheet=rts_images.SpriteSheet('rts_blue_marine_sheet.png')
 		elif(self.team=='red'):
-			self.image=pygame.Surface([15,25])
-			self.image.fill((255,0,0))
+			self.spritesheet=rts_images.SpriteSheet('rts_red_marine_sheet.png')
 		elif(self.team=='green'):
-			self.image=pygame.Surface([15,25])
-			self.image.fill((0,255,0))
+			self.spritesheet=rts_images.SpriteSheet('rts_green_marine_sheet.png')
+		self.image=self.spritesheet.image_at((self.ssX,self.ssY,self.spriteWidth,self.spriteHeight),(255,255,255))
+		self.image=pygame.transform.scale(self.image,(40,44))
 		self.rect=self.image.get_rect()
-		self.speed=5
+		self.speed=8
 		self.rect.center=(x,y)
 		self.selected=False
 		self.flying=False
@@ -32,23 +38,58 @@ class Militia(pygame.sprite.Sprite):
 		self.maxHealth=self.health
 		self.attackRange=300
 		self.target=None
+		self.attacking=False
+		self.animationState=0
+		self.animationFace='left'
+		self.animateDx=0
 
 	def attack(self,data):
 		if(self.target!=None):
 			dist=((self.rect.center[0]-self.target.rect.center[0])**2+(self.rect.center[1]-self.target.rect.center[1])**2)**.5
 			if(dist<=self.attackRange):
+				self.attacking=True
+				if(self.target.rect.center[0]>self.rect.center[0]):
+					self.animateAttack(1)
+				else:
+					self.animateAttack(-1)
 				self.desX=self.rect.center[0]
 				self.desY=self.rect.center[1]
 				self.target.health-=self.damage
-				msg='damageDealt %d %d \n'%(self.target.ID,self.damage)
-				if(data.startMenuState!='Singleplayer'):
-					data.server.send(msg.encode())
 				self.target.update(data)
 				if(self.target.health<=0):
 					self.target=None
 			else:
+				self.attacking=False
 				self.desX=self.target.rect.center[0]
 				self.desY=self.target.rect.center[1]
+		else:
+			self.attacking=False
+
+	def animateAttack(self,direction):
+		if(direction==-1):
+			self.animationFace='left'
+		else:
+			self.animationFace='right'
+		if(self.animationState==1):
+			self.image=self.spritesheet.image_at((247,self.ssY,54,self.spriteHeight),(255,255,255))
+			self.image=pygame.transform.scale(self.image,(46,40))
+			if(self.animationFace=='left'):
+				self.rect.x-=2
+				self.animateDx=2
+			else:
+				self.animateDx=0
+		elif(self.animationState==0):
+			self.image=self.spritesheet.image_at((313,self.ssY,67,self.spriteHeight),(255,255,255))
+			self.image=pygame.transform.scale(self.image,(57,40))
+			if(self.animationFace=='left'):
+				self.rect.x-=11
+				self.animateDx=11
+			else:
+				self.animateDx=0
+		if(self.animationFace=='right'):
+			self.image=pygame.transform.flip(self.image,True,False)
+		self.animationState+=1
+		self.animationState%=2
 
 	@staticmethod
 	def getBuildTime():
@@ -64,12 +105,45 @@ class Militia(pygame.sprite.Sprite):
 
 	def update(self,data):
 		ogCenter=self.rect.center
-		self.rect.center=rts_helpers.moveUnit(self.rect.center[0],self.rect.center[1],self.desX,self.desY,self.speed)
+		if(self.attacking):
+			self.rect.x+=self.animateDx
+		if(self.attacking==False):
+			self.rect.center,moveDir=rts_helpers.moveUnit(self.rect.center[0],self.rect.center[1],self.desX,self.desY,self.speed)
+			if(moveDir!=None):
+				self.animateMovement(moveDir[0])
+			else:
+				self.animateMovement(moveDir)
 		self.attack(data)
 		if(rts_helpers.legalPosition(data,self)==False):
+			self.animateMovement(None)
 			self.rect.center=ogCenter
 		if(self.health<=0):
 			self.kill()
+
+	def animateMovement(self,direction):
+		if(self.animationState==0):
+			self.ssPos=(0,1)
+		elif(self.animationState==1):
+			self.ssPos=(1,1)
+		elif(self.animationState==2):
+			self.ssPos=(2,1)
+		elif(self.animationState==3):
+			self.ssPos=(3,1)
+		if(direction==None):
+			self.ssPos=(0,0)
+			self.animationState=0
+		elif(direction==1):
+			self.animationFace='right'
+		elif(direction==-1):
+			self.animationFace='left'
+		self.image=self.spritesheet.image_at((self.ssX+(self.ssPos[0]*(self.spriteWidth+self.ssXGap)),\
+			self.ssY+(self.ssPos[1]*(self.spriteHeight+self.ssYGap)),self.spriteWidth,self.spriteHeight),(255,255,255))
+		self.image=pygame.transform.scale(self.image,(44,40))
+		if(self.animationFace=='right'):
+			self.image=pygame.transform.flip(self.image,True,False)
+		self.animationState+=1
+		self.animationState%=4
+
 
 class Drone(pygame.sprite.Sprite):
 	"""docstring for Drone"""
@@ -84,7 +158,7 @@ class Drone(pygame.sprite.Sprite):
 			self.image=pygame.image.load(os.path.join('rts_drone_dl1_red.png'))
 		elif(self.team=='green'):
 			self.image=pygame.image.load(os.path.join('rts_drone_dl1_green.png'))
-		self.image=pygame.transform.scale(self.image,(24,15))
+		self.image=pygame.transform.scale(self.image,(36,23))
 		self.rect=self.image.get_rect()
 		self.speed=10
 		self.rect.center=(x,y)
@@ -122,7 +196,9 @@ class Drone(pygame.sprite.Sprite):
 
 	def update(self,data):
 		ogCenter=self.rect.center
-		self.rect.center=rts_helpers.moveUnit(self.rect.center[0],self.rect.center[1],self.desX,self.desY,self.speed)
+		self.rect.center,moveDir=rts_helpers.moveUnit(self.rect.center[0],self.rect.center[1],self.desX,self.desY,self.speed)
+		if(moveDir!=None):
+			pass
 		self.attack(data)
 		self.build(data)
 		if(rts_helpers.legalPosition(data,self)==False):
@@ -146,9 +222,6 @@ class Drone(pygame.sprite.Sprite):
 				self.desY=self.rect.center[1]
 				self.target.health-=self.damage
 				self.target.update(data)
-				msg='damageDealt %d %d \n'%(self.target.ID,self.damage)
-				if(data.startMenuState!='Singleplayer'):
-					data.server.send(msg.encode())
 				if(self.target.health<=0):
 					self.target=None
 			else:
@@ -176,6 +249,7 @@ class Drone(pygame.sprite.Sprite):
 					data.localPlayer.wood-=self.building.woodCost
 					self.building.update(data)
 					buildingID=random.randint(1000000,9999999)
+					data.localPlayer.IDs.add(buildingID)
 					self.building.ID=buildingID
 					msg='buildBuilding %s %d %d %d \n'%(self.building.name,self.building.coords[0],self.building.coords[1],buildingID)
 					if(data.startMenuState!='Singleplayer'):

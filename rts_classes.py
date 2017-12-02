@@ -23,9 +23,11 @@ class Player(object):
 		self.menuHover=None
 		self.team='red'
 		self.ID=None
+		self.IDs=set()
+		self.winCondition='play'
 
 	def select(self,data,item):
-		if(item in self.units or item in self.buildings or item in self.inConstruction):
+		if(item.ID in self.IDs):
 			if(self.menuState==None):
 				self.menuState=item.name
 				rts_helpers.updateMenuIcons(data)
@@ -40,6 +42,7 @@ class Player(object):
 		drone=rts_units.Drone(x,y,rallyX,rallyY,self.team)
 		if(ID==None):
 			drone.ID=random.randint(1000000,9999999)
+			self.IDs.add(drone.ID)
 		else:
 			drone.ID=ID
 		self.units.add(drone)
@@ -53,6 +56,7 @@ class Player(object):
 		militia=rts_units.Militia(x,y,rallyX,rallyY,self.team)
 		if(ID==None):
 			militia.ID=random.randint(1000000,9999999)
+			self.IDs.add(militia.ID)
 		else:
 			militia.ID=ID
 		militia.rect.center=(militia.rect.center[0],militia.rect.center[1]+militia.rect.height//2)

@@ -4,6 +4,7 @@ import rts_classes
 import rts_images
 import rts_units
 
+#draws all aspects of menu
 def drawMenu(display,data):
 	pygame.draw.rect(display,(20,20,20),(0,data.height*.75,data.width,data.height*.25))
 	drawMiniMap(display,data)
@@ -11,6 +12,7 @@ def drawMenu(display,data):
 	drawCmdBox(display,data)
 	drawResourceBar(display,data)
 
+#draw top resource bar
 def drawResourceBar(display,data):
 	pygame.draw.rect(display,(20,20,20),(0,0,data.width,data.height*.04))
 	nameLabel=data.font.render(data.localPlayer.username,1,(255,255,255))
@@ -24,6 +26,7 @@ def drawResourceBar(display,data):
 	supplyLabel=data.font.render('Supply:'+str(data.localPlayer.supply)+' / '+str(data.localPlayer.supplyCap),1,(255,255,255))
 	display.blit(supplyLabel,(data.width*.48,data.height*.01))
 
+#draws botton right mini map
 def drawMiniMap(display,data):
 	boxX=data.width*.0125
 	boxY=data.height*.75+data.height*.0125
@@ -70,6 +73,7 @@ def drawMiniMap(display,data):
 				cursorCenterY=(miniPoint0[1]+miniPoint2[1])/2
 	pygame.draw.rect(display,(255,255,255),(cursorCenterX-8.1,cursorCenterY-6.075,16.2,12.15),1)
 
+#draws middle box containing selected units as well as information about units
 def drawUnitBox(display,data):
 	data.unitIcons.empty()
 	boxX=data.width*.25
@@ -307,7 +311,7 @@ def drawUnitBox(display,data):
 		descLabel1=data.font.render('Returns to Previous Menu',1,(153,230,255))
 		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
 
-
+#draws left hand command box
 def drawCmdBox(display,data):
 	data.menuButtons.empty()
 	boxX=data.width*.65
@@ -339,6 +343,7 @@ def drawCmdBox(display,data):
 		data.menuButtons.add(data.menuButton6)
 	data.menuButtons.draw(display)
 
+#activates button pressed if mouse if clicked within given field
 def menuButtonsPressed(pos,data):
 	if(pos[0]>data.width*.68125 and pos[0]<data.width*.68125+45):
 		if(pos[1]>data.height*.763 and pos[1]<data.height*.763+45):
@@ -359,6 +364,7 @@ def menuButtonsPressed(pos,data):
 		if(pos[1]>data.height*.763+(data.width*.025+45) and pos[1]<data.height*.763+(data.width*.025+45)+45):
 			return data.menuButton6.pressed(data)
 
+#activates button hover if mouse moves within given field
 def menuButtonsHover(pos,data):
 	if(pos[0]>data.width*.68125 and pos[0]<data.width*.68125+45):
 		if(pos[1]>data.height*.763 and pos[1]<data.height*.763+45):

@@ -297,5 +297,29 @@ class QueueIcon4(pygame.sprite.Sprite):
 		self.rect=self.image.get_rect()
 		self.rect.x=x
 		self.rect.y=y
+
+class MenuBackButton(pygame.sprite.Sprite):
+	def __init__(self,x,y):
+		pygame.sprite.Sprite.__init__(self)
+		self.image=pygame.image.load(os.path.join('rts_menu_back_button.png'))
+		self.image=pygame.transform.scale(self.image,(35,35))
+		self.rect=self.image.get_rect()
+		self.rect.x=x
+		self.rect.y=y
 		
-	
+class SpriteSheet(object):
+	def __init__(self,filename):
+		try:
+			self.sheet=pygame.image.load(os.path.join(filename)).convert()
+		except:
+			print('Unable to load spritesheet: ',filename)
+
+	def image_at(self,rect,colorkey=None):
+		rect=pygame.Rect(rect)
+		image=pygame.Surface(rect.size).convert()
+		image.blit(self.sheet,(0,0),rect)
+		if colorkey is not None:
+			if colorkey is -1:
+				colorkey = image.get_at((0,0))
+			image.set_colorkey(colorkey, pygame.RLEACCEL)
+		return image

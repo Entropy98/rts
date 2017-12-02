@@ -16,7 +16,11 @@ def drawMenu(display,data):
 		pygame.draw.rect(display,(153,230,255),(data.width/2-100,data.height*.43,200,40),3)
 		multiplayerLabel=data.menuFont.render('Multiplayer',1,(153,230,255))
 		display.blit(multiplayerLabel,(data.width/2-60,data.height*.43))
+
 	elif(data.startMenuState=='Singleplayer'):
+		if(data.backButtonHover):
+			pygame.draw.rect(display,(76,76,76),(30,30,35,35))
+		data.backButton.draw(display)
 		nameLabel=data.titleFont.render('Singleplayer',1,(153,230,255))
 		usernameLabel=data.menuFont.render('Username: ',1,(153,230,255))
 		display.blit(usernameLabel,(data.width*.2,data.height*.35))
@@ -31,7 +35,11 @@ def drawMenu(display,data):
 			pygame.draw.rect(display,(76,76,76),(data.width/2-80,data.height*.8,160,40))
 		pygame.draw.rect(display,(153,230,255),(data.width/2-80,data.height*.8,160,40),3)
 		display.blit(playLabel,(data.width/2-63,data.height*.8))
+
 	elif(data.startMenuState=='Multiplayer'):
+		if(data.backButtonHover):
+			pygame.draw.rect(display,(76,76,76),(30,30,35,35))
+		data.backButton.draw(display)
 		nameLabel=data.titleFont.render('Multiplayer',1,(153,230,255))
 		usernameLabel=data.menuFont.render('Username: ',1,(153,230,255))
 		display.blit(usernameLabel,(data.width*.2,data.height*.35))
@@ -51,6 +59,10 @@ def drawMenu(display,data):
 			textBox2Text=data.menuFont.render(data.IPInput,1,(153,230,255))
 		display.blit(textBox2Text,(data.width*.41+5,data.height*.5))
 
+		if(data.invalidIP):
+			errorLabel=data.menuFont.render('Invalid IP',1,(255,0,0))
+			display.blit(errorLabel,(data.width*.4,data.height*.6))
+
 		hostLabel=data.menuFont.render('Host',1,(153,230,255))
 		if(data.multiplayerButtonHover==1):
 			pygame.draw.rect(display,(76,76,76),(data.width*.28,data.height*.8,100,40))
@@ -61,6 +73,7 @@ def drawMenu(display,data):
 			pygame.draw.rect(display,(76,76,76),(data.width*.58,data.height*.8,100,40))
 		pygame.draw.rect(display,(153,230,255),(data.width*.58,data.height*.8,100,40),3)
 		display.blit(joinLabel,(data.width*.62,data.height*.8))
+
 	elif(data.startMenuState=='Lobby'):
 		nameLabel=data.titleFont.render('Lobby',1,(153,230,255))
 		usernameLabel=data.menuFont.render(data.localPlayer.username,1,(153,230,255))
@@ -126,9 +139,11 @@ def startMenuButtonHover(data,pos):
 def startMenuButtonPressed(data,pos):
 	if(pos[0]>data.width/2-100 and pos[0]<data.width/2+100):
 		if(pos[1]>data.height*.35 and pos[1]<data.height*.35+40):
+			data.startMenuSelect=None
 			return 'Singleplayer'
 	if(pos[0]>data.width/2-100 and pos[0]<data.width/2+100):
 		if(pos[1]>data.height*.43 and pos[1]<data.height*.43+40):
+			data.startMenuSelect=None
 			return 'Multiplayer'
 	return data.startMenuState
 

@@ -30,25 +30,42 @@ def initStartMenu(data):
 	data.multiplayerTextBoxSelect=None
 	data.IPInput=''
 	data.multiplayerButtonsPressed=None
+	data.invalidIP=False
+	data.backButton=pygame.sprite.GroupSingle()
+	data.backButton.add(rts_images.MenuBackButton(30,30))
+	data.backButtonHover=False
 
 def initMultiplayer(data):
-	print('initMultiplayer')
 	data.clientele = dict()
 	data.otherUsers=dict()
 	data.localPlayer=rts_classes.Player(data.usernameInput)
 	if(data.multiplayerButtonsPressed==1):
-		data.localPlayer.role='Host'
 		#subprocess.Popen(['cmd','-r',os.path.join('rts_server.py')])
-		threading.Thread(target = rts_server_commands.handleServerMsg, args = (data.server, data.serverMsg)).start()
-		rts_server_commands.joinServer(data,data.IPInput)
-		msg='newUsername %s \n'%data.usernameInput
-		data.server.send(msg.encode())
+		try:
+			rts_server_commands.joinServer(data,data.IPInput)
+			data.invalidIP=False
+		except:
+			data.invalidIP=True
+			data.multiplayerButtonsPressed=None
+			data.startMenuState='Multiplayer'
+		if(data.invalidIP==False):
+			data.localPlayer.role='Host'
+			threading.Thread(target = rts_server_commands.handleServerMsg, args = (data.server, data.serverMsg)).start()
+			msg='newUsername %s \n'%data.usernameInput
+			data.server.send(msg.encode())
 	elif(data.multiplayerButtonsPressed==2):
-		data.localPlayer.role='Client'
-		threading.Thread(target = rts_server_commands.handleServerMsg, args = (data.server, data.serverMsg)).start()
-		rts_server_commands.joinServer(data,data.IPInput)
-		msg='newUsername %s \n'%data.usernameInput
-		data.server.send(msg.encode())
+		try:
+			rts_server_commands.joinServer(data,data.IPInput)
+			data.invalidIP=False
+		except:
+			data.invalidIP=True
+			data.multiplayerButtonsPressed=None
+			data.startMenuState='Multiplayer'
+		if(data.invalidIP==False):
+			data.localPlayer.role='Client'
+			threading.Thread(target = rts_server_commands.handleServerMsg, args = (data.server, data.serverMsg)).start()
+			msg='newUsername %s \n'%data.usernameInput
+			data.server.send(msg.encode())
 
 def init(data):
 	sys.setrecursionlimit(3000)
@@ -63,7 +80,7 @@ def init(data):
 	data.mousePos=(0,0)
 	data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
 	data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
-	data.numOfForests=25
+	data.numOfForests=15
 	data.forestSize=100
 	data.numOfMines=10
 	data.trees=pygame.sprite.Group()
@@ -82,73 +99,77 @@ def startGame(display,data):
 	data.localPlayer=rts_classes.Player(data.usernameInput)
 	init(data)
 	rts_map_builder.buildMap(display,data)
+	x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
+	data.localPlayer.createDrone(data,x,y,x,y)
 
 def mouseDown(event,data):
 	if(data.startMenu==False):
-		if(event.pos[1]<data.height*.75):
-		    data.cellWidth=data.maxCellWidth*data.zoom
-		    if(event.button==1):
-		    	for unit in data.localPlayer.selected:
-		    		if(unit.name=='CommandCenter' and unit.rallyReset==True):
-		    			unit.rally_pointX=event.pos[0]
-		    			unit.rally_pointY=event.pos[1]
-		    			unit.rallyReset=False
-		    			break
-		    		if(unit.name=='Drone' and unit.buildState=='Select'):
-		    			unit.buildState='Place'
-		    	if(data.selectBox1==(None,None)):
-		    		data.localPlayer.clearSelected()
-		    		data.selectBox1=event.pos
-		    	for building in data.localPlayer.inConstruction:
-		    		if(building.rect.collidepoint(event.pos)):
-		    			data.localPlayer.clearSelected()
-		    			data.localPlayer.select(data,building)
-		    	for building in data.localPlayer.buildings:
-		    		if(building.rect.collidepoint(event.pos)):
-		    			data.localPlayer.clearSelected()
-		    			data.localPlayer.select(data,building)
+		if(data.localPlayer.winCondition=='play'):
+			if(event.pos[1]<data.height*.75):
+			    data.cellWidth=data.maxCellWidth*data.zoom
+			    if(event.button==1):
+			    	for unit in data.localPlayer.selected:
+			    		if(unit.name=='CommandCenter' and unit.rallyReset==True):
+			    			unit.rally_pointX=event.pos[0]
+			    			unit.rally_pointY=event.pos[1]
+			    			unit.rallyReset=False
+			    			break
+			    		if(unit.name=='Drone' and unit.buildState=='Select'):
+			    			unit.buildState='Place'
+			    	if(data.selectBox1==(None,None)):
+			    		data.localPlayer.clearSelected()
+			    		data.selectBox1=event.pos
+			    	for building in data.localPlayer.inConstruction:
+			    		if(building.rect.collidepoint(event.pos)):
+			    			data.localPlayer.clearSelected()
+			    			data.localPlayer.select(data,building)
+			    	for building in data.localPlayer.buildings:
+			    		if(building.rect.collidepoint(event.pos)):
+			    			data.localPlayer.clearSelected()
+			    			data.localPlayer.select(data,building)
 
 
-		    if(event.button==3):
-		    	mouseX=event.pos[0]
-		    	mouseY=event.pos[1]
-		    	target=None
-		    	for building in data.localPlayer.buildings:
-		    		if(building.rect.collidepoint(event.pos)):
-    					target=building
-    					break
-		    	for unit in data.localPlayer.units:
-    				if(unit.rect.collidepoint(event.pos)):
-    					target=unit
-    					break
-		    	if(data.startMenuState!='Singleplayer'):
-		    		for ID in data.otherUsers:
-		    			player=data.otherUsers[ID]
-		    			for building in player.buildings:
-		    				if(building.rect.collidepoint(event.pos)):
-		    					target=building
-		    					break
-		    			for unit in player.units:
-		    				if(unit.rect.collidepoint(event.pos)):
-		    					target=unit
-		    					break
-		    	for unit in data.localPlayer.selected:
-		    		msg=''#transmit change in position and unit ID
-			    	unit.desX=mouseX
-			    	unit.desY=mouseY
-			    	msg+='moveUnit %d %d %d \n'%(unit.rect.center[0]-mouseX,unit.rect.center[1]-mouseY,unit.ID)
-			    	unit.rally_pointX=mouseX
-			    	unit.rally_pointY=mouseY
-			    	unit.target=target
-			    	if(target==None):
-			    		msg+='newTarget %d None \n'%(unit.ID)
-			    	else:
-			    		msg+='newTarget %d %d \n'%(unit.ID,target.ID)
+			    if(event.button==3):
+			    	mouseX=event.pos[0]
+			    	mouseY=event.pos[1]
+			    	target=None
+			    	for building in data.localPlayer.buildings:
+			    		if(building.rect.collidepoint(event.pos)):
+	    					target=building
+	    					break
+			    	for unit in data.localPlayer.units:
+	    				if(unit.rect.collidepoint(event.pos)):
+	    					target=unit
+	    					break
 			    	if(data.startMenuState!='Singleplayer'):
-			    		data.server.send(msg.encode())
+			    		for ID in data.otherUsers:
+			    			player=data.otherUsers[ID]
+			    			for building in player.buildings:
+			    				if(building.rect.collidepoint(event.pos)):
+			    					target=building
+			    					break
+			    			for unit in player.units:
+			    				if(unit.rect.collidepoint(event.pos)):
+			    					target=unit
+			    					break
+			    	for unit in data.localPlayer.selected:
+			    		msg=''#transmit change in position and unit ID
+				    	unit.desX=mouseX
+				    	unit.desY=mouseY
+				    	msg+='moveUnit %d %d %d \n'%(unit.rect.center[0]-mouseX,unit.rect.center[1]-mouseY,unit.ID)
+				    	unit.rally_pointX=mouseX
+				    	unit.rally_pointY=mouseY
+				    	if(target!=None and target.ID not in data.localPlayer.IDs):
+					    	unit.target=target
+					    	if(target==None):
+					    		msg+='newTarget %d None \n'%(unit.ID)
+					    	else:
+					    		msg+='newTarget %d %d \n'%(unit.ID,target.ID)
+					    	if(data.startMenuState!='Singleplayer'):
+					    		data.server.send(msg.encode())
 
-		else:
-			rts_menus.menuButtonsPressed(event.pos,data)
+			else:
+				rts_menus.menuButtonsPressed(event.pos,data)
 	else:
 		if(data.startMenuState=='Start'):
 			data.startMenuState=rts_startmenu.startMenuButtonPressed(data,event.pos)
@@ -156,11 +177,17 @@ def mouseDown(event,data):
 			data.singlePlayerTextBoxSelect=rts_startmenu.singlePlayerTextBoxSelect(data,event.pos)
 			if(len(data.usernameInput)>0):
 				data.playButtonPressed=rts_startmenu.playButtonPressed(data,event.pos)
+			if(data.backButton.sprite.rect.collidepoint(event.pos)):
+				data.startMenuState='Start'
+				data.backButtonHover=False
 		elif(data.startMenuState=='Multiplayer'):
 			data.multiplayerTextBoxSelect=rts_startmenu.multiplayerTextBoxSelect(data,event.pos)
 			if(len(data.IPInput)>0 and len(data.usernameInput)>0):
 				data.multiplayerButtonsPressed=rts_startmenu.multiplayerButtonsPressed(data,event.pos)
 				initMultiplayer(data)
+			if(data.backButton.sprite.rect.collidepoint(event.pos)):
+				data.startMenuState='Start'
+				data.backButtonHover=False
 		elif(data.startMenuState=='Lobby'):
 			data.localPlayer.team=rts_startmenu.lobbyTeamButtonsPressed(data,event.pos)
 			msg=''
@@ -180,88 +207,109 @@ def mouseUp(event,data):
 
 def mouseMotion(event,data):
 	if(data.startMenu==False):
-		if(data.selectBox1!=(None,None)):
-			dX,dY=event.rel[0],event.rel[1]
-			data.selectBox2[0]+=dX
-			data.selectBox2[1]+=dY
-		data.mousePos=event.pos
-		rts_menus.menuButtonsHover(event.pos,data)
+		if(data.localPlayer.winCondition=='play'):
+			if(data.selectBox1!=(None,None)):
+				dX,dY=event.rel[0],event.rel[1]
+				data.selectBox2[0]+=dX
+				data.selectBox2[1]+=dY
+			data.mousePos=event.pos
+			rts_menus.menuButtonsHover(event.pos,data)
 	else:
 		if(data.startMenuState=='Start'):
 			data.startMenuSelect=rts_startmenu.startMenuButtonHover(data,event.pos)
-		elif(data.startMenuState=='Singleplayer' or (data.startMenuState=='Lobby' and data.localPlayer.role=='Host')):
+		elif(data.startMenuState=='Lobby' and data.localPlayer.role=='Host'):
 			data.playButtonHover=rts_startmenu.playButtonHover(data,event.pos)
+		elif(data.startMenuState=='Singleplayer'):
+			data.playButtonHover=rts_startmenu.playButtonHover(data,event.pos)
+			if(data.backButton.sprite.rect.collidepoint(event.pos)):
+				data.backButtonHover=True
+			else:
+				data.backButtonHover=False
 		elif(data.startMenuState=='Multiplayer'):
 			data.multiplayerButtonHover=rts_startmenu.multiplayerButtonsHover(data,event.pos)
+			if(data.backButton.sprite.rect.collidepoint(event.pos)):
+				data.backButtonHover=True
+			else:
+				data.backButtonHover=False
 
 def keyDown(event,data):
 	if(data.startMenu==False):
-		if(event.key==274):#down
-			data.cursorY+=data.scrollSpeed
-			data.cursorX+=data.scrollSpeed
-			ogGameX=data.gameX
-			ogGameY=data.gameY
-			data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
-			data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
-			rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
-		elif(event.key==273):#up
-			data.cursorY-=data.scrollSpeed
-			data.cursorX-=data.scrollSpeed
-			ogGameX=data.gameX
-			ogGameY=data.gameY
-			data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
-			data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
-			rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
-		elif(event.key==275):#right
-			data.cursorX+=data.scrollSpeed
-			data.cursorY-=data.scrollSpeed
-			ogGameX=data.gameX
-			ogGameY=data.gameY
-			data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
-			data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
-			rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
-		elif(event.key==276):#left
-			data.cursorX-=data.scrollSpeed
-			data.cursorY+=data.scrollSpeed
-			ogGameX=data.gameX
-			ogGameY=data.gameY
-			data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
-			data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
-			rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
-		if(data.cursorX<0):
-			data.cursorX=0
-			ogGameX=data.gameX
-			ogGameY=data.gameY
-			data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
-			data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
-			rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
-		if(data.cursorY<0):
-			data.cursorY=0
-			ogGameX=data.gameX
-			ogGameY=data.gameY
-			data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
-			data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
-			rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
-		if(data.cursorX>=data.cells):
-			data.cursorX=data.cells-1
-			ogGameX=data.gameX
-			ogGameY=data.gameY
-			data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
-			data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
-			rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
-		if(data.cursorY>=data.cells):
-			data.cursorY=data.cells-1
-			ogGameX=data.gameX
-			ogGameY=data.gameY
-			data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
-			data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
-			rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
+		if(data.localPlayer.winCondition=='play'):
+			if(event.key==274):#down
+				data.cursorY+=data.scrollSpeed
+				data.cursorX+=data.scrollSpeed
+				ogGameX=data.gameX
+				ogGameY=data.gameY
+				data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+				data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+				rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
+			elif(event.key==273):#up
+				data.cursorY-=data.scrollSpeed
+				data.cursorX-=data.scrollSpeed
+				ogGameX=data.gameX
+				ogGameY=data.gameY
+				data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+				data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+				rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
+			elif(event.key==275):#right
+				data.cursorX+=data.scrollSpeed
+				data.cursorY-=data.scrollSpeed
+				ogGameX=data.gameX
+				ogGameY=data.gameY
+				data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+				data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+				rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
+			elif(event.key==276):#left
+				data.cursorX-=data.scrollSpeed
+				data.cursorY+=data.scrollSpeed
+				ogGameX=data.gameX
+				ogGameY=data.gameY
+				data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+				data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+				rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
+			if(data.cursorX<0):
+				data.cursorX=0
+				ogGameX=data.gameX
+				ogGameY=data.gameY
+				data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+				data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+				rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
+			if(data.cursorY<0):
+				data.cursorY=0
+				ogGameX=data.gameX
+				ogGameY=data.gameY
+				data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+				data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+				rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
+			if(data.cursorX>=data.cells):
+				data.cursorX=data.cells-1
+				ogGameX=data.gameX
+				ogGameY=data.gameY
+				data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+				data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+				rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
+			if(data.cursorY>=data.cells):
+				data.cursorY=data.cells-1
+				ogGameX=data.gameX
+				ogGameY=data.gameY
+				data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
+				data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
+				rts_helpers.updateMap(data,ogGameX-data.gameX,ogGameY-data.gameY)
+
+		###############Dev Commands##################
 
 		if(event.unicode=='p'):
 			x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
-			data.localPlayer.createDrone(data,x,y,x,y)
+			data.localPlayer.createMilitia(data,x,y,x,y)
 	else:
 		if(data.startMenuState=='Singleplayer' or data.startMenuState=='Multiplayer'):
+			if(event.key==9):
+				if(data.multiplayerTextBoxSelect==None):
+					data.multiplayerTextBoxSelect=1
+				else:
+					data.multiplayerTextBoxSelect+=1
+					if(data.multiplayerTextBoxSelect>2):
+						data.multiplayerTextBoxSelect=1
 			if(data.singlePlayerTextBoxSelect==1 or data.multiplayerTextBoxSelect==1):
 				if(event.unicode.isalnum()):
 					data.usernameInput+=event.unicode
@@ -291,6 +339,7 @@ def timerFired(display,data):
 				player=data.otherUsers[ID]
 				player.units.update(data)
 		rts_helpers.inSelectionBox(data)
+		rts_helpers.checkWinConditions(data)
 	else:
 		if(data.playButtonPressed):
 			if(data.startMenuState=='Singleplayer'):
@@ -304,6 +353,8 @@ def timerFired(display,data):
 					msg='board %s \n'%boardmsg
 					data.server.send(msg.encode())
 					data.startMenu=False
+					x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
+					data.localPlayer.createDrone(data,x,y,x,y)
 				else:
 					if(data.startMenuState=='Lobby'):
 						init(data)
@@ -314,13 +365,13 @@ def timerFired(display,data):
 								newRow.append('field')
 							data.board.append(newRow)
 					if(data.boardComplete):
-						print(data.board)
 						data.board=rts_helpers.eval2DListOfStrings(data.board)
-						print('making terrain')
 						rts_map_builder.drawLoadBar(display,data,'Compiling Tree Sprites...',0)
 						rts_map_builder.compileTreeSprites(display,data)
 						rts_map_builder.compileMineSprites(display,data)
 						data.startMenu=False
+						x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
+						data.localPlayer.createDrone(data,x,y,x,y)
 
 
 
@@ -336,7 +387,10 @@ def redrawAll(display, data):
 		rts_helpers.drawHealthBars(display,data)
 		rts_helpers.drawSelectBox(display,data)
 		#rts_helpers.drawCursor(display,data)
-		rts_menus.drawMenu(display,data)
+		if(data.localPlayer.winCondition=='play'):
+			rts_menus.drawMenu(display,data)
+		else:
+			rts_helpers.drawEndScreen(display,data)
 	else:
 		rts_startmenu.drawMenu(display,data)
 

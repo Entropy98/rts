@@ -1,7 +1,5 @@
 #############################
-# Sockets Server Demo
-# by Rohan Varma
-# adapted by Kyle Chin
+#adapted from 15-112 Sockets Demo
 #############################
 
 import socket
@@ -9,13 +7,15 @@ import threading
 from queue import Queue
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 50003
+PORT = 50003 #default port for game
 BACKLOG = 4
 
+#initialize server
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 server.bind((HOST,PORT))
 server.listen(BACKLOG)
 print("looking for connection")
+
 
 def handleClient(client, serverChannel, cID, clientele):
 	client.setblocking(1)
