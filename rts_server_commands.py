@@ -7,11 +7,11 @@ import threading
 import rts_classes
 import rts_helpers
 import rts_buildings
-from rts_dev_debug import optimizationCheck
+from rts_dev_debug import efficiencyCheck
 from queue import Queue
 
 #function connects user to server using default port and given IP
-@optimizationCheck
+@efficiencyCheck
 def joinServer(data,IP='',port=50003):
 	HOST = IP # put your IP address here if playing on multiple computers
 	PORT = port
@@ -20,7 +20,7 @@ def joinServer(data,IP='',port=50003):
 	print("connected to server")
 
 #background process for receiving serever messages and preparing them for interpretation
-@optimizationCheck
+@efficiencyCheck
 def handleServerMsg(server, serverMsg):
 	print('called')
 	server.setblocking(1)
@@ -36,7 +36,7 @@ def handleServerMsg(server, serverMsg):
 			command = msg.split("\n")
 
 #various actions for specific server commands
-@optimizationCheck
+@efficiencyCheck
 def interpServerCommands(data):
 	if (data.serverMsg.qsize() > 0):
 		msg = data.serverMsg.get(False)

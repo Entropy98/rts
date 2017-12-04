@@ -3,10 +3,10 @@ from pygame.locals import *
 import rts_classes
 import rts_images
 import rts_units
-from rts_dev_debug import optimizationCheck
+from rts_dev_debug import efficiencyCheck
 
 #draws all aspects of menu
-@optimizationCheck
+@efficiencyCheck
 def drawMenu(display,data):
 	pygame.draw.rect(display,(20,20,20),(0,data.height*.75,data.width,data.height*.25))
 	drawMiniMap(display,data)
@@ -15,7 +15,7 @@ def drawMenu(display,data):
 	drawResourceBar(display,data)
 
 #draw top resource bar
-@optimizationCheck
+@efficiencyCheck
 def drawResourceBar(display,data):
 	pygame.draw.rect(display,(20,20,20),(0,0,data.width,data.height*.04))
 	nameLabel=data.font.render(data.localPlayer.username,1,(255,255,255))
@@ -30,7 +30,7 @@ def drawResourceBar(display,data):
 	display.blit(supplyLabel,(data.width*.48,data.height*.01))
 
 #draws botton right mini map
-@optimizationCheck
+@efficiencyCheck
 def drawMiniMap(display,data):
 	boxX=data.width*.0125
 	boxY=data.height*.75+data.height*.0125
@@ -77,7 +77,7 @@ def drawMiniMap(display,data):
 	pygame.draw.rect(display,(255,255,255),(cursorCenterX-8.1,cursorCenterY-6.075,16.2,12.15),1)
 
 #draws middle box containing selected units as well as information about units
-@optimizationCheck
+@efficiencyCheck
 def drawUnitBox(display,data):
 	data.unitIcons.empty()
 	boxX=data.width*.25
@@ -330,7 +330,7 @@ def drawUnitBox(display,data):
 		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
 
 #draws left hand command box
-@optimizationCheck
+@efficiencyCheck
 def drawCmdBox(display,data):
 	data.menuButtons.empty()
 	boxX=data.width*.65
@@ -367,7 +367,7 @@ def drawCmdBox(display,data):
 	data.menuButtons.draw(display)
 
 #activates button pressed if mouse if clicked within given field
-@optimizationCheck
+@efficiencyCheck
 def menuButtonsPressed(pos,data):
 	if(pos[0]>data.width*.68125 and pos[0]<data.width*.68125+45):
 		if(pos[1]>data.height*.763 and pos[1]<data.height*.763+45):
@@ -389,7 +389,7 @@ def menuButtonsPressed(pos,data):
 			return data.menuButton6.pressed(data)
 
 #activates button hover if mouse moves within given field
-@optimizationCheck
+@efficiencyCheck
 def menuButtonsHover(pos,data):
 	if(pos[0]>data.width*.68125 and pos[0]<data.width*.68125+45):
 		if(pos[1]>data.height*.763 and pos[1]<data.height*.763+45):

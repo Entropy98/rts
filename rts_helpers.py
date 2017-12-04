@@ -6,10 +6,10 @@ import pygame,sys
 from pygame.locals import *
 import os
 import time
-from rts_dev_debug import optimizationCheck
+from rts_dev_debug import efficiencyCheck
 
 #helper function of print2DList, borrowed from 15-112 class notes
-@optimizationCheck
+@efficiencyCheck
 def maxItemLength(a):
     maxLen = 0
     rows = len(a)
@@ -20,7 +20,7 @@ def maxItemLength(a):
     return maxLen
 
 #function for printing 2D lists for debugging, borrowed from 15-112 class notes
-@optimizationCheck
+@efficiencyCheck
 def print2dList(a):
     if (a == []):
         # So we don't crash accessing a[0]
@@ -42,7 +42,7 @@ def print2dList(a):
     print("]")
 
 #BROKEN? works well with bottom right corner of rect1
-@optimizationCheck
+@efficiencyCheck
 def rectanglesOverlap(x1, y1, w1, h1, x2, y2, w2, h2):
     if(((y2<=y1 and y1<=y2+h2) or (y2<=y1+h1 and y1+h1<=y2+h2))and
         ((x1<=x2 and x2<=x1+w1) or (x2<=x1+w1 and x1+w1<=x2+w2))):
@@ -50,7 +50,7 @@ def rectanglesOverlap(x1, y1, w1, h1, x2, y2, w2, h2):
     return False
 
 #returns the center position of the rhombus at the given coordinate
-@optimizationCheck
+@efficiencyCheck
 def getTileCenterCoordinate(data,xCoord,yCoord):
     point0=((xCoord*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
         (xCoord*.25*data.cellWidth+yCoord*.25*data.cellWidth)+data.gameY)
@@ -66,7 +66,7 @@ def getTileCenterCoordinate(data,xCoord,yCoord):
     return (point1[0]+point3[0])//2,(point0[1]+point2[1])//2
 
 #returns the location of a given unit with the added unit vector towards its destination
-@optimizationCheck
+@efficiencyCheck
 def moveUnit(x,y,destX,destY,speed,epsilon=6):
     dx=destX-x
     dy=destY-y
@@ -88,7 +88,7 @@ def moveUnit(x,y,destX,destY,speed,epsilon=6):
         return (x+i,y+j),(xDir,yDir)
 
 #determines if a unit is allowed to be at it's current position
-@optimizationCheck
+@efficiencyCheck
 def legalPosition(data,unit):
     collided=pygame.sprite.spritecollide(unit,data.localPlayer.units,False)
     if(len(collided)>1):
@@ -113,7 +113,7 @@ def legalPosition(data,unit):
     return True
 
 #keep units pegged to map as opposed to window
-@optimizationCheck
+@efficiencyCheck
 def mapAdjustUnits(data,dx,dy):
     for unit in data.localPlayer.units:
         curCoords=unit.rect.center
@@ -132,7 +132,7 @@ def mapAdjustUnits(data,dx,dy):
         building.rally_pointY-=dy
 
 #update all items on the map as it scrolls
-@optimizationCheck
+@efficiencyCheck
 def updateMap(data,dx,dy):
     mapAdjustUnits(data,dx,dy)
     data.trees.update(data)
@@ -146,7 +146,7 @@ def updateMap(data,dx,dy):
     data.mapPos=rts_map_builder.generateMapPos(data)
 
 #function determines if a given point is inside of a rhombus
-@optimizationCheck
+@efficiencyCheck
 def pointRhombusIntersect(pos,point0,point1,point2,point3):
     m01=(point0[1]-point1[1])/(point0[0]-point1[0])
     m03=(point0[1]-point3[1])/(point0[0]-point3[0])
@@ -169,7 +169,7 @@ def pointRhombusIntersect(pos,point0,point1,point2,point3):
     return True
 
 #function takes in a position relative to the window and gives the nearest coordinate on the map
-@optimizationCheck
+@efficiencyCheck
 def pos2Coord(data,xPos,yPos):
     for row in range(data.cells):
         for col in range(data.cells):
@@ -178,7 +178,7 @@ def pos2Coord(data,xPos,yPos):
 
 #change anchor to 'tile' to receive 4 coordinates of tile instead of 2 of center
 #function takes in a coordinate on the map and gives the position relative to the window
-@optimizationCheck
+@efficiencyCheck
 def coord2Pos(data,xCoord,yCoord,anchor='center'):
     point0=((xCoord*.5*data.cellWidth - yCoord*.5*data.cellWidth)+data.gameX,\
         (xCoord*.25*data.cellWidth+yCoord*.25*data.cellWidth)+data.gameY)
@@ -197,7 +197,7 @@ def coord2Pos(data,xCoord,yCoord,anchor='center'):
         return (point0,point1,point2,point3)
 
 #initializes the button locations in the command menu at the bottom left
-@optimizationCheck
+@efficiencyCheck
 def initializeMenu(data):
     data.menuButtons=pygame.sprite.Group()
     data.unitIcons=pygame.sprite.Group()
@@ -214,7 +214,7 @@ def initializeMenu(data):
     data.menuButton6=rts_images.MenuButton6(boxX+iconBuffer*1.25+(iconWidth+iconBuffer)*2,boxY+iconBuffer+(iconWidth+iconBuffer))
 
 #updates the icons for the different menu buttons between menues
-@optimizationCheck
+@efficiencyCheck
 def updateMenuIcons(data):
     if(data.localPlayer.menuState=='Drone'):
         mB1Image=pygame.image.load(os.path.join('rts_build_icon1.png'))
@@ -264,7 +264,7 @@ def updateMenuIcons(data):
 
 #building is a 2D list with a True where a building will be built and a false elsewhere
 #stencils have a 1 tile outline to allow proper line ups with other structures
-@optimizationCheck
+@efficiencyCheck
 def compileBuildStencil(data,building):
     stencil=[]
     centerRhobusCoord=pos2Coord(data,data.mousePos[0],data.mousePos[1])
@@ -273,20 +273,23 @@ def compileBuildStencil(data,building):
     buildingCenter=(buildingCenterX,buildingCenterY)
     for y in range(len(building)):
         for x in range(len(building[0])):
-            newX=centerRhobusCoord[0]-(buildingCenterX-x)
-            newY=centerRhobusCoord[1]-(buildingCenterY-y)
-            if(building[y][x]):
-                if(data.board[newX][newY]!='field'):
-                    stencil.append([False,coord2Pos(data,newX,newY,'tile')])
+            try:
+                newX=centerRhobusCoord[0]-(buildingCenterX-x)
+                newY=centerRhobusCoord[1]-(buildingCenterY-y)
+                if(building[y][x]):
+                    if(data.board[newX][newY]!='field'):
+                        stencil.append([False,coord2Pos(data,newX,newY,'tile'),(newX,newY)])
+                    else:
+                        stencil.append([True,coord2Pos(data,newX,newY,'tile'),(newX,newY)])
                 else:
-                    stencil.append([True,coord2Pos(data,newX,newY,'tile')])
-            else:
-                stencil.append(['empty',coord2Pos(data,newX,newY,'tile')])
+                    stencil.append(['empty',coord2Pos(data,newX,newY,'tile'),(newX,newY)])
+            except:
+                pass
                     
     return stencil
     
 #plades building at highlighted stencil location
-@optimizationCheck
+@efficiencyCheck
 def placeBuilding(data,building):
     layout=building.layout
     centerRhobusCoord=pos2Coord(data,data.mousePos[0],data.mousePos[1])
@@ -302,7 +305,7 @@ def placeBuilding(data,building):
                 building.tiles.append((newX,newY))
     return centerRhobusCoord
 
-@optimizationCheck
+@efficiencyCheck
 def placeBuildingAtCoord(data,building,xCoord,yCoord):
     layout=building.layout
     centerRhobusCoord=(xCoord,yCoord)
@@ -318,21 +321,24 @@ def placeBuildingAtCoord(data,building,xCoord,yCoord):
                 building.tiles.append((newX,newY))
 
 #draws stencil for building around cursor position
-@optimizationCheck
+@efficiencyCheck
 def drawBuildStencils(display,data):
     if(data.mousePos[1]<data.height*.75):
         for unit in data.localPlayer.selected:
             if(unit.name=='Drone' and unit.stencil!=None):
                 for tile in unit.stencil:
-                    if(tile[0]=='empty'):
-                        pygame.draw.polygon(display,(217,217,217),tile[1],1)
-                    elif(tile[0]):
-                        pygame.draw.polygon(display,(153,230,255),tile[1],3)
-                    else:
+                    if(tile[2][0]<0 or tile[2][1]<0 or tile[2][0]>99 or tile[2][1]>99):
                         pygame.draw.polygon(display,(255,77,77),tile[1],3)
+                    else:
+                        if(tile[0]=='empty'):
+                            pygame.draw.polygon(display,(217,217,217),tile[1],1)
+                        elif(tile[0]):
+                            pygame.draw.polygon(display,(153,230,255),tile[1],3)
+                        else:
+                            pygame.draw.polygon(display,(255,77,77),tile[1],3)
 
 #collect all materials dropped off by drones and store them in player
-@optimizationCheck
+@efficiencyCheck
 def collectUnitMats(data):
     for unit in data.localPlayer.units:
         if(unit.name=='Drone'):
@@ -340,24 +346,24 @@ def collectUnitMats(data):
                 unit.dropOffMats(data)
 
 #progress in building buildings being builts
-@optimizationCheck
+@efficiencyCheck
 def buildBuildings(data):
     for building in data.localPlayer.inConstruction:
-        building.build(data)
+        building.build(data,data.localPlayer)
     for ID in data.otherUsers:
         player=data.otherUsers[ID]
         for building in player.inConstruction:
-            building.build(data)
+            building.build(data,player)
 
 #draw line which units built by this building will follow
-@optimizationCheck
+@efficiencyCheck
 def drawRallyLine(display,data):
     for building in data.localPlayer.selected:
         if(building.name=='CommandCenter' or building.name=='Barracks'):
             pygame.draw.line(display,(153,230,255),(building.rect.center),(building.rally_pointX,building.rally_pointY))
 
 #progress units being created by buildings
-@optimizationCheck
+@efficiencyCheck
 def createUnits(data):
     for building in data.localPlayer.buildings:
         if(building.name=='CommandCenter'):
@@ -382,7 +388,7 @@ def createUnits(data):
                             building.createMilitia(data)
 
 #collect energy from all structures which produce it
-@optimizationCheck
+@efficiencyCheck
 def collectEnergy(data):
     for building in data.localPlayer.buildings:
         data.localPlayer.energy+=building.energy
@@ -391,7 +397,7 @@ def collectEnergy(data):
         data.localPlayer.energy=data.localPlayer.powerCap
 
 #calculate dynamic energy cap based on energy storing buildings
-@optimizationCheck
+@efficiencyCheck
 def setPowerCap(data):
     TotalBattery=0
     for building in data.localPlayer.buildings:
@@ -399,7 +405,7 @@ def setPowerCap(data):
     data.localPlayer.powerCap=TotalBattery
 
 #calulate dynamic supply cap based on energy stored in buildings
-@optimizationCheck
+@efficiencyCheck
 def setSupplyCap(data):
     supply=0
     for building in data.localPlayer.buildings:
@@ -408,7 +414,7 @@ def setSupplyCap(data):
     data.localPlayer.supplyCap=supply
 
 #determines if units are to be selected
-@optimizationCheck
+@efficiencyCheck
 def inSelectionBox(data):
     if(data.selectBox1!=(None,None)):
         for unit in data.localPlayer.units:
@@ -417,7 +423,7 @@ def inSelectionBox(data):
                 data.localPlayer.select(data,unit)
 
 #primarily for debugging purposes but shows tile type and binds center of screen
-@optimizationCheck
+@efficiencyCheck
 def drawCursor(display,data):
     coords=coord2Pos(data,data.cursorX,data.cursorY,'tile')
     point0,point1,point2,point3=coords[0],coords[1],coords[2],coords[3]
@@ -430,19 +436,19 @@ def drawCursor(display,data):
     display.blit(textSurface,((((point1[0]+point3[0])//2)-fontSize,((point0[1]+point2[1])//2)-.5*fontSize)))
 
 #draw box players use to select their units
-@optimizationCheck
+@efficiencyCheck
 def drawSelectBox(display,data):
     if(data.selectBox1!=(None,None)):
         pygame.draw.rect(display,(153,230,255),(data.selectBox1[0],data.selectBox1[1],data.selectBox2[0],data.selectBox2[1]),1)
 
 #highlight units to indicate that they are selected
-@optimizationCheck
+@efficiencyCheck
 def drawSelectedRing(display,data):
     for unit in data.localPlayer.selected:
         pygame.draw.ellipse(display,(153,230,255),(unit.rect.left-2,unit.rect.top+2,unit.rect.width+4,unit.rect.height+4),2)
 
 #draw all units from all players
-@optimizationCheck
+@efficiencyCheck
 def drawUnits(display,data):
     data.localPlayer.units.draw(display)
     for ID in data.otherUsers:
@@ -450,7 +456,7 @@ def drawUnits(display,data):
         player.units.draw(display)
 
 #determine if buildings can be built whether it be resources or previously built infrastructure
-@optimizationCheck
+@efficiencyCheck
 def buildReqsMet(data,building):
     if(data.localPlayer.wood>=building.woodCost and data.localPlayer.metals>=building.metalCost):
         numOfReqs=len(building.prereqs)
@@ -465,7 +471,7 @@ def buildReqsMet(data,building):
     return False
 
 #draw health bars for units and buildings depending on whether or not they have full health
-@optimizationCheck
+@efficiencyCheck
 def drawHealthBars(display,data):
     healthBarHeight=10
     #draws black line every 15 health
@@ -507,7 +513,7 @@ def drawHealthBars(display,data):
                         (building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y),1)
 
 #special eval used for interpretting 2D list. normal eval works but does not handle string abnormalities like spaces
-@optimizationCheck
+@efficiencyCheck
 def eval2DListOfStrings(s):
     newList=[]
     for i in range(len(s)):
@@ -522,7 +528,7 @@ def eval2DListOfStrings(s):
     return newList
 
 #check all units in game for their unique ID to determine which is being called
-@optimizationCheck
+@efficiencyCheck
 def findUnitByID(data,ID):
     for unit in data.localPlayer.units:
         if(unit.ID==ID):
@@ -539,7 +545,7 @@ def findUnitByID(data,ID):
             if(building.ID==ID):
                 return building
 
-@optimizationCheck
+@efficiencyCheck
 def checkWinConditions(data):
     msg=''
     if(len(data.localPlayer.units)==0 and len(data.localPlayer.buildings)==0):
@@ -563,7 +569,7 @@ def checkWinConditions(data):
         if(data.localPlayer.winCondition=='play'):
             data.server.send(msg.encode())
 
-@optimizationCheck
+@efficiencyCheck
 def drawEndScreen(display,data):
     if(data.localPlayer.winCondition=='win'):
         endMessage=data.titleFont.render('VICTORY',1,(0,0,255))
@@ -575,9 +581,11 @@ def drawEndScreen(display,data):
     pygame.draw.rect(display,(153,230,255),(data.width*.4,data.height*.6,data.width*.2,40),3)
     display.blit(homeButtonLabel,(data.width*.42,data.height*.6))
 
-@optimizationCheck
-def printOptimizationResults(data):
-    print('In '+str(time.time()))
+@efficiencyCheck
+def printEfficiencyResults(data):
+    runTime=time.time()-data.runStartTime
+    print('--------------Efficiency Check Results--------------')
+    print('In '+(str(runTime//60)+'minutes '+str(runTime%60)+'seconds:'))
     risk=[]
     for function in data.functions:
         avgTime=data.functions[function]['avgTime']

@@ -1,7 +1,7 @@
 import time
 from rts_data import data
 
-def optimizationCheck(f):
+def efficiencyCheck(f):
     def g(*args):
         startTime=time.time()
         result=f(*args)

@@ -1,12 +1,12 @@
 import pygame
 import rts_helpers
 import rts_images
-from rts_dev_debug import optimizationCheck
+from rts_dev_debug import efficiencyCheck
 import random
 import os
 
 class Militia(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y,destX,destY,team):
 		pygame.sprite.Sprite.__init__(self)
 		self.team=team
@@ -45,7 +45,7 @@ class Militia(pygame.sprite.Sprite):
 		self.animationFace='left'
 		self.animateDx=0
 
-	@optimizationCheck
+	@efficiencyCheck
 	def attack(self,data):
 		if(self.target!=None):
 			dist=((self.rect.center[0]-self.target.rect.center[0])**2+(self.rect.center[1]-self.target.rect.center[1])**2)**.5
@@ -68,7 +68,7 @@ class Militia(pygame.sprite.Sprite):
 		else:
 			self.attacking=False
 
-	@optimizationCheck
+	@efficiencyCheck
 	def animateAttack(self,direction):
 		if(direction==-1):
 			self.animationFace='left'
@@ -96,12 +96,12 @@ class Militia(pygame.sprite.Sprite):
 		self.animationState%=2
 
 	@staticmethod
-	@optimizationCheck
+	@efficiencyCheck
 	def getBuildTime():
 		return 10
 
 	@staticmethod
-	@optimizationCheck
+	@efficiencyCheck
 	def getBuildCost():
 		d={}
 		d['metals']=50
@@ -109,7 +109,7 @@ class Militia(pygame.sprite.Sprite):
 		d['energy']=0
 		return d
 
-	@optimizationCheck
+	@efficiencyCheck
 	def update(self,data):
 		ogCenter=self.rect.center
 		if(self.attacking):
@@ -127,7 +127,7 @@ class Militia(pygame.sprite.Sprite):
 		if(self.health<=0):
 			self.kill()
 
-	@optimizationCheck
+	@efficiencyCheck
 	def animateMovement(self,direction):
 		if(self.animationState==0):
 			self.ssPos=(0,1)
@@ -155,7 +155,7 @@ class Militia(pygame.sprite.Sprite):
 
 class Drone(pygame.sprite.Sprite):
 	"""docstring for Drone"""
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y,destX,destY,team):
 		pygame.sprite.Sprite.__init__(self)
 		self.team=team
@@ -192,12 +192,12 @@ class Drone(pygame.sprite.Sprite):
 		self.target=None
 
 	@staticmethod
-	@optimizationCheck
+	@efficiencyCheck
 	def getBuildTime():
 		return 5
 
 	@staticmethod
-	@optimizationCheck
+	@efficiencyCheck
 	def getBuildCost():
 		d={}
 		d['metals']=30
@@ -205,7 +205,7 @@ class Drone(pygame.sprite.Sprite):
 		d['energy']=20
 		return d
 
-	@optimizationCheck
+	@efficiencyCheck
 	def update(self,data):
 		ogCenter=self.rect.center
 		self.rect.center,moveDir=rts_helpers.moveUnit(self.rect.center[0],self.rect.center[1],self.desX,self.desY,self.speed)
@@ -226,7 +226,7 @@ class Drone(pygame.sprite.Sprite):
 		if(self.health<=0):
 			self.kill()
 
-	@optimizationCheck
+	@efficiencyCheck
 	def attack(self,data):
 		if(self.target!=None):
 			dist=((self.rect.center[0]-self.target.rect.center[0])**2+(self.rect.center[1]-self.target.rect.center[1])**2)**.5
@@ -241,7 +241,7 @@ class Drone(pygame.sprite.Sprite):
 				self.desX=self.target.rect.center[0]
 				self.desY=self.target.rect.center[1]
 
-	@optimizationCheck
+	@efficiencyCheck
 	def build(self,data):
 		if(self.buildState=='Select'):
 			self.stencil=rts_helpers.compileBuildStencil(data,self.building.layout)
@@ -276,14 +276,14 @@ class Drone(pygame.sprite.Sprite):
 		elif(self.buildState=='Build'):
 			pass
 
-	@optimizationCheck
+	@efficiencyCheck
 	def dropOffMats(self,data):
 		data.localPlayer.wood+=self.wood
 		self.wood=0
 		data.localPlayer.metals+=self.metals
 		self.metals=0
 
-	@optimizationCheck
+	@efficiencyCheck
 	def gatherWood(self,data):
 		if(len(pygame.sprite.spritecollide(self,data.trees,None))>0):
 			self.metalMining=False
@@ -294,7 +294,7 @@ class Drone(pygame.sprite.Sprite):
 				self.wood+=1
 				break
 
-	@optimizationCheck
+	@efficiencyCheck
 	def mineMetals(self,data):
 		if(len(pygame.sprite.spritecollide(self,data.mines,None))>0):
 			self.woodGathering=False

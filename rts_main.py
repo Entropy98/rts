@@ -8,7 +8,7 @@ import rts_menus
 import rts_buildings
 import rts_startmenu
 import rts_server_commands
-from rts_dev_debug import optimizationCheck
+from rts_dev_debug import efficiencyCheck
 from rts_data import data
 import random
 import math
@@ -17,9 +17,10 @@ import os
 import socket
 import threading
 import ast
+import time
 from queue import Queue
 
-@optimizationCheck
+@efficiencyCheck
 def initStartMenu(data):
 	data.startMenu=True
 	data.startMenuState='Start'
@@ -37,7 +38,7 @@ def initStartMenu(data):
 	data.backButton.add(rts_images.MenuBackButton(30,30))
 	data.backButtonHover=False
 
-@optimizationCheck
+@efficiencyCheck
 def initMultiplayer(data):
 	data.clientele = dict()
 	data.otherUsers=dict()
@@ -70,7 +71,7 @@ def initMultiplayer(data):
 			msg='newUsername %s \n'%data.usernameInput
 			data.server.send(msg.encode())
 
-@optimizationCheck
+@efficiencyCheck
 def init(data):
 	sys.setrecursionlimit(3000)
 	data.cells=100
@@ -98,7 +99,7 @@ def init(data):
 	data.board=[]
 	data.boardComplete=False
 
-@optimizationCheck
+@efficiencyCheck
 def startSingleplayerGame(display,data):
 	data.startMenu=False
 	data.localPlayer=rts_classes.Player(data.usernameInput)
@@ -120,7 +121,7 @@ def startSingleplayerGame(display,data):
 	x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
 	data.localPlayer.createDrone(data,x,y,x,y)
 
-@optimizationCheck
+@efficiencyCheck
 def mouseDown(event,data):
 	if(data.startMenu==False):
 		if(data.localPlayer.winCondition=='play'):
@@ -152,14 +153,14 @@ def mouseDown(event,data):
 			    	mouseX=event.pos[0]
 			    	mouseY=event.pos[1]
 			    	target=None
-			    	for building in data.localPlayer.buildings:
-			    		if(building.rect.collidepoint(event.pos)):
-	    					target=building
-	    					break
-			    	for unit in data.localPlayer.units:
-	    				if(unit.rect.collidepoint(event.pos)):
-	    					target=unit
-	    					break
+			    	# for building in data.localPlayer.buildings:
+			    	# 	if(building.rect.collidepoint(event.pos)):
+	    			# 		target=building
+	    			# 		break
+			    	# for unit in data.localPlayer.units:
+	    			# 	if(unit.rect.collidepoint(event.pos)):
+	    			# 		target=unit
+	    			# 		break
 		    		for ID in data.otherUsers:
 		    			player=data.otherUsers[ID]
 		    			for building in player.buildings:
@@ -177,12 +178,11 @@ def mouseDown(event,data):
 				    	msg+='moveUnit %d %d %d \n'%(unit.rect.center[0]-mouseX,unit.rect.center[1]-mouseY,unit.ID)
 				    	unit.rally_pointX=mouseX
 				    	unit.rally_pointY=mouseY
-				    	if(target!=None and target.ID not in data.localPlayer.IDs):
-					    	unit.target=target
-					    	if(target==None):
-					    		msg+='newTarget %d None \n'%(unit.ID)
-					    	else:
-					    		msg+='newTarget %d %d \n'%(unit.ID,target.ID)
+				    	unit.target=target
+				    	if(target==None):
+				    		msg+='newTarget %d None \n'%(unit.ID)
+				    	else:
+				    		msg+='newTarget %d %d \n'%(unit.ID,target.ID)
 				    	if(data.startMenuState!='Singleplayer'):
 				    		data.server.send(msg.encode())
 
@@ -217,14 +217,14 @@ def mouseDown(event,data):
 					msg+='startGame %s \n'%'test'
 					data.server.send(msg.encode())
 
-@optimizationCheck
+@efficiencyCheck
 def mouseUp(event,data):
 	if(data.startMenu==False):
 	    if(data.selectBox1!=(None,None)):
 	   		data.selectBox1=(None,None)
 	   		data.selectBox2=[0,0]
 
-@optimizationCheck
+@efficiencyCheck
 def mouseMotion(event,data):
 	if(data.startMenu==False):
 		if(data.localPlayer.winCondition=='play'):
@@ -252,7 +252,7 @@ def mouseMotion(event,data):
 			else:
 				data.backButtonHover=False
 
-@optimizationCheck
+@efficiencyCheck
 def keyDown(event,data):
 	if(data.startMenu==False):
 		if(data.localPlayer.winCondition=='play'):
@@ -323,7 +323,7 @@ def keyDown(event,data):
 			x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
 			data.localPlayer.createMilitia(data,x,y,x,y)
 		elif(event.unicode=='`'):
-			rts_helpers.printOptimizationResults(data)
+			rts_helpers.printEfficiencyResults(data)
 	else:
 		if(data.startMenuState=='Singleplayer' or data.startMenuState=='Multiplayer'):
 			if(event.key==9):
@@ -344,11 +344,11 @@ def keyDown(event,data):
 				elif(event.key==8 and len(data.IPInput)>0):
 					data.IPInput=data.IPInput[:-1]
 
-@optimizationCheck
+@efficiencyCheck
 def keyUp(event,data):
    	pass
 
-@optimizationCheck
+@efficiencyCheck
 def timerFired(display,data):
 	rts_server_commands.interpServerCommands(data)
 	if(data.startMenu==False):
@@ -399,7 +399,7 @@ def timerFired(display,data):
 
 
 
-@optimizationCheck
+@efficiencyCheck
 def redrawAll(display, data):
 	if(data.startMenu==False):
 		rts_map_builder.drawMap(display,data)
@@ -454,6 +454,7 @@ def run(width=300, height=300,serverMsg=None,server=None):
 		data.fpsClock.tick(data.fps)
 
 	# Set up data and call init
+	data.runStartTime=time.time()
 	data.multiplayerButtonsPressed=None
 	data.serverMsg=serverMsg
 	data.server=server

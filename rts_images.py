@@ -4,13 +4,13 @@ import os
 import rts_helpers
 import rts_classes
 import rts_buildings
-from rts_dev_debug import optimizationCheck
+from rts_dev_debug import efficiencyCheck
 		
-@optimizationCheck
+@efficiencyCheck
 def loadImages(data):
 	data.map=pygame.image.load(os.path.join('rts_map.png'))
 
-@optimizationCheck
+@efficiencyCheck
 def displayMap(display,data,x,y):
 	pic=pygame.transform.scale(data.map,(5000,2500))
 	display.blit(pic,(x,y))
@@ -27,11 +27,11 @@ class Tree(pygame.sprite.Sprite):
 		self.coords=(x,y)
 		self.wood=50
 
-	@optimizationCheck
+	@efficiencyCheck
 	def update(self,data):
 		self.rect.center=rts_helpers.coord2Pos(data,self.coords[0]-1.5,self.coords[1]-1.5)
 
-	@optimizationCheck
+	@efficiencyCheck
 	def updateResources(self,data):
 		if(self.wood<1):
 			self.kill()
@@ -48,17 +48,17 @@ class Mine(pygame.sprite.Sprite):
 		self.coords=(x,y)
 		self.metals=10000
 
-	@optimizationCheck
+	@efficiencyCheck
 	def update(self,data):
 		self.rect.center=rts_helpers.coord2Pos(data,self.coords[0]-.5,self.coords[1]-.5)
 
-	@optimizationCheck
+	@efficiencyCheck
 	def updateResources(self,data):
 		if(self.metals<1):
 			self.kill()
 
 class MenuButton1(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.Surface([45,45])
@@ -66,7 +66,7 @@ class MenuButton1(pygame.sprite.Sprite):
 		self.rect.x=x
 		self.rect.y=y
 
-	@optimizationCheck
+	@efficiencyCheck
 	def pressed(self,data):
 		if(data.localPlayer.menuState=='Drone'):
 			data.localPlayer.menuState='Drone_b1'
@@ -99,7 +99,7 @@ class MenuButton1(pygame.sprite.Sprite):
 					break
 		data.localPlayer.menuHover=None
 
-	@optimizationCheck
+	@efficiencyCheck
 	def hover(self,data):
 		if(data.localPlayer.menuState=='Drone'):
 			data.localPlayer.menuHover='Drone_b1'
@@ -113,7 +113,7 @@ class MenuButton1(pygame.sprite.Sprite):
 			data.localPlayer.menuHover='Train_Militia'
 
 class MenuButton2(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.Surface([45,45])
@@ -121,7 +121,7 @@ class MenuButton2(pygame.sprite.Sprite):
 		self.rect.x=x
 		self.rect.y=y
 
-	@optimizationCheck
+	@efficiencyCheck
 	def pressed(self,data):
 		if(data.localPlayer.menuState=='Drone'):
 			data.localPlayer.menuState='Drone_b2'
@@ -141,7 +141,7 @@ class MenuButton2(pygame.sprite.Sprite):
 					unit.building=building
 					break
 
-	@optimizationCheck
+	@efficiencyCheck
 	def hover(self,data):
 		if(data.localPlayer.menuState=='Drone'):
 			data.localPlayer.menuHover='Drone_b2'
@@ -151,7 +151,7 @@ class MenuButton2(pygame.sprite.Sprite):
 			data.localPlayer.menuHover='WoodWall'
 
 class MenuButton3(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.Surface([45,45])
@@ -159,7 +159,7 @@ class MenuButton3(pygame.sprite.Sprite):
 		self.rect.x=x
 		self.rect.y=y
 
-	@optimizationCheck
+	@efficiencyCheck
 	def pressed(self,data):
 		if(data.localPlayer.menuState=='Drone_b1'):
 			for unit in data.localPlayer.selected:
@@ -169,13 +169,13 @@ class MenuButton3(pygame.sprite.Sprite):
 					unit.building=building
 					break
 
-	@optimizationCheck
+	@efficiencyCheck
 	def hover(self,data):
 		if(data.localPlayer.menuState=='Drone_b1'):
 			data.localPlayer.menuHover='Farm'
 
 class MenuButton4(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.Surface([45,45])
@@ -183,7 +183,7 @@ class MenuButton4(pygame.sprite.Sprite):
 		self.rect.x=x
 		self.rect.y=y
 
-	@optimizationCheck
+	@efficiencyCheck
 	def pressed(self,data):
 		for unit in data.localPlayer.selected:
 			if(unit.name=='Drone'):
@@ -197,7 +197,7 @@ class MenuButton4(pygame.sprite.Sprite):
 				break
 		data.localPlayer.menuHover=None
 
-	@optimizationCheck
+	@efficiencyCheck
 	def hover(self,data):
 		for unit in data.localPlayer.selected:
 			if(unit.name=='Drone'):
@@ -208,7 +208,7 @@ class MenuButton4(pygame.sprite.Sprite):
 				data.localPlayer.menuHover='Rally_Point'
 
 class MenuButton6(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.Surface([45,45])
@@ -216,7 +216,7 @@ class MenuButton6(pygame.sprite.Sprite):
 		self.rect.x=x
 		self.rect.y=y
 
-	@optimizationCheck
+	@efficiencyCheck
 	def pressed(self,data):
 		if(data.localPlayer.menuState=='Drone' or data.localPlayer.menuState=='Militia'):
 			for unit in data.localPlayer.selected:
@@ -242,7 +242,7 @@ class MenuButton6(pygame.sprite.Sprite):
 				unit.kill()
 		data.localPlayer.menuHover=None
 
-	@optimizationCheck
+	@efficiencyCheck
 	def hover(self,data):
 		if(data.localPlayer.menuState=='Drone'):
 			data.localPlayer.menuHover='Destroy'
@@ -252,7 +252,7 @@ class MenuButton6(pygame.sprite.Sprite):
 			data.localPlayer.menuHover='Destroy'
 
 class DroneIcon(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y,width,height):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_drone_icon.png'))
@@ -262,7 +262,7 @@ class DroneIcon(pygame.sprite.Sprite):
 		self.rect.y=y
 
 class CommandCenterIcon(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y,width,height):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_command_center_icon.png'))
@@ -272,7 +272,7 @@ class CommandCenterIcon(pygame.sprite.Sprite):
 		self.rect.y=y
 
 class GeothermalGeneratorIcon(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y,width,height):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_geothermal_generator_icon.png'))
@@ -282,7 +282,7 @@ class GeothermalGeneratorIcon(pygame.sprite.Sprite):
 		self.rect.y=y
 
 class FarmIcon(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y,width,height):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_farm_icon.png'))
@@ -292,7 +292,7 @@ class FarmIcon(pygame.sprite.Sprite):
 		self.rect.y=y
 
 class WoodWallIcon(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y,width,height):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_wood_wall_icon.png'))
@@ -302,7 +302,7 @@ class WoodWallIcon(pygame.sprite.Sprite):
 		self.rect.y=y
 
 class QueueIcon1(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y,width,height):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_queue_icon1.png'))
@@ -312,7 +312,7 @@ class QueueIcon1(pygame.sprite.Sprite):
 		self.rect.y=y
 
 class QueueIcon2(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y,width,height):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_queue_icon2.png'))
@@ -322,7 +322,7 @@ class QueueIcon2(pygame.sprite.Sprite):
 		self.rect.y=y
 
 class QueueIcon3(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y,width,height):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_queue_icon3.png'))
@@ -332,7 +332,7 @@ class QueueIcon3(pygame.sprite.Sprite):
 		self.rect.y=y
 
 class QueueIcon4(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y,width,height):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_queue_icon4.png'))
@@ -342,7 +342,7 @@ class QueueIcon4(pygame.sprite.Sprite):
 		self.rect.y=y
 
 class MenuBackButton(pygame.sprite.Sprite):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_menu_back_button.png'))
@@ -352,14 +352,14 @@ class MenuBackButton(pygame.sprite.Sprite):
 		self.rect.y=y
 		
 class SpriteSheet(object):
-	@optimizationCheck
+	@efficiencyCheck
 	def __init__(self,filename):
 		try:
 			self.sheet=pygame.image.load(os.path.join(filename)).convert()
 		except:
 			print('Unable to load spritesheet: ',filename)
 
-	@optimizationCheck
+	@efficiencyCheck
 	def image_at(self,rect,colorkey=None):
 		rect=pygame.Rect(rect)
 		image=pygame.Surface(rect.size).convert()

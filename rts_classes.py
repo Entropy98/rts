@@ -3,7 +3,7 @@ from pygame.locals import *
 import rts_images
 import rts_helpers
 import rts_units
-from rts_dev_debug import optimizationCheck
+from rts_dev_debug import efficiencyCheck
 import random
 
 class Player(object):
@@ -27,7 +27,7 @@ class Player(object):
 		self.IDs=set()
 		self.winCondition='play'
 
-	@optimizationCheck
+	@efficiencyCheck
 	def select(self,data,item):
 		if(item.ID in self.IDs):
 			if(self.menuState==None):
@@ -36,12 +36,12 @@ class Player(object):
 			if(len(self.selected)<=40):
 				self.selected.add(item)
 
-	@optimizationCheck
+	@efficiencyCheck
 	def clearSelected(self):
 		self.menuState=None
 		self.selected.empty()
 
-	@optimizationCheck
+	@efficiencyCheck
 	def createDrone(self,data,x,y,rallyX,rallyY,client=False,ID=None):
 		drone=rts_units.Drone(x,y,rallyX,rallyY,self.team)
 		if(ID==None):
@@ -56,7 +56,7 @@ class Player(object):
 			msg='createDrone %d %d %d %d %d \n'%(coord[0],coord[1],rallyCoord[0],rallyCoord[1],drone.ID)
 			data.server.send(msg.encode())
 
-	@optimizationCheck
+	@efficiencyCheck
 	def createMilitia(self,data,x,y,rallyX,rallyY,client=False,ID=None):
 		militia=rts_units.Militia(x,y,rallyX,rallyY,self.team)
 		if(ID==None):
