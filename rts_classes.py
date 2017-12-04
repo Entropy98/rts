@@ -9,8 +9,8 @@ import random
 class Player(object):
 	def __init__(self, username):
 		self.username = username
-		self.wood=1000
-		self.metals=1000
+		self.wood=300
+		self.metals=200
 		self.energy=0
 		self.powerCap=0
 		self.supplyCap=0
@@ -26,6 +26,7 @@ class Player(object):
 		self.ID=None
 		self.IDs=set()
 		self.winCondition='play'
+		self.role=None
 
 	@efficiencyCheck
 	def select(self,data,item):

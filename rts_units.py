@@ -159,14 +159,17 @@ class Drone(pygame.sprite.Sprite):
 	def __init__(self,x,y,destX,destY,team):
 		pygame.sprite.Sprite.__init__(self)
 		self.team=team
+		self.spriteWidth=400
+		self.spriteHeight=254
 		if(self.team=='yellow'):
-			self.image=pygame.image.load(os.path.join('rts_drone_dl1_yellow.png'))
+			self.spritesheet=rts_images.SpriteSheet('rts_drone_yellow_sheet.png')
 		elif(self.team=='blue'):
-			self.image=pygame.image.load(os.path.join('rts_drone_dl1_blue.png'))
+			self.spritesheet=rts_images.SpriteSheet('rts_drone_blue_sheet.png')
 		elif(self.team=='red'):
-			self.image=pygame.image.load(os.path.join('rts_drone_dl1_red.png'))
+			self.spritesheet=rts_images.SpriteSheet('rts_drone_red_sheet.png')
 		elif(self.team=='green'):
-			self.image=pygame.image.load(os.path.join('rts_drone_dl1_green.png'))
+			self.spritesheet=rts_images.SpriteSheet('rts_drone_green_sheet.png')
+		self.image=self.spritesheet.image_at((0,0,self.spriteWidth,self.spriteHeight),(217,0,255))
 		self.image=pygame.transform.scale(self.image,(36,23))
 		self.rect=self.image.get_rect()
 		self.speed=10
@@ -190,6 +193,7 @@ class Drone(pygame.sprite.Sprite):
 		self.maxHealth=self.health
 		self.attackRange=50
 		self.target=None
+		self.animationFace='left'
 
 	@staticmethod
 	@efficiencyCheck
@@ -210,7 +214,7 @@ class Drone(pygame.sprite.Sprite):
 		ogCenter=self.rect.center
 		self.rect.center,moveDir=rts_helpers.moveUnit(self.rect.center[0],self.rect.center[1],self.desX,self.desY,self.speed)
 		if(moveDir!=None):
-			pass
+			self.animateMovement(moveDir)
 		self.attack(data)
 		self.build(data)
 		if(rts_helpers.legalPosition(data,self)==False):
@@ -225,6 +229,27 @@ class Drone(pygame.sprite.Sprite):
 			self.metalMining=False
 		if(self.health<=0):
 			self.kill()
+
+	@efficiencyCheck
+	def animateMovement(self,direction):
+		state=''
+		if(direction[1]==-1):
+			state+='U'
+		else:
+			state+='D'
+		if(direction[0]==-1):
+			state+='L'
+		else:
+			state+='R'
+		if(state=='DL'):
+			self.image=self.spritesheet.image_at((0,0,self.spriteWidth,self.spriteHeight),(217,0,255))
+		elif(state=='UR'):
+			self.image=self.spritesheet.image_at((self.spriteWidth,0,self.spriteWidth,self.spriteHeight),(217,0,255))
+		elif(state=='DR'):
+			self.image=self.spritesheet.image_at((0,273,self.spriteWidth,self.spriteHeight),(217,0,255))
+		elif(state=='UL'):
+			self.image=self.spritesheet.image_at((self.spriteWidth,273,self.spriteWidth,self.spriteHeight),(217,0,255))
+		self.image=pygame.transform.scale(self.image,(36,23))
 
 	@efficiencyCheck
 	def attack(self,data):

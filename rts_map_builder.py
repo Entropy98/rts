@@ -28,7 +28,6 @@ def populateForests(display,data,startTime,forestNum=0,board=None,pos=None,treeC
 		pos=(randX,randY)
 	#compile the tree sprites if all forests have been made to adequate size
 	if(forestNum>data.numOfForests):#base case
-		compileTreeSprites(display,data)
 		return board
 	else: #recursive case
 		x,y=pos[0],pos[1] #current tree seed
@@ -37,10 +36,10 @@ def populateForests(display,data,startTime,forestNum=0,board=None,pos=None,treeC
 			(x,y-1),(x+1,y-1),(x+1,y),(x+1,y+1),(x,y+1),(x-1,y+1),(x-1,y),(x-1,y-1)]
 		#shuffle moves so that the board does not create a straight line if possible
 		random.shuffle(moves)
+		if(time.time()-startTime>timeout):
+			print('timeout')
+			1/0
 		for move in moves:
-			if(time.time()-startTime>timeout):
-				print('timeout')
-				1/0
 			#is legal
 			if(pos[0]>0 and pos[0]<data.cells-1):
 				if(pos[1]>0 and pos[1]<data.cells-1):
@@ -116,18 +115,21 @@ def buildMap(display,data):
 			drawLoadBar(display,data,'Constructing Board...',(iterations)/(data.cells**2))
 			newRow.append('field')
 		data.board.append(newRow)
+	emptyBoard=data.board
 	drawLoadBar(display,data,'Planting Trees...',0)
 	maxAttempts=25
 	attempts=0
 	for i in range(maxAttempts):
 		try:
 			startTime=time.time()
-			#populateForests(display,data,startTime)
+			populateForests(display,data,startTime)
 			attempts+=1
 			break
 		except:
+			data.board=emptyBoard
 			attempts+=1
 	print(attempts)
+	compileTreeSprites(display,data)
 	populateMines(display,data)
 
 #creates load bar without use of redraw all so that it can occur within a loop

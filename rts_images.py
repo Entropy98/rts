@@ -301,6 +301,26 @@ class WoodWallIcon(pygame.sprite.Sprite):
 		self.rect.x=x
 		self.rect.y=y
 
+class MarineIcon(pygame.sprite.Sprite):
+	@efficiencyCheck
+	def __init__(self,x,y,width,height):
+		pygame.sprite.Sprite.__init__(self)
+		self.image=pygame.image.load(os.path.join('rts_marine_icon.png'))
+		self.image=pygame.transform.scale(self.image,(width,height))
+		self.rect=self.image.get_rect()
+		self.rect.x=x
+		self.rect.y=y
+
+class BarracksIcon(pygame.sprite.Sprite):
+	@efficiencyCheck
+	def __init__(self,x,y,width,height):
+		pygame.sprite.Sprite.__init__(self)
+		self.image=pygame.image.load(os.path.join('rts_barracks_icon.png'))
+		self.image=pygame.transform.scale(self.image,(width,height))
+		self.rect=self.image.get_rect()
+		self.rect.x=x
+		self.rect.y=y
+
 class QueueIcon1(pygame.sprite.Sprite):
 	@efficiencyCheck
 	def __init__(self,x,y,width,height):
@@ -350,14 +370,41 @@ class MenuBackButton(pygame.sprite.Sprite):
 		self.rect=self.image.get_rect()
 		self.rect.x=x
 		self.rect.y=y
+
+class InstructionImage(pygame.sprite.Sprite):
+	@efficiencyCheck
+	def __init__(self,x,y,page):
+		pygame.sprite.Sprite.__init__(self)
+		self.image=pygame.image.load(os.path.join('rts_instruction_1.png'))
+		self.image=pygame.transform.scale(self.image,(500,500))
+		self.rect=self.image.get_rect()
+		self.page=1
+		self.rect.x=x
+		self.rect.y=y
+
+	def changePage(self,page):
+		if(page==1):
+			self.image=pygame.image.load(os.path.join('rts_instruction_1.png'))
+			self.image=pygame.transform.scale(self.image,(500,500))
+			self.page=1
+		elif(page==2):
+			self.image=pygame.image.load(os.path.join('rts_instruction_2.png'))
+			self.image=pygame.transform.scale(self.image,(500,500))
+			self.page=2
+		elif(page==3):
+			self.image=pygame.image.load(os.path.join('rts_instruction_3.png'))
+			self.image=pygame.transform.scale(self.image,(500,500))
+			self.page=3
+		elif(page==4):
+			self.image=pygame.image.load(os.path.join('rts_instruction_4.png'))
+			self.image=pygame.transform.scale(self.image,(500,500))
+			self.page=4
+
 		
 class SpriteSheet(object):
 	@efficiencyCheck
 	def __init__(self,filename):
-		try:
-			self.sheet=pygame.image.load(os.path.join(filename)).convert()
-		except:
-			print('Unable to load spritesheet: ',filename)
+		self.sheet=pygame.image.load(os.path.join(filename)).convert()
 
 	@efficiencyCheck
 	def image_at(self,rect,colorkey=None):

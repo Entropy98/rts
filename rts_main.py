@@ -21,24 +21,6 @@ import time
 from queue import Queue
 
 @efficiencyCheck
-def initStartMenu(data):
-	data.startMenu=True
-	data.startMenuState='Start'
-	data.startMenuSelect=None
-	data.usernameInput=''
-	data.singlePlayerTextBoxSelect=None
-	data.playButtonHover=False
-	data.playButtonPressed=False
-	data.multiplayerButtonHover=None
-	data.multiplayerTextBoxSelect=None
-	data.IPInput=''
-	data.multiplayerButtonsPressed=None
-	data.invalidIP=False
-	data.backButton=pygame.sprite.GroupSingle()
-	data.backButton.add(rts_images.MenuBackButton(30,30))
-	data.backButtonHover=False
-
-@efficiencyCheck
 def initMultiplayer(data):
 	data.clientele = dict()
 	data.otherUsers=dict()
@@ -85,7 +67,7 @@ def init(data):
 	data.mousePos=(0,0)
 	data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
 	data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
-	data.numOfForests=15
+	data.numOfForests=10
 	data.forestSize=100
 	data.numOfMines=10
 	data.trees=pygame.sprite.Group()
@@ -188,9 +170,16 @@ def mouseDown(event,data):
 
 			else:
 				rts_menus.menuButtonsPressed(event.pos,data)
+		else:
+			rts_helpers.endButtonPressed(data,event.pos)
 	else:
 		if(data.startMenuState=='Start'):
 			data.startMenuState=rts_startmenu.startMenuButtonPressed(data,event.pos)
+		elif(data.startMenuState=='Instructions'):
+			if(data.backButton.sprite.rect.collidepoint(event.pos)):
+				data.startMenuState='Start'
+				data.backButtonHover=False
+			rts_startmenu.instructionPageFlip(data,event.pos)
 		elif(data.startMenuState=='Singleplayer'):
 			data.singlePlayerTextBoxSelect=rts_startmenu.singlePlayerTextBoxSelect(data,event.pos)
 			if(len(data.usernameInput)>0):
@@ -324,6 +313,8 @@ def keyDown(event,data):
 			data.localPlayer.createMilitia(data,x,y,x,y)
 		elif(event.unicode=='`'):
 			rts_helpers.printEfficiencyResults(data)
+		elif(event.unicode=='w'):
+			data.localPlayer.winCondition='win'
 	else:
 		if(data.startMenuState=='Singleplayer' or data.startMenuState=='Multiplayer'):
 			if(event.key==9):
@@ -358,6 +349,7 @@ def timerFired(display,data):
 		rts_helpers.collectEnergy(data)
 		rts_helpers.setPowerCap(data)
 		rts_helpers.setSupplyCap(data)
+		rts_helpers.calcSupply(data)
 		data.localPlayer.units.update(data)
 		for ID in data.otherUsers:
 			player=data.otherUsers[ID]
@@ -463,7 +455,7 @@ def run(width=300, height=300,serverMsg=None,server=None):
 	data.fps=30 #frames per second
 	data.fpsClock=pygame.time.Clock()
 	data.functions=dict()
-	initStartMenu(data)
+	rts_helpers.initStartMenu(data)
 
 	# initialize module and display
 	pygame.init()

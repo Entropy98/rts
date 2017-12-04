@@ -16,6 +16,19 @@ def drawMenu(display,data):
 		pygame.draw.rect(display,(153,230,255),(data.width/2-100,data.height*.43,200,40),3)
 		multiplayerLabel=data.menuFont.render('Multiplayer',1,(153,230,255))
 		display.blit(multiplayerLabel,(data.width/2-60,data.height*.43))
+		if(data.startMenuSelect==3):
+			pygame.draw.rect(display,(76,76,76),(data.width/2-100,data.height*.51,200,40))	
+		pygame.draw.rect(display,(153,230,255),(data.width/2-100,data.height*.51,200,40),3)
+		instructionsLabel=data.menuFont.render('Instructions',1,(153,230,255))
+		display.blit(instructionsLabel,(data.width/2-60,data.height*.51))
+
+	elif(data.startMenuState=='Instructions'):
+		if(data.backButtonHover):
+			pygame.draw.rect(display,(76,76,76),(30,30,35,35))
+		data.backButton.draw(display)
+		nameLabel=data.titleFont.render('Instructions',1,(153,230,255))
+		data.instructions.draw(display)
+		data.instructionScollers.draw(display)
 
 	elif(data.startMenuState=='Singleplayer'):
 		if(data.backButtonHover):
@@ -126,7 +139,10 @@ def drawMenu(display,data):
 	elif(data.startMenuState=='syncMap'):
 		nameLabel=data.titleFont.render('Waiting For Host...',1,(153,230,255))
 
-	display.blit(nameLabel,(data.width/2-100,data.height*.15))
+	if(data.startMenuState!='Instructions'):
+		display.blit(nameLabel,(data.width/2-100,data.height*.15))
+	else:
+		display.blit(nameLabel,(data.width/2-100,data.height*.1))
 
 def startMenuButtonHover(data,pos):
 	if(pos[0]>data.width/2-100 and pos[0]<data.width/2+100):
@@ -135,6 +151,9 @@ def startMenuButtonHover(data,pos):
 	if(pos[0]>data.width/2-100 and pos[0]<data.width/2+100):
 		if(pos[1]>data.height*.43 and pos[1]<data.height*.43+40):
 			return 2
+	if(pos[0]>data.width/2-100 and pos[0]<data.width/2+100):
+		if(pos[1]>data.height*.5 and pos[1]<data.height*.5+40):
+			return 3
 
 def startMenuButtonPressed(data,pos):
 	if(pos[0]>data.width/2-100 and pos[0]<data.width/2+100):
@@ -145,6 +164,9 @@ def startMenuButtonPressed(data,pos):
 		if(pos[1]>data.height*.43 and pos[1]<data.height*.43+40):
 			data.startMenuSelect=None
 			return 'Multiplayer'
+	if(pos[0]>data.width/2-100 and pos[0]<data.width/2+100):
+		if(pos[1]>data.height*.5 and pos[1]<data.height*.5+40):
+			return 'Instructions'
 	return data.startMenuState
 
 def singlePlayerTextBoxSelect(data,pos):
@@ -201,3 +223,25 @@ def lobbyTeamButtonsPressed(data,pos):
 		elif(pos[1]>data.height*.49 and pos[1]<data.height*.49+40):
 			return 'blue'
 	return data.localPlayer.team
+
+def instructionPageFlip(data,pos):
+	instructions=data.instructions.sprite
+	if(pos[1]>data.height*.9 and pos[1]<data.height*.9+35):
+		if(pos[0]>20 and pos[0]<55):
+			if(instructions.page==1):
+				instructions.changePage(4)
+			elif(instructions.page==2):
+				instructions.changePage(1)
+			elif(instructions.page==3):
+				instructions.changePage(2)
+			elif(instructions.page==4):
+				instructions.changePage(3)
+		elif(pos[0]>data.width-55 and pos[0]<data.width-20):
+			if(instructions.page==1):
+				instructions.changePage(2)
+			elif(instructions.page==2):
+				instructions.changePage(3)
+			elif(instructions.page==3):
+				instructions.changePage(4)
+			elif(instructions.page==4):
+				instructions.changePage(1)

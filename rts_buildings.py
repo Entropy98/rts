@@ -227,7 +227,8 @@ class Barracks(Building):
 	def __init__(self,data,x,y,team):
 		Building.__init__(self,x,y,team)
 
-		self.image=pygame.Surface([100,50])
+		self.image=pygame.image.load(os.path.join('rts_barracks_frame.png'))
+		self.image=pygame.transform.scale(self.image,[150,113])
 		self.rect=self.image.get_rect()
 		self.xTileOffset=-.8
 		self.yTileOffset=-.8
@@ -236,7 +237,7 @@ class Barracks(Building):
 		self.name='BarracksX'
 		self.prereqs=['Farm']
 
-		self.rally_pointX=self.rect.center[0]
+		self.rally_pointX=self.rect.center[0]+100
 		self.rally_pointY=self.rect.center[1]+100
 
 		self.createStartTime=0
@@ -255,6 +256,7 @@ class Barracks(Building):
 		[False,False,False,False,False],
 		[False,True,True,True,False],
 		[False,True,True,True,False],
+		[False,True,True,True,False],
 		[False,False,False,False,False]
 		]
 
@@ -267,17 +269,14 @@ class Barracks(Building):
 			self.buildComplete=True
 			self.name='Barracks'
 			if(self.team=='yellow'):
-				self.image=pygame.Surface([100,50])
-				self.image.fill((255,255,0))
+				self.image=pygame.image.load(os.path.join('rts_barracks_yellow.png'))
 			elif(self.team=='blue'):
-				self.image=pygame.Surface([100,50])
-				self.image.fill((0,0,255))
+				self.image=pygame.image.load(os.path.join('rts_barracks_blue.png'))
 			elif(self.team=='red'):
-				self.image=pygame.Surface([100,50])
-				self.image.fill((255,0,0))
+				self.image=pygame.image.load(os.path.join('rts_barracks_red.png'))
 			elif(self.team=='green'):
-				self.image=pygame.Surface([100,50])
-				self.image.fill((0,255,0))
+				self.image=pygame.image.load(os.path.join('rts_barracks_green.png'))
+			self.image=pygame.transform.scale(self.image,[150,113])
 			user.inConstruction.remove(self)
 			user.buildings.add(self)
 
@@ -287,17 +286,18 @@ class Barracks(Building):
 			self.createStartTime=time.time()
 		self.createTimeLeft=time.time()-self.createStartTime
 		if(rts_units.Militia.getBuildTime()-self.createTimeLeft<=0):
-			costs=rts_units.Militia.getBuildCost()
-			woodCost=costs['wood']
-			metalCost=costs['metals']
-			energyCost=costs['energy']
-			if(data.localPlayer.metals>=metalCost and data.localPlayer.wood>=woodCost and data.localPlayer.energy>=energyCost):
-				data.localPlayer.createMilitia(data,self.rect.center[0],self.rect.center[1]+self.rect.height//2,self.rally_pointX,self.rally_pointY)
-				self.buildQueue.pop(0)
-				self.createStartTime=0
-				data.localPlayer.metals-=metalCost
-				data.localPlayer.wood-=woodCost
-				data.localPlayer.energy-=energyCost
+			if(data.localPlayer.supply<data.localPlayer.supplyCap):
+				costs=rts_units.Militia.getBuildCost()
+				woodCost=costs['wood']
+				metalCost=costs['metals']
+				energyCost=costs['energy']
+				if(data.localPlayer.metals>=metalCost and data.localPlayer.wood>=woodCost and data.localPlayer.energy>=energyCost):
+					data.localPlayer.createMilitia(data,self.rect.center[0]+self.rect.width//4,self.rect.center[1]+self.rect.height//2,self.rally_pointX,self.rally_pointY)
+					self.buildQueue.pop(0)
+					self.createStartTime=0
+					data.localPlayer.metals-=metalCost
+					data.localPlayer.wood-=woodCost
+					data.localPlayer.energy-=energyCost
 
 class WoodWall(Building):
 	@efficiencyCheck

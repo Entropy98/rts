@@ -6,6 +6,7 @@ import pygame,sys
 from pygame.locals import *
 import os
 import time
+import socket
 from rts_dev_debug import efficiencyCheck
 
 #helper function of print2DList, borrowed from 15-112 class notes
@@ -235,7 +236,7 @@ def updateMenuIcons(data):
         mb6Image=pygame.image.load(os.path.join('rts_escape_icon.png'))
         data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
     elif(data.localPlayer.menuState=='Drone_b2'):
-        mB1Image=pygame.image.load(os.path.join('rts_queue_icon1.png'))
+        mB1Image=pygame.image.load(os.path.join('rts_build_barracks_icon.png'))
         data.menuButton1.image=pygame.transform.scale(mB1Image,(45,45))
         mB2Image=pygame.image.load(os.path.join('rts_build_wood_wall_icon.png'))
         data.menuButton2.image=pygame.transform.scale(mB2Image,(45,45))
@@ -249,7 +250,7 @@ def updateMenuIcons(data):
         mb6Image=pygame.image.load(os.path.join('rts_destroy_icon.png'))
         data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
     elif(data.localPlayer.menuState=='Barracks'):
-        mb1Image=pygame.image.load(os.path.join('rts_queue_icon1.png'))
+        mb1Image=pygame.image.load(os.path.join('rts_build_marine_icon.png'))
         data.menuButton1.image=pygame.transform.scale(mb1Image,(45,45))
         mb4Image=pygame.image.load(os.path.join('rts_rally_point_icon.png'))
         data.menuButton4.image=pygame.transform.scale(mb4Image,(45,45))
@@ -301,7 +302,7 @@ def placeBuilding(data,building):
             if(layout[y][x]):
                 newX=centerRhobusCoord[0]-(buildingCenterX-x)
                 newY=centerRhobusCoord[1]-(buildingCenterY-y)
-                data.board[newX][newY]=data.localPlayer.team
+                data.board[newX][newY]=building.team
                 building.tiles.append((newX,newY))
     return centerRhobusCoord
 
@@ -317,7 +318,7 @@ def placeBuildingAtCoord(data,building,xCoord,yCoord):
             if(layout[y][x]):
                 newX=centerRhobusCoord[0]-(buildingCenterX-x)
                 newY=centerRhobusCoord[1]-(buildingCenterY-y)
-                data.board[newX][newY]=data.localPlayer.team
+                data.board[newX][newY]=building.team
                 building.tiles.append((newX,newY))
 
 #draws stencil for building around cursor position
@@ -412,6 +413,14 @@ def setSupplyCap(data):
         if(building.name=='Farm'):
             supply+=building.supply
     data.localPlayer.supplyCap=supply
+
+@efficiencyCheck
+def calcSupply(data):
+    supply=0
+    for unit in data.localPlayer.units:
+        if(unit.name=='Militia'):
+            supply+=1
+    data.localPlayer.supply=supply
 
 #determines if units are to be selected
 @efficiencyCheck
@@ -582,6 +591,12 @@ def drawEndScreen(display,data):
     display.blit(homeButtonLabel,(data.width*.42,data.height*.6))
 
 @efficiencyCheck
+def endButtonPressed(data,pos):
+    if(pos[0]>data.width*.4 and pos[0]<data.width*.6):
+        if(pos[1]>data.height*.6 and pos[1]<data.height*.6+40):
+            initStartMenu(data)
+
+@efficiencyCheck
 def printEfficiencyResults(data):
     runTime=time.time()-data.runStartTime
     print('--------------Efficiency Check Results--------------')
@@ -598,3 +613,28 @@ def printEfficiencyResults(data):
         avgTime=data.functions[function]['avgTime']
         occur=data.functions[function]['occur']
         print(str(function).split()[1]+' occured '+str(occur)+' times and averaged '+str(avgTime)+'s')
+
+@efficiencyCheck
+def initStartMenu(data):
+    data.startMenu=True
+    data.startMenuState='Start'
+    data.startMenuSelect=None
+    data.usernameInput=''
+    data.singlePlayerTextBoxSelect=None
+    data.playButtonHover=False
+    data.playButtonPressed=False
+    data.multiplayerButtonHover=None
+    data.multiplayerTextBoxSelect=None
+    data.IPInput=''
+    data.multiplayerButtonsPressed=None
+    data.invalidIP=False
+    data.backButton=pygame.sprite.GroupSingle()
+    data.backButton.add(rts_images.MenuBackButton(30,30))
+    data.backButtonHover=False
+    data.instructions=pygame.sprite.GroupSingle()
+    data.instructions.add(rts_images.InstructionImage(50,100,1))
+    data.instructionScollers=pygame.sprite.Group()
+    data.instructionScollers.add(rts_images.MenuBackButton(20,data.height*.9))
+    rightButton=rts_images.MenuBackButton(data.width-55,data.height*.9)
+    rightButton.image=pygame.transform.flip(rightButton.image,True,False)
+    data.instructionScollers.add(rightButton)

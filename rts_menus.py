@@ -102,6 +102,10 @@ def drawUnitBox(display,data):
 					data.unitIcons.add(rts_images.FarmIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 				elif(unit.name=='WoodWall' or unit.name=='WoodWallX'):
 					data.unitIcons.add(rts_images.WoodWallIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
+				elif(unit.name=='Militia'):
+					data.unitIcons.add(rts_images.MarineIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
+				elif(unit.name=='Barracks' or unit.name=='BarracksX'):
+					data.unitIcons.add(rts_images.BarracksIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 				else:
 					pygame.draw.rect(display,(0,0,0),(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 				x+=1
@@ -175,19 +179,19 @@ def drawUnitBox(display,data):
 					queueIconWidth=50
 					queueIconHeight=50
 					if(len(unit.buildQueue)>0 and unit.buildQueue[0]=='Militia'):
-						data.unitIcons.add(rts_images.DroneIcon(boxX+queueIconBuffer,boxY+queueIconBuffer+(queueIconHeight+queueIconBuffer),queueIconWidth,queueIconHeight))
+						data.unitIcons.add(rts_images.MarineIcon(boxX+queueIconBuffer,boxY+queueIconBuffer+(queueIconHeight+queueIconBuffer),queueIconWidth,queueIconHeight))
 					else:
 						data.unitIcons.add(rts_images.QueueIcon1(boxX+queueIconBuffer,boxY+queueIconBuffer+(queueIconHeight+queueIconBuffer),queueIconWidth,queueIconHeight))
 					if(len(unit.buildQueue)>1 and unit.buildQueue[1]=='Militia'):
-						data.unitIcons.add(rts_images.DroneIcon(boxX+queueIconBuffer+(queueIconWidth+queueIconBuffer),boxY+queueIconBuffer+(queueIconHeight+queueIconBuffer),queueIconWidth,queueIconHeight))
+						data.unitIcons.add(rts_images.MarineIcon(boxX+queueIconBuffer+(queueIconWidth+queueIconBuffer),boxY+queueIconBuffer+(queueIconHeight+queueIconBuffer),queueIconWidth,queueIconHeight))
 					else:
 						data.unitIcons.add(rts_images.QueueIcon2(boxX+queueIconBuffer+(queueIconWidth+queueIconBuffer),boxY+queueIconBuffer+(queueIconHeight+queueIconBuffer),queueIconWidth,queueIconHeight))
 					if(len(unit.buildQueue)>2 and unit.buildQueue[2]=='Militia'):
-						data.unitIcons.add(rts_images.DroneIcon(boxX+queueIconBuffer+(queueIconWidth+queueIconBuffer)*2,boxY+queueIconBuffer+(queueIconHeight+queueIconBuffer),queueIconWidth,queueIconHeight))
+						data.unitIcons.add(rts_images.MarineIcon(boxX+queueIconBuffer+(queueIconWidth+queueIconBuffer)*2,boxY+queueIconBuffer+(queueIconHeight+queueIconBuffer),queueIconWidth,queueIconHeight))
 					else:
 						data.unitIcons.add(rts_images.QueueIcon3(boxX+queueIconBuffer+(queueIconWidth+queueIconBuffer)*2,boxY+queueIconBuffer+(queueIconHeight+queueIconBuffer),queueIconWidth,queueIconHeight))
 					if(len(unit.buildQueue)>3 and unit.buildQueue[3]=='Militia'):
-						data.unitIcons.add(rts_images.DroneIcon(boxX+queueIconBuffer+(queueIconWidth+queueIconBuffer)*3,boxY+queueIconBuffer+(queueIconHeight+queueIconBuffer),queueIconWidth,queueIconHeight))
+						data.unitIcons.add(rts_images.MarineIcon(boxX+queueIconBuffer+(queueIconWidth+queueIconBuffer)*3,boxY+queueIconBuffer+(queueIconHeight+queueIconBuffer),queueIconWidth,queueIconHeight))
 					else:
 						data.unitIcons.add(rts_images.QueueIcon4(boxX+queueIconBuffer+(queueIconWidth+queueIconBuffer)*3,boxY+queueIconBuffer+(queueIconHeight+queueIconBuffer),queueIconWidth,queueIconHeight))
 					if(unit.createStartTime!=0):
