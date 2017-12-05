@@ -27,6 +27,7 @@ class Player(object):
 		self.IDs=set()
 		self.winCondition='play'
 		self.role=None
+		self.multiplayerReady=False
 
 	@efficiencyCheck
 	def select(self,data,item):

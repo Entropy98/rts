@@ -144,13 +144,13 @@ def drawLoadBar(display,data,msg,progress):
 	elif(data.loadingScreenTip=='Marine'):
 		tip='Militia, while strong in numbers, become disjointed when conjested. Place your army carefully!'
 	elif(data.loadingScreenTip=='Drone'):
-		tip='Fun Fact: The developer spent way too much time on this sprite that you can barely see!'
+		tip='Fun Fact: The developer spent way too much time on this sprite that you can barely see in-game!'
 	elif(data.loadingScreenTip=='Farm'):
 		tip="Farms greatly increase your army size but at a hefty wood cost. Don't build more than you need!"
 	elif(data.loadingScreenTip=='Generator'):
 		tip='Generators have a great energy yield but a small battery. Build too many and their yield will become saturated'
 	elif(data.loadingScreenTip=='Wall'):
-		tip='Walls are cheap and sturdy. Build them to keep your enemy at bay'
+		tip='Walls are cheap and sturdy. Taking the time to build them is worth keeping your enemy at bay'
 	elif(data.loadingScreenTip=='Barracks'):
 		tip='Barracks are costly and the only way to build an army. Focus these in your opponents bases'
 	tipLabel=data.font.render(tip,1,(153,230,255))

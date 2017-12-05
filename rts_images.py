@@ -8,12 +8,35 @@ from rts_dev_debug import efficiencyCheck
 		
 @efficiencyCheck
 def loadImages(data):
-	data.map=pygame.image.load(os.path.join('rts_map.png'))
+	data.map=pygame.sprite.GroupSingle()
+	data.map.add(Map(0,0))
+	data.backdrop=pygame.sprite.GroupSingle()
+	data.backdrop.add(Backdrop())
 
 @efficiencyCheck
 def displayMap(display,data,x,y):
-	pic=pygame.transform.scale(data.map,(5000,2500))
-	display.blit(pic,(x,y))
+	data.map.sprite.rect.x=x
+	data.map.sprite.rect.y=y
+	data.backdrop.draw(display)
+	data.map.draw(display)
+
+class Map(pygame.sprite.Sprite):
+	def __init__(self,x,y):
+		pygame.sprite.Sprite.__init__(self)
+		self.image=pygame.image.load(os.path.join('rts_map.png'))
+		self.image=pygame.transform.scale(self.image,(5000,2500))
+		self.rect=self.image.get_rect()
+		self.rect.x=x
+		self.rect.y=y
+
+class Backdrop(pygame.sprite.Sprite):
+	def __init__(self):
+		pygame.sprite.Sprite.__init__(self)
+		self.image=pygame.image.load(os.path.join('rts_backdrop.png'))
+		self.image=pygame.transform.scale(self.image,(600,600))
+		self.rect=self.image.get_rect()
+		self.rect.x=0
+		self.rect.y=0
 
 class Tree(pygame.sprite.Sprite):
 	"""docstring for Tree"""
@@ -387,7 +410,7 @@ class HostIcon(pygame.sprite.Sprite):
 	def __init__(self,x,y):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_host_icon.png'))
-		self.image=pygame.transform.scale(self.image,(48,40))
+		self.image=pygame.transform.scale(self.image,(45,37))
 		self.rect=self.image.get_rect()
 		self.rect.x=x
 		self.rect.y=y

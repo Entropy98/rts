@@ -77,16 +77,11 @@ def drawMenu(display,data):
 			errorLabel=data.menuFont.render('Invalid IP',1,(255,0,0))
 			display.blit(errorLabel,(data.width*.4,data.height*.6))
 
-		hostLabel=data.menuFont.render('Host',1,(153,230,255))
-		if(data.multiplayerButtonHover==1):
-			pygame.draw.rect(display,(76,76,76),(data.width*.28,data.height*.8,100,40))
-		pygame.draw.rect(display,(153,230,255),(data.width*.28,data.height*.8,100,40),3)
-		display.blit(hostLabel,(data.width*.32,data.height*.8))
 		joinLabel=data.menuFont.render('Join',1,(153,230,255))
-		if(data.multiplayerButtonHover==2):
-			pygame.draw.rect(display,(76,76,76),(data.width*.58,data.height*.8,100,40))
-		pygame.draw.rect(display,(153,230,255),(data.width*.58,data.height*.8,100,40),3)
-		display.blit(joinLabel,(data.width*.62,data.height*.8))
+		if(data.multiplayerButtonHover==1):
+			pygame.draw.rect(display,(76,76,76),(data.width*.42,data.height*.8,100,40))
+		pygame.draw.rect(display,(153,230,255),(data.width*.42,data.height*.8,100,40),3)
+		display.blit(joinLabel,(data.width*.46,data.height*.8))
 
 	elif(data.startMenuState=='Lobby'):
 		data.hostIcon.empty()
@@ -102,7 +97,7 @@ def drawMenu(display,data):
 			pygame.draw.rect(display,(0,145,0),(data.width*.2,data.height*.35,data.width*.08,40))
 		pygame.draw.rect(display,(39,117,135),(data.width*.2,data.height*.35,data.width*.08,40),3)
 		if(data.localPlayer.role=='Host'):
-			data.hostIcon.add(rts_images.HostIcon(data.width*.2,data.height*.35))
+			data.hostIcon.add(rts_images.HostIcon(data.width*.2+1.5,data.height*.35+1.5))
 		display.blit(usernameLabel,(data.width*.3,data.height*.35))
 
 		i=0
@@ -147,7 +142,12 @@ def drawMenu(display,data):
 	elif(data.startMenuState=='syncMap'):
 		nameLabel=data.titleFont.render('Waiting For Host...',1,(153,230,255))
 
-	if(data.startMenuState!='Instructions'):
+	elif(data.startMenuState=='syncTime'):
+		nameLabel=data.titleFont.render('Waiting For Other Players...',1,(153,230,255))
+
+	if(data.startMenuState=='syncTime'):
+		display.blit(nameLabel,(data.width*.2,data.height*.1))
+	elif(data.startMenuState!='Instructions'):
 		display.blit(nameLabel,(data.width/2-100,data.height*.15))
 	else:
 		display.blit(nameLabel,(data.width/2-100,data.height*.1))
@@ -202,22 +202,15 @@ def playButtonPressed(data,pos):
 	return False
 
 def multiplayerButtonsHover(data,pos):
-	if(pos[0]>data.width*.28 and pos[0]<data.width*.28+100):
+	if(pos[0]>data.width*.42 and pos[0]<data.width*.42+100):
 		if(pos[1]>data.height*.8 and pos[1]<data.height*.8+40):
 			return 1
-	if(pos[0]>data.width*.58 and pos[0]<data.width*.58+100):
-		if(pos[1]>data.height*.8 and pos[1]<data.height*.8+40):
-			return 2
 
 def multiplayerButtonsPressed(data,pos):
-	if(pos[0]>data.width*.28 and pos[0]<data.width*.28+100):
+	if(pos[0]>data.width*.42 and pos[0]<data.width*.42+100):
 		if(pos[1]>data.height*.8 and pos[1]<data.height*.8+40):
 			data.startMenuState='Lobby'
 			return 1
-	if(pos[0]>data.width*.58 and pos[0]<data.width*.58+100):
-		if(pos[1]>data.height*.8 and pos[1]<data.height*.8+40):
-			data.startMenuState='Lobby'
-			return 2
 
 def lobbyTeamButtonsPressed(data,pos):
 	if(pos[0]>data.width*.6 and pos[0]<data.width*.6+40):

@@ -38,8 +38,11 @@ def drawObjectiveMenu(display,data):
 	pygame.draw.line(display,(255,255,255),(data.width*.8,data.height*.09),(data.width*.99,data.height*.09),2)
 	menuTitle=data.font.render('Objectives:',1,(255,255,255))
 	display.blit(menuTitle,(data.width*.85,data.height*.055))
-	objectiveLine1=data.font.render('Destroy %d enemy ',1,(255,255,255))
-	objectiveLine2=data.font.render('Command Centers ',1,(255,255,255))
+	objectiveLine1=data.font.render('Destroy %d enemy '%len(data.otherUsers['AI'].buildings),1,(255,255,255))
+	cmdCenterStr='Command Center'
+	if(len(data.otherUsers['AI'].buildings)==1):
+		cmdCenterStr+='s'
+	objectiveLine2=data.font.render(cmdCenterStr,1,(255,255,255))
 	objectiveLine3=data.font.render('before they claim ',1,(255,255,255))
 	timeRemaining=int(data.failTime-(time.time()-data.failStartTime))
 	seconds=(timeRemaining)%60

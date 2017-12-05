@@ -49,11 +49,17 @@ def interpServerCommands(data):
 			if (command == "myIDis"):
 				ID = msg[1]
 				data.localPlayer.ID=ID
+				if(ID=='alpha'):
+					data.localPlayer.role='Host'
+				else:
+					data.localPlayer.role='Client'
 
 			#command given when another player enters server
 			elif(command=='newPlayer'):
 				ID=msg[1]
 				data.otherUsers[ID]=rts_classes.Player(data.usernameInput)
+				if(ID=='alpha'):
+					data.otherUsers[ID].role='Host'
 				update=''
 				update+='newUsername %s \n'%data.usernameInput
 				update+='newTeam %s \n'%data.localPlayer.team
@@ -186,6 +192,10 @@ def interpServerCommands(data):
 					if(tree.x==x and tree.y==y):
 						tree.kill()
 				data.board[x][y]='field'
+
+			elif(command=='ready'):
+				ID=msg[1]
+				data.otherUsers[ID].multiplayerReady=True
 
 
 			#whenever a unit/building is dealt damage

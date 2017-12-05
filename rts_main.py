@@ -26,7 +26,6 @@ def initMultiplayer(data):
 	data.otherUsers=dict()
 	data.localPlayer=rts_classes.Player(data.usernameInput)
 	if(data.multiplayerButtonsPressed==1):
-		#subprocess.Popen(['cmd','-r',os.path.join('rts_server.py')])
 		try:
 			rts_server_commands.joinServer(data,data.IPInput)
 			data.invalidIP=False
@@ -35,20 +34,6 @@ def initMultiplayer(data):
 			data.multiplayerButtonsPressed=None
 			data.startMenuState='Multiplayer'
 		if(data.invalidIP==False):
-			data.localPlayer.role='Host'
-			threading.Thread(target = rts_server_commands.handleServerMsg, args = (data.server, data.serverMsg)).start()
-			msg='newUsername %s \n'%data.usernameInput
-			data.server.send(msg.encode())
-	elif(data.multiplayerButtonsPressed==2):
-		try:
-			rts_server_commands.joinServer(data,data.IPInput)
-			data.invalidIP=False
-		except:
-			data.invalidIP=True
-			data.multiplayerButtonsPressed=None
-			data.startMenuState='Multiplayer'
-		if(data.invalidIP==False):
-			data.localPlayer.role='Client'
 			threading.Thread(target = rts_server_commands.handleServerMsg, args = (data.server, data.serverMsg)).start()
 			msg='newUsername %s \n'%data.usernameInput
 			data.server.send(msg.encode())
@@ -100,8 +85,9 @@ def init(data):
 		data.loadingScreenImage.add(rts_images.GeothermalGeneratorIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
 	elif(data.loadingScreenTip=='Wall'):
 		data.loadingScreenImage.add(rts_images.WoodWallIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
-	elif(data.loadingScreenTip=='BarracksCenter'):
-		data.loadingScreenImage.add(rts_images.BarracksCenterIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
+	elif(data.loadingScreenTip=='Barracks'):
+		data.loadingScreenImage.add(rts_images.BarracksIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
+	rts_helpers.updateMap(data,data.gameX,data.gameY)
 
 
 @efficiencyCheck
@@ -386,17 +372,17 @@ def timerFired(display,data):
 			if(data.startMenuState=='Singleplayer'):
 				startSingleplayerGame(display,data)
 			else:
-				if(data.localPlayer.role=='Host'):
+				if(data.localPlayer.role=='Host' and data.startMenuState!='syncTime'):
 					init(data)
 					rts_map_builder.buildMap(display,data)
 					boardmsg=str(data.board)
 					boardmsg=boardmsg.replace(' ','')
 					msg='board %s \n'%boardmsg
+					data.localPlayer.multiplayerReady=True
+					msg+='ready buffer \n'
 					data.server.send(msg.encode())
-					data.startMenu=False
-					x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
-					data.localPlayer.createDrone(data,x,y,x,y)
-				else:
+					data.startMenuState='syncTime'
+				elif(data.localPlayer.role=='Client' and data.startMenuState!='syncTime'):
 					if(data.startMenuState=='Lobby'):
 						init(data)
 						data.startMenuState='syncMap'
@@ -410,9 +396,19 @@ def timerFired(display,data):
 						rts_map_builder.drawLoadBar(display,data,'Compiling Tree Sprites...',0)
 						rts_map_builder.compileTreeSprites(display,data)
 						rts_map_builder.compileMineSprites(display,data)
-						data.startMenu=False
-						x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
-						data.localPlayer.createDrone(data,x,y,x,y)
+						data.localPlayer.multiplayerReady=True
+						msg='ready buffer \n'
+						data.server.send(msg.encode())
+						data.startMenuState='syncTime'
+			if(data.startMenuState=='syncTime'):
+				ready=True
+				for ID in data.otherUsers:
+					if(data.otherUsers[ID].multiplayerReady==False):
+						ready=False
+				if(ready):
+					data.startMenu=False
+					x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
+					data.localPlayer.createDrone(data,x,y,x,y)
 
 
 
