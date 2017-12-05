@@ -233,6 +233,8 @@ def updateMenuIcons(data):
         data.menuButton2.image=pygame.transform.scale(mB2Image,(45,45))
         mB3Image=pygame.image.load(os.path.join('rts_build_farm_icon.png'))
         data.menuButton3.image=pygame.transform.scale(mB3Image,(45,45))
+        mB4Image=pygame.image.load(os.path.join('rts_build_beacon_icon.png'))
+        data.menuButton4.image=pygame.transform.scale(mB4Image,(45,45))
         mb6Image=pygame.image.load(os.path.join('rts_escape_icon.png'))
         data.menuButton6.image=pygame.transform.scale(mb6Image,(45,45))
     elif(data.localPlayer.menuState=='Drone_b2'):
@@ -572,6 +574,19 @@ def checkWinConditions(data):
     if('AI' in data.otherUsers):
         if(len(data.otherUsers['AI'].units)==0 and len(data.otherUsers['AI'].buildings)==0 and len(data.otherUsers['AI'].inConstruction)==0):
             data.otherUsers['AI'].winCondition='defeat'
+
+    for building in data.localPlayer.buildings:
+        if(building.name=='Beacon'):
+            if(data.localPlayer.energy<0):
+                msg+='destroyBuilding %d %s \n'%(building.ID,building.tiles)
+                for tile in building.tiles:
+                    data.board[tile[0]][tile[1]]='field'
+                    building.kill()
+            if(time.time()-building.winStartTime>building.winGoal):
+                data.localPlayer.winCondition='win'
+                msg+='winCondition win \n'
+            if(data.startMenuState!='Singleplayer'):
+                data.server.send(msg.encode())
 
     defeatedPlayers=0
     for ID in data.otherUsers:

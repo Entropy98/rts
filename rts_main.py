@@ -319,13 +319,13 @@ def keyDown(event,data):
 
 		###############Dev Commands##################
 
-		if(event.unicode=='p'):
-			x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
-			data.localPlayer.createMilitia(data,x,y,x,y)
-		elif(event.unicode=='`'):
+		# if(event.unicode=='p'):
+		# 	x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
+		# 	data.localPlayer.createMilitia(data,x,y,x,y)
+		if(event.unicode=='`'):
 			rts_helpers.printEfficiencyResults(data)
-		elif(event.unicode=='w'):
-			data.localPlayer.winCondition='win'
+		# elif(event.unicode=='w'):
+		# 	data.localPlayer.winCondition='win'
 	else:
 		if(data.startMenuState=='Singleplayer' or data.startMenuState=='Multiplayer'):
 			if(event.key==9):

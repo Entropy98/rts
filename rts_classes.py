@@ -9,8 +9,8 @@ import random
 class Player(object):
 	def __init__(self, username):
 		self.username = username
-		self.wood=300
-		self.metals=200
+		self.wood=3000
+		self.metals=2000
 		self.energy=0
 		self.powerCap=0
 		self.supplyCap=0

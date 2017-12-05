@@ -37,7 +37,7 @@ def populateForests(display,data,startTime,forestNum=0,board=None,pos=None,treeC
 		#shuffle moves so that the board does not create a straight line if possible
 		random.shuffle(moves)
 		if(time.time()-startTime>timeout):
-			print('timeout')
+			#print('timeout')
 			1/0
 		for move in moves:
 			#is legal
@@ -126,7 +126,7 @@ def buildMap(display,data):
 		except:
 			data.board=emptyBoard
 			attempts+=1
-	print(attempts)
+	#print(attempts)
 	compileTreeSprites(display,data)
 	populateMines(display,data)
 

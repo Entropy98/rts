@@ -133,6 +133,8 @@ def drawUnitBox(display,data):
 					data.unitIcons.add(rts_images.MarineIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 				elif(unit.name=='Barracks' or unit.name=='BarracksX'):
 					data.unitIcons.add(rts_images.BarracksIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
+				elif(unit.name=='Beacon' or unit.name=='BeaconX'):
+					data.unitIcons.add(rts_images.BeaconIcon(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 				else:
 					pygame.draw.rect(display,(0,0,0),(boxX+iconBuffer+(iconWidth+iconBuffer)*x,boxY+iconBuffer+(iconHeight+iconBuffer)*y,iconWidth,iconHeight))
 				x+=1
@@ -249,6 +251,19 @@ def drawUnitBox(display,data):
 					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
 					healthLabel=data.font.render(str(unit.health)+' / '+str(unit.maxHealth),1,(153,230,255))
 					display.blit(healthLabel,(data.width*.36,data.height*.79))
+				elif(unit.name=='BeaconX'):
+					nameLabel=data.font.render('Warp Beacon',1,(153,230,255))
+					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
+					constructionLabel=data.font.render('Build Progress: '+str(int(unit.buildTimeLeft))+'/'+str(unit.buildTime),1,(153,230,255))
+					display.blit(constructionLabel,(boxX+iconBuffer,data.height*.8))
+				elif(unit.name=='Beacon'):
+					nameLabel=data.font.render('Warp Beacon',1,(153,230,255))
+					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
+					healthLabel=data.font.render(str(unit.health)+' / '+str(unit.maxHealth),1,(153,230,255))
+					display.blit(healthLabel,(data.width*.36,data.height*.79))
+					timeRemaining=int(unit.winGoal-(time.time()-unit.winStartTime))
+					winLabel=data.font.render('Time Until Warp: '+str(timeRemaining//60)+' : '+str(timeRemaining%60),1,(153,230,255))
+					display.blit(winLabel,(boxX+iconBuffer,data.height*.81))
 				elif(unit.name=='WoodWallX'):
 					nameLabel=data.font.render('Wood Wall',1,(153,230,255))
 					display.blit(nameLabel,(data.width//2-data.width*.15,data.height*.77))
@@ -321,12 +336,23 @@ def drawUnitBox(display,data):
 		display.blit(descLabel2,(boxX+iconBuffer,data.height*.84))
 		descLabel3=data.font.render('[Requires Farm]',1,(153,230,255))
 		display.blit(descLabel3,(boxX+iconBuffer,data.height*.88))
+	elif(data.localPlayer.menuHover=='Beacon'):
+		nameLabel=data.font.render('Build Warp Beacon',1,(153,230,255))
+		display.blit(nameLabel,(data.width//2-data.width*.2,data.height*.77))
+		descLabel1=data.font.render('Complete for Science Victory',1,(153,230,255))
+		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
+		descLabel2=data.font.render('Wood Cost: 300  Metals Cost: 500',1,(153,230,255))
+		display.blit(descLabel2,(boxX+iconBuffer,data.height*.84))
+		descLabel3=data.font.render('Energy Cost: 5J per Tick',1,(153,230,255))
+		display.blit(descLabel3,(boxX+iconBuffer,data.height*.88))
+		descLabel4=data.font.render('[Requires Farm and Geothermal Generator]',1,(153,230,255))
+		display.blit(descLabel4,(boxX+iconBuffer,data.height*.92))
 	elif(data.localPlayer.menuHover=='Build_Drone'):
 		nameLabel=data.font.render('Build Drone',1,(153,230,255))
 		display.blit(nameLabel,(data.width//2-data.width*.2,data.height*.77))
 		descLabel1=data.font.render('Worker Unit',1,(153,230,255))
 		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
-		descLabel2=data.font.render('Wood Cost: 0  Metals Cost: 30  Energy Cost: 50',1,(153,230,255))
+		descLabel2=data.font.render('Wood Cost: 0  Metals Cost: 30  Energy Cost: 0',1,(153,230,255))
 		display.blit(descLabel2,(boxX+iconBuffer,data.height*.84))
 	elif(data.localPlayer.menuHover=='Train_Militia'):
 		nameLabel=data.font.render('Train Militia',1,(153,230,255))
@@ -378,6 +404,7 @@ def drawCmdBox(display,data):
 		data.menuButtons.add(data.menuButton1)
 		data.menuButtons.add(data.menuButton2)
 		data.menuButtons.add(data.menuButton3)
+		data.menuButtons.add(data.menuButton4)
 		data.menuButtons.add(data.menuButton6)
 	elif(data.localPlayer.menuState=='Drone_b2'):
 		data.menuButtons.add(data.menuButton1)

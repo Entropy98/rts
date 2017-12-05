@@ -128,7 +128,6 @@ class MenuButton1(pygame.sprite.Sprite):
 					if(len(building.buildQueue)<5):
 						building.buildQueue.append('Militia')
 					break
-		data.localPlayer.menuHover=None
 
 	@efficiencyCheck
 	def hover(self,data):
@@ -218,24 +217,30 @@ class MenuButton4(pygame.sprite.Sprite):
 	def pressed(self,data):
 		for unit in data.localPlayer.selected:
 			if(unit.name=='Drone'):
-				unit.woodGathering=True
-				unit.metalMining=True
-			elif(unit.name=='CommandCenter'):
+				if(data.localPlayer.menuState=='Drone_b1'):
+					building=rts_buildings.Beacon(data,-100,-100,data.localPlayer.team)
+					unit.buildState='Select'
+					unit.building=building
+					break
+				elif(data.localPlayer.menuState=='Drone'):
+					unit.woodGathering=True
+					unit.metalMining=True
+			elif(unit.name=='CommandCenter' and data.localPlayer.menuState=='CommandCenter'):
 				unit.rallyReset=True
 				break
-			elif(unit.name=='Barracks'):
+			elif(unit.name=='Barracks' and data.localPlayer.menuState=='Barracks'):
 				unit.rallyReset=True
 				break
-		data.localPlayer.menuHover=None
 
 	@efficiencyCheck
 	def hover(self,data):
-		for unit in data.localPlayer.selected:
-			if(unit.name=='Drone'):
-				data.localPlayer.menuHover='Drone_Action'
-			elif(unit.name=='CommandCenter'):
+		if(data.localPlayer.menuState=='Drone'):
+			data.localPlayer.menuHover='Drone_Action'
+		elif(data.localPlayer.menuState=='Drone_b1'):
+			data.localPlayer.menuHover='Beacon'
+		elif(data.localPlayer.menuState=='CommandCenter'):
 				data.localPlayer.menuHover='Rally_Point'
-			elif(unit.name=='Barracks'):
+		elif(data.localPlayer.menuState=='Barracks'):
 				data.localPlayer.menuHover='Rally_Point'
 
 class MenuButton6(pygame.sprite.Sprite):
@@ -274,7 +279,6 @@ class MenuButton6(pygame.sprite.Sprite):
 				if(data.startMenuState!='Singleplayer'):
 					data.server.send(msg.encode())
 				unit.kill()
-		data.localPlayer.menuHover=None
 
 	@efficiencyCheck
 	def hover(self,data):
@@ -350,6 +354,16 @@ class BarracksIcon(pygame.sprite.Sprite):
 	def __init__(self,x,y,width,height):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_barracks_icon.png'))
+		self.image=pygame.transform.scale(self.image,(width,height))
+		self.rect=self.image.get_rect()
+		self.rect.x=x
+		self.rect.y=y
+
+class BeaconIcon(pygame.sprite.Sprite):
+	@efficiencyCheck
+	def __init__(self,x,y,width,height):
+		pygame.sprite.Sprite.__init__(self)
+		self.image=pygame.image.load(os.path.join('rts_beacon_icon.png'))
 		self.image=pygame.transform.scale(self.image,(width,height))
 		self.rect=self.image.get_rect()
 		self.rect.x=x
