@@ -21,6 +21,8 @@ class Tree(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 		image=pygame.image.load(os.path.join('rts_tree.png'))
 		image=pygame.transform.scale(image,(50,100))
+		self.x=x
+		self.y=y
 		self.image=image
 		self.rect=self.image.get_rect()
 		self.rect.center=rts_helpers.coord2Pos(data,x,y)
@@ -34,6 +36,10 @@ class Tree(pygame.sprite.Sprite):
 	@efficiencyCheck
 	def updateResources(self,data):
 		if(self.wood<1):
+			msg='cutTree %d %d \n'%(self.x,self.y)
+			data.board[self.x][self.y]='field'
+			if(data.startMenuState!='Singleplayer'):
+				data.server.send(msg.encode())
 			self.kill()
 
 class Mine(pygame.sprite.Sprite):
@@ -42,6 +48,8 @@ class Mine(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 		image=pygame.image.load(os.path.join('rts_mine.png'))
 		image=pygame.transform.scale(image,(50,50))
+		self.x=x
+		self.y=y
 		self.image=image
 		self.rect=self.image.get_rect()
 		self.rect.center=rts_helpers.coord2Pos(data,x,y)
@@ -219,6 +227,7 @@ class MenuButton6(pygame.sprite.Sprite):
 	@efficiencyCheck
 	def pressed(self,data):
 		if(data.localPlayer.menuState=='Drone' or data.localPlayer.menuState=='Militia'):
+			msg=''
 			for unit in data.localPlayer.selected:
 				msg+='destroyUnit %d \n'%unit.ID
 				if(data.startMenuState!='Singleplayer'):
@@ -228,6 +237,8 @@ class MenuButton6(pygame.sprite.Sprite):
 		elif(data.localPlayer.menuState=='Drone_b1' or data.localPlayer.menuState=='Drone_b2'):
 			data.localPlayer.menuState='Drone'
 			rts_helpers.updateMenuIcons(data)
+			for unit in data.localPlayer.units:
+				unit.stencil=None
 		elif(data.localPlayer.menuState=='CommandCenter' or data.localPlayer.menuState=='Barracks' or\
 			data.localPlayer.menuState=='WoodWall' or data.localPlayer.menuState=='Farm' or data.localPlayer.menuState=='GeothermalGenerator'):
 			msg=''
@@ -367,6 +378,16 @@ class MenuBackButton(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 		self.image=pygame.image.load(os.path.join('rts_menu_back_button.png'))
 		self.image=pygame.transform.scale(self.image,(35,35))
+		self.rect=self.image.get_rect()
+		self.rect.x=x
+		self.rect.y=y
+
+class HostIcon(pygame.sprite.Sprite):
+	@efficiencyCheck
+	def __init__(self,x,y):
+		pygame.sprite.Sprite.__init__(self)
+		self.image=pygame.image.load(os.path.join('rts_host_icon.png'))
+		self.image=pygame.transform.scale(self.image,(48,40))
 		self.rect=self.image.get_rect()
 		self.rect.x=x
 		self.rect.y=y

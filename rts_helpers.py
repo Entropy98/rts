@@ -459,10 +459,15 @@ def drawSelectedRing(display,data):
 #draw all units from all players
 @efficiencyCheck
 def drawUnits(display,data):
-    data.localPlayer.units.draw(display)
+    data.visibleUnits.empty()
+    for unit in data.localPlayer.units:
+        if(isVisible(data,unit)):
+            data.visibleUnits.add(unit)
     for ID in data.otherUsers:
         player=data.otherUsers[ID]
-        player.units.draw(display)
+        for unit in player.units:
+            data.visibleUnits.add(unit)
+    data.visibleUnits.draw(display)
 
 #determine if buildings can be built whether it be resources or previously built infrastructure
 @efficiencyCheck
@@ -486,40 +491,44 @@ def drawHealthBars(display,data):
     #draws black line every 15 health
     for unit in data.localPlayer.units:
         if(unit.health<unit.maxHealth):
-            pygame.draw.rect(display,(255,0,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,unit.maxHealth//3,healthBarHeight))
-            pygame.draw.rect(display,(0,255,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,(unit.maxHealth//3)*(unit.health/unit.maxHealth),healthBarHeight))
-            pygame.draw.rect(display,(0,0,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,unit.maxHealth//3,healthBarHeight),1)
-            for i in range(unit.maxHealth//15):
-                pygame.draw.line(display,(0,0,0),(unit.rect.center[0]-unit.maxHealth//6+((unit.maxHealth//3)//(unit.maxHealth//15))*(i+1),unit.rect.y-healthBarHeight),\
-                    (unit.rect.center[0]-unit.maxHealth//6+((unit.maxHealth//3)//(unit.maxHealth//15))*(i+1),unit.rect.y),1)
-    #draws black line every 100 health
-    for building in data.localPlayer.buildings:
-        if(building.health<building.maxHealth):
-            pygame.draw.rect(display,(255,0,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width,healthBarHeight))
-            pygame.draw.rect(display,(0,255,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width*(building.health/building.maxHealth),healthBarHeight))
-            pygame.draw.rect(display,(0,0,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width,healthBarHeight),1)
-            for i in range(building.maxHealth//100):
-                pygame.draw.line(display,(0,0,0),(building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y-healthBarHeight),\
-                    (building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y),1)
-    for ID in data.otherUsers:
-        player=data.otherUsers[ID]
-        for unit in player.units:
-            if(unit.health<unit.maxHealth):
+            if(isVisible(data,unit)):
                 pygame.draw.rect(display,(255,0,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,unit.maxHealth//3,healthBarHeight))
                 pygame.draw.rect(display,(0,255,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,(unit.maxHealth//3)*(unit.health/unit.maxHealth),healthBarHeight))
                 pygame.draw.rect(display,(0,0,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,unit.maxHealth//3,healthBarHeight),1)
                 for i in range(unit.maxHealth//15):
                     pygame.draw.line(display,(0,0,0),(unit.rect.center[0]-unit.maxHealth//6+((unit.maxHealth//3)//(unit.maxHealth//15))*(i+1),unit.rect.y-healthBarHeight),\
                         (unit.rect.center[0]-unit.maxHealth//6+((unit.maxHealth//3)//(unit.maxHealth//15))*(i+1),unit.rect.y),1)
-        #draws black line every 100 health
-        for building in player.buildings:
-            if(building.health<building.maxHealth):
+    #draws black line every 100 health
+    for building in data.localPlayer.buildings:
+        if(building.health<building.maxHealth):
+            if(isVisible(data,building)):
                 pygame.draw.rect(display,(255,0,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width,healthBarHeight))
                 pygame.draw.rect(display,(0,255,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width*(building.health/building.maxHealth),healthBarHeight))
                 pygame.draw.rect(display,(0,0,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width,healthBarHeight),1)
                 for i in range(building.maxHealth//100):
                     pygame.draw.line(display,(0,0,0),(building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y-healthBarHeight),\
                         (building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y),1)
+    for ID in data.otherUsers:
+        player=data.otherUsers[ID]
+        for unit in player.units:
+            if(unit.health<unit.maxHealth):
+                if(isVisible(data,unit)):
+                    pygame.draw.rect(display,(255,0,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,unit.maxHealth//3,healthBarHeight))
+                    pygame.draw.rect(display,(0,255,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,(unit.maxHealth//3)*(unit.health/unit.maxHealth),healthBarHeight))
+                    pygame.draw.rect(display,(0,0,0),(unit.rect.center[0]-unit.maxHealth//6,unit.rect.y-healthBarHeight,unit.maxHealth//3,healthBarHeight),1)
+                    for i in range(unit.maxHealth//15):
+                        pygame.draw.line(display,(0,0,0),(unit.rect.center[0]-unit.maxHealth//6+((unit.maxHealth//3)//(unit.maxHealth//15))*(i+1),unit.rect.y-healthBarHeight),\
+                            (unit.rect.center[0]-unit.maxHealth//6+((unit.maxHealth//3)//(unit.maxHealth//15))*(i+1),unit.rect.y),1)
+        #draws black line every 100 health
+        for building in player.buildings:
+            if(building.health<building.maxHealth):
+                if(isVisible(data,building)):
+                    pygame.draw.rect(display,(255,0,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width,healthBarHeight))
+                    pygame.draw.rect(display,(0,255,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width*(building.health/building.maxHealth),healthBarHeight))
+                    pygame.draw.rect(display,(0,0,0),(building.rect.x,building.rect.y- healthBarHeight,building.rect.width,healthBarHeight),1)
+                    for i in range(building.maxHealth//100):
+                        pygame.draw.line(display,(0,0,0),(building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y-healthBarHeight),\
+                            (building.rect.x+building.rect.width//(building.maxHealth//100)*(i+1),building.rect.y),1)
 
 #special eval used for interpretting 2D list. normal eval works but does not handle string abnormalities like spaces
 @efficiencyCheck
@@ -577,6 +586,9 @@ def checkWinConditions(data):
     if(data.startMenuState!='Singleplayer'):
         if(data.localPlayer.winCondition=='play'):
             data.server.send(msg.encode())
+    else:
+        if(data.failTime-(time.time()-data.failStartTime)<=0):
+            data.localPlayer.winCondition='defeat'
 
 @efficiencyCheck
 def drawEndScreen(display,data):
@@ -638,3 +650,31 @@ def initStartMenu(data):
     rightButton=rts_images.MenuBackButton(data.width-55,data.height*.9)
     rightButton.image=pygame.transform.flip(rightButton.image,True,False)
     data.instructionScollers.add(rightButton)
+    data.hostIcon=pygame.sprite.GroupSingle()
+
+@efficiencyCheck
+def isVisible(data,item):
+    visibilityRange=400
+    for unit in data.localPlayer.units:
+        dist=((unit.rect.center[0]-item.rect.center[0])**2+(unit.rect.center[1]-item.rect.center[1])**2)**.5
+        if(dist<=visibilityRange):
+            return True
+    for building in data.localPlayer.buildings:
+        dist=((building.rect.center[0]-item.rect.center[0])**2+(building.rect.center[1]-item.rect.center[1])**2)**.5
+        if(dist<=visibilityRange):
+            return True
+    for building in data.localPlayer.inConstruction:
+        dist=((building.rect.center[0]-item.rect.center[0])**2+(building.rect.center[1]-item.rect.center[1])**2)**.5
+        if(dist<=visibilityRange):
+            return True
+    return False
+
+@efficiencyCheck
+def drawVisibility(data,display):
+    visibilityRange=400
+    for unit in data.localPlayer.units:
+        pygame.draw.circle(display,(255,255,255),unit.rect.center,visibilityRange)
+    for building in data.localPlayer.buildings:
+        pygame.draw.circle(display,(255,255,255),building.rect.center,visibilityRange)
+    for building in data.localPlayer.inConstruction:
+        pygame.draw.circle(display,(255,255,255),building.rect.center,visibilityRange)

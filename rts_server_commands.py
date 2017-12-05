@@ -178,6 +178,15 @@ def interpServerCommands(data):
 				unit=rts_helpers.findUnitByID(data,unitID)
 				unit.kill()
 
+			elif(command=='cutTree'):
+				ID=msg[1]
+				x=msg[2]
+				y=msg[3]
+				for tree in data.trees:
+					if(tree.x==x and tree.y==y):
+						tree.kill()
+				data.board[x][y]='field'
+
 
 			#whenever a unit/building is dealt damage
 			# elif(command=='damageDealt'):

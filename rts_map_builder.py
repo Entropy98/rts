@@ -105,14 +105,12 @@ def generateMapPos(data):
 #uses mine and forest compilers to build 100x100 tile map
 @efficiencyCheck
 def buildMap(display,data):
-	drawLoadBar(display,data,'Constructing Board...',0)
 	iterations=0
 	for i in range(data.cells):
 		iterations+=1
 		newRow=[]
 		for j in range(data.cells):
 			iterations+=1
-			drawLoadBar(display,data,'Constructing Board...',(iterations)/(data.cells**2))
 			newRow.append('field')
 		data.board.append(newRow)
 	emptyBoard=data.board
@@ -136,15 +134,38 @@ def buildMap(display,data):
 @efficiencyCheck
 def drawLoadBar(display,data,msg,progress):
 	display.fill((20,20,20))
+	data.loadingScreenImage.draw(display)
 	loadmessage=data.font.render(msg+str(int(progress*100))+'%',1,(153,230,255))
 	display.blit(loadmessage,(data.width*.4,data.height*.77))
 	pygame.draw.rect(display,(76,76,76),(data.width*.1,data.height*.8,data.width*.8,10))
 	pygame.draw.rect(display,(153,230,255),(data.width*.1,data.height*.8+2,data.width*.8*progress,6))
+	if(data.loadingScreenTip=='CommandCenter'):
+		tip='Maximize resource yield by placing your command center closer to mines and trees'
+	elif(data.loadingScreenTip=='Marine'):
+		tip='Militia, while strong in numbers, become disjointed when conjested. Place your army carefully!'
+	elif(data.loadingScreenTip=='Drone'):
+		tip='Fun Fact: The developer spent way too much time on this sprite that you can barely see!'
+	elif(data.loadingScreenTip=='Farm'):
+		tip="Farms greatly increase your army size but at a hefty wood cost. Don't build more than you need!"
+	elif(data.loadingScreenTip=='Generator'):
+		tip='Generators have a great energy yield but a small battery. Build too many and their yield will become saturated'
+	elif(data.loadingScreenTip=='Wall'):
+		tip='Walls are cheap and sturdy. Build them to keep your enemy at bay'
+	elif(data.loadingScreenTip=='Barracks'):
+		tip='Barracks are costly and the only way to build an army. Focus these in your opponents bases'
+	tipLabel=data.font.render(tip,1,(153,230,255))
+	display.blit(tipLabel,(data.width*.1,data.height*.9))
 	pygame.display.update() 
 
 #draws all map sprites
 @efficiencyCheck
 def drawMap(display,data):
 	rts_images.displayMap(display,data,data.gameX-2500,data.gameY)
-	data.mines.draw(display)
-	data.trees.draw(display)
+	data.visibleNature.empty()
+	for mine in data.mines:
+		if(rts_helpers.isVisible(data,mine)):
+			data.visibleNature.add(mine)
+	for tree in data.trees:
+		if(rts_helpers.isVisible(data,tree)):
+			data.visibleNature.add(tree)
+	data.visibleNature.draw(display)

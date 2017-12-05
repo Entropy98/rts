@@ -67,8 +67,8 @@ def init(data):
 	data.mousePos=(0,0)
 	data.gameX=(25*data.cursorY-25*data.cursorX)+(data.width/2)
 	data.gameY=-((12.5*(data.cursorY+data.cursorX))-(data.height*.75)/2)
-	data.numOfForests=10
-	data.forestSize=100
+	data.numOfForests=15
+	data.forestSize=50
 	data.numOfMines=10
 	data.trees=pygame.sprite.Group()
 	data.mines=pygame.sprite.Group()
@@ -80,6 +80,29 @@ def init(data):
 	data.buildStencil=None
 	data.board=[]
 	data.boardComplete=False
+	data.visibleUnits=pygame.sprite.Group()
+	data.visibleBuildings=pygame.sprite.Group()
+	data.visibleNature=pygame.sprite.Group()
+	data.fogOfWar=pygame.Surface([data.width,data.height])
+	data.fogOfWar.set_alpha(20)
+	data.fogOfWar.fill((0,0,0))
+	data.loadingScreenTip=random.choice(['CommandCenter','Marine','Drone','Farm','Generator','Wall','Barracks'])
+	data.loadingScreenImage=pygame.sprite.GroupSingle()
+	if(data.loadingScreenTip=='CommandCenter'):
+		data.loadingScreenImage.add(rts_images.CommandCenterIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
+	elif(data.loadingScreenTip=='Marine'):
+		data.loadingScreenImage.add(rts_images.MarineIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
+	elif(data.loadingScreenTip=='Drone'):
+		data.loadingScreenImage.add(rts_images.DroneIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
+	elif(data.loadingScreenTip=='Farm'):
+		data.loadingScreenImage.add(rts_images.FarmIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
+	elif(data.loadingScreenTip=='Generator'):
+		data.loadingScreenImage.add(rts_images.GeothermalGeneratorIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
+	elif(data.loadingScreenTip=='Wall'):
+		data.loadingScreenImage.add(rts_images.WoodWallIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
+	elif(data.loadingScreenTip=='BarracksCenter'):
+		data.loadingScreenImage.add(rts_images.BarracksCenterIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
+
 
 @efficiencyCheck
 def startSingleplayerGame(display,data):
@@ -102,6 +125,8 @@ def startSingleplayerGame(display,data):
 		data.otherUsers['AI'].inConstruction.add(commandCenter)
 	x,y=rts_helpers.getTileCenterCoordinate(data,data.cursorX,data.cursorY)
 	data.localPlayer.createDrone(data,x,y,x,y)
+	data.failStartTime=time.time()
+	data.failTime=20*60
 
 @efficiencyCheck
 def mouseDown(event,data):
@@ -404,6 +429,9 @@ def redrawAll(display, data):
 		rts_helpers.drawSelectBox(display,data)
 		#rts_helpers.drawCursor(display,data)
 		if(data.localPlayer.winCondition=='play'):
+			data.fogOfWar.fill((0,0,0))
+			rts_helpers.drawVisibility(data,data.fogOfWar)
+			display.blit(data.fogOfWar,(0,0))
 			rts_menus.drawMenu(display,data)
 		else:
 			rts_helpers.drawEndScreen(display,data)

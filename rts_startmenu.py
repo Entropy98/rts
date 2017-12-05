@@ -1,4 +1,5 @@
 import pygame
+import rts_images
 
 def drawMenu(display,data):
 	pygame.draw.rect(display,(20,20,20),(0,0,data.width,data.height))
@@ -88,6 +89,7 @@ def drawMenu(display,data):
 		display.blit(joinLabel,(data.width*.62,data.height*.8))
 
 	elif(data.startMenuState=='Lobby'):
+		data.hostIcon.empty()
 		nameLabel=data.titleFont.render('Lobby',1,(153,230,255))
 		usernameLabel=data.menuFont.render(data.localPlayer.username,1,(153,230,255))
 		if(data.localPlayer.team=='yellow'):
@@ -99,6 +101,8 @@ def drawMenu(display,data):
 		elif(data.localPlayer.team=='green'):
 			pygame.draw.rect(display,(0,145,0),(data.width*.2,data.height*.35,data.width*.08,40))
 		pygame.draw.rect(display,(39,117,135),(data.width*.2,data.height*.35,data.width*.08,40),3)
+		if(data.localPlayer.role=='Host'):
+			data.hostIcon.add(rts_images.HostIcon(data.width*.2,data.height*.35))
 		display.blit(usernameLabel,(data.width*.3,data.height*.35))
 
 		i=0
@@ -114,7 +118,11 @@ def drawMenu(display,data):
 			elif(data.otherUsers[user].team=='green'):
 				pygame.draw.rect(display,(0,145,0),(data.width*.2,data.height*.35+((data.height*.05+40)*i),data.width*.08,40))
 			pygame.draw.rect(display,(39,117,135),(data.width*.2,data.height*.35+((data.height*.05+40)*i),data.width*.08,40),3)
+			if(data.otherUsers[user].role=='Host'):
+				data.hostIcon.add(rts_images.HostIcon(data.width*.2,data.height*.35+((data.height*.05+40)*i)))
 			display.blit(usernameLabel,(data.width*.3,data.height*.35+((data.height*.05+40)*i)))
+
+		data.hostIcon.draw(display)
 
 		#green team
 		pygame.draw.rect(display,(0,145,0),(data.width*.6,data.height*.4,40,40))

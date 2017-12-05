@@ -3,6 +3,7 @@ from pygame.locals import *
 import rts_classes
 import rts_images
 import rts_units
+import time
 from rts_dev_debug import efficiencyCheck
 
 #draws all aspects of menu
@@ -13,6 +14,8 @@ def drawMenu(display,data):
 	drawUnitBox(display,data)
 	drawCmdBox(display,data)
 	drawResourceBar(display,data)
+	if(data.startMenuState=='Singleplayer'):
+		drawObjectiveMenu(display,data)
 
 #draw top resource bar
 @efficiencyCheck
@@ -28,6 +31,27 @@ def drawResourceBar(display,data):
 	display.blit(energyLabel,(data.width*.6,data.height*.01))
 	supplyLabel=data.font.render('Supply:'+str(data.localPlayer.supply)+' / '+str(data.localPlayer.supplyCap),1,(255,255,255))
 	display.blit(supplyLabel,(data.width*.48,data.height*.01))
+
+@efficiencyCheck
+def drawObjectiveMenu(display,data):
+	pygame.draw.rect(display,(255,255,255),(data.width*.8,data.height*.05,data.width*.19,data.height*.2),2)
+	pygame.draw.line(display,(255,255,255),(data.width*.8,data.height*.09),(data.width*.99,data.height*.09),2)
+	menuTitle=data.font.render('Objectives:',1,(255,255,255))
+	display.blit(menuTitle,(data.width*.85,data.height*.055))
+	objectiveLine1=data.font.render('Destroy %d enemy ',1,(255,255,255))
+	objectiveLine2=data.font.render('Command Centers ',1,(255,255,255))
+	objectiveLine3=data.font.render('before they claim ',1,(255,255,255))
+	timeRemaining=int(data.failTime-(time.time()-data.failStartTime))
+	seconds=(timeRemaining)%60
+	if(len(str(seconds))==1):
+		seconds='0'+str(seconds)
+	else:
+		seconds=str(seconds)
+	objectiveLine4=data.font.render('the region in %d : %s'%(timeRemaining//60,seconds),1,(255,255,255))
+	display.blit(objectiveLine1,(data.width*.81,data.height*.1))
+	display.blit(objectiveLine2,(data.width*.81,data.height*.13))
+	display.blit(objectiveLine3,(data.width*.81,data.height*.16))
+	display.blit(objectiveLine4,(data.width*.81,data.height*.19))
 
 #draws botton right mini map
 @efficiencyCheck

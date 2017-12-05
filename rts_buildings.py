@@ -344,9 +344,19 @@ class WoodWall(Building):
 
 @efficiencyCheck
 def drawBuildings(display,data):
-	data.localPlayer.inConstruction.draw(display)
-	data.localPlayer.buildings.draw(display)
+	data.visibleBuildings.empty()
+	for building in data.localPlayer.inConstruction:
+		if(rts_helpers.isVisible(data,building)):
+			data.visibleBuildings.add(building)
+	for building in data.localPlayer.buildings:
+		if(rts_helpers.isVisible(data,building)):
+			data.visibleBuildings.add(building)
 	for ID in data.otherUsers:
 		player=data.otherUsers[ID]
-		player.inConstruction.draw(display)
-		player.buildings.draw(display)
+		for building in player.inConstruction:
+			if(rts_helpers.isVisible(data,building)):
+				data.visibleBuildings.add(building)
+		for building in player.buildings:
+			if(rts_helpers.isVisible(data,building)):
+				data.visibleBuildings.add(building)
+	data.visibleBuildings.draw(display)
