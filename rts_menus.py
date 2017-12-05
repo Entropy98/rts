@@ -40,7 +40,7 @@ def drawObjectiveMenu(display,data):
 	display.blit(menuTitle,(data.width*.85,data.height*.055))
 	objectiveLine1=data.font.render('Destroy %d enemy '%len(data.otherUsers['AI'].buildings),1,(255,255,255))
 	cmdCenterStr='Command Center'
-	if(len(data.otherUsers['AI'].buildings)==1):
+	if(len(data.otherUsers['AI'].buildings)!=1):
 		cmdCenterStr+='s'
 	objectiveLine2=data.font.render(cmdCenterStr,1,(255,255,255))
 	objectiveLine3=data.font.render('before they claim ',1,(255,255,255))
