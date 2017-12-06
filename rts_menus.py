@@ -343,7 +343,7 @@ def drawUnitBox(display,data):
 		display.blit(descLabel1,(boxX+iconBuffer,data.height*.8))
 		descLabel2=data.font.render('Wood Cost: 300  Metals Cost: 500',1,(153,230,255))
 		display.blit(descLabel2,(boxX+iconBuffer,data.height*.84))
-		descLabel3=data.font.render('Energy Cost: 5J per Tick',1,(153,230,255))
+		descLabel3=data.font.render('Energy Cost: 2.5J per Tick',1,(153,230,255))
 		display.blit(descLabel3,(boxX+iconBuffer,data.height*.88))
 		descLabel4=data.font.render('[Requires Farm and Geothermal Generator]',1,(153,230,255))
 		display.blit(descLabel4,(boxX+iconBuffer,data.height*.92))
