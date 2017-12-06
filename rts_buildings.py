@@ -373,7 +373,7 @@ class Beacon(Building):
 		self.health=2500
 		self.maxHealth=self.health
 
-		self.energy=-2.5
+		self.energy=-.25
 		self.battery=500
 
 		self.ringHeight=self.rect.height//2+20
