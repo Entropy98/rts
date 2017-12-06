@@ -593,8 +593,9 @@ def checkWinConditions(data):
         player=data.otherUsers[ID]
         if(player.winCondition=='defeat'):
             defeatedPlayers+=1
-        elif(player.winCondition=='win'):
             msg+='winCondition defeat \n'
+        elif(player.winCondition=='win'):
+            msg+='winCondition win \n'
     if(defeatedPlayers>=len(data.otherUsers)):
         msg+='winCondition win \n'
         data.localPlayer.winCondition='win'
