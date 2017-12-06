@@ -26,12 +26,20 @@ class Building(pygame.sprite.Sprite):
 		self.tiles=[]
 
 	@efficiencyCheck
+	def burn(self):
+		if(self.health<20):
+			self.health-=2
+
+	@efficiencyCheck
 	def update(self,data):
 		self.rect.center=rts_helpers.coord2Pos(data,self.coords[0]+self.xTileOffset,self.coords[1]+self.yTileOffset)
 		if(self.health<=0):
 			for tile in self.tiles:
 				data.board[tile[0]][tile[1]]='field'
 			self.kill()
+			msg='destroyBuilding %d %s \n'%(self.ID,self.tiles)
+			if(data.startMenuState!='Singleplayer'):
+					data.server.send(msg.encode())
 			
 
 class CommandCenter(Building):
@@ -467,6 +475,7 @@ def drawBuildings(display,data):
 	for building in data.localPlayer.buildings:
 		if(rts_helpers.isVisible(data,building)):
 			data.visibleBuildings.add(building)
+			building.burn()
 			if(building.name=='Beacon'):
 				data.visibleBuildings.add(building.ring)
 				building.ringHeight=building.ringHeight+(building.maxRingHeight-building.ringHeight)*((time.time()-building.winStartTime)/building.winGoal)
@@ -480,6 +489,7 @@ def drawBuildings(display,data):
 		for building in player.buildings:
 			if(rts_helpers.isVisible(data,building)):
 				data.visibleBuildings.add(building)
+				building.burn
 				if(building.name=='Beacon'):
 					data.visibleBuildings.add(building.ring)
 					building.ringHeight=building.ringHeight+(building.maxRingHeight-building.ringHeight)*((time.time()-building.winStartTime)/building.winGoal)

@@ -166,11 +166,7 @@ def interpServerCommands(data):
 			elif(command=='winCondition'):
 				ID=msg[1]
 				condition=msg[2]
-				player=msg[3]
-				if(ID!=player):
-					data.otherUsers[player].winCondition=condition
-				else:
-					data.localPlayer.winCondition=condition
+				data.otherUsers[ID].winCondition=condition
 
 			elif(command=='destroyBuilding'):
 				ID=msg[1]

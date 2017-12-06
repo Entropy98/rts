@@ -570,7 +570,9 @@ def checkWinConditions(data):
     msg=''
     if(len(data.localPlayer.units)==0 and len(data.localPlayer.buildings)==0):
         data.localPlayer.winCondition='defeat'
-        msg+='winCondition defeat %s \n'%(data.localPlayer.ID)
+        msg+='winCondition defeat \n'
+        if(data.startMenuState!='Singleplayer'):
+            data.server.send(msg.encode())
     if('AI' in data.otherUsers):
         if(len(data.otherUsers['AI'].units)==0 and len(data.otherUsers['AI'].buildings)==0 and len(data.otherUsers['AI'].inConstruction)==0):
             data.otherUsers['AI'].winCondition='defeat'
@@ -584,7 +586,7 @@ def checkWinConditions(data):
                     building.kill()
             if(time.time()-building.winStartTime>building.winGoal):
                 data.localPlayer.winCondition='win'
-                msg+='winCondition win %s \n'%(data.localPlayer.ID)
+                msg+='winCondition win \n'
             if(data.startMenuState!='Singleplayer'):
                 data.server.send(msg.encode())
 
@@ -593,15 +595,11 @@ def checkWinConditions(data):
         player=data.otherUsers[ID]
         if(player.winCondition=='defeat'):
             defeatedPlayers+=1
-            msg+='winCondition defeat %s \n'%(player.ID)
-        if(len(player.units)==0 and len(player.buildings)==0):
-            data.localPlayer.winCondition='defeat'
-            defeatedPlayers+=1
-            msg+='winCondition defeat %s \n'%(player.ID)
+            msg+='winCondition defeat \n'
         elif(player.winCondition=='win'):
-            msg+='winCondition win %s \n'%(player.ID)
+            msg+='winCondition win \n'
     if(defeatedPlayers>=len(data.otherUsers)):
-        msg+='winCondition win %s \n'%(player.ID)
+        msg+='winCondition win \n'
         data.localPlayer.winCondition='win'
     if(data.startMenuState!='Singleplayer'):
         if(data.localPlayer.winCondition=='play'):
