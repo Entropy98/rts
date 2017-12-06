@@ -71,7 +71,7 @@ def init(data):
 	data.fogOfWar=pygame.Surface([data.width,data.height])
 	data.fogOfWar.set_alpha(20)
 	data.fogOfWar.fill((0,0,0))
-	data.loadingScreenTip=random.choice(['CommandCenter','Marine','Drone','Farm','Generator','Wall','Barracks'])
+	data.loadingScreenTip=random.choice(['CommandCenter','Marine','Drone','Farm','Generator','Wall','Barracks','Beacon'])
 	data.loadingScreenImage=pygame.sprite.GroupSingle()
 	if(data.loadingScreenTip=='CommandCenter'):
 		data.loadingScreenImage.add(rts_images.CommandCenterIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
@@ -87,6 +87,8 @@ def init(data):
 		data.loadingScreenImage.add(rts_images.WoodWallIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
 	elif(data.loadingScreenTip=='Barracks'):
 		data.loadingScreenImage.add(rts_images.BarracksIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
+	elif(data.loadingScreenTip=='Beacon'):
+		data.loadingScreenImage.add(rts_images.BeaconIcon(data.width*.123,0,int(data.width*.75),int(data.width*.75)))
 	rts_helpers.updateMap(data,data.gameX,data.gameY)
 
 

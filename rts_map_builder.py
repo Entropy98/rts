@@ -153,6 +153,8 @@ def drawLoadBar(display,data,msg,progress):
 		tip='Walls are cheap and sturdy. Taking the time to build them is worth keeping your enemy at bay'
 	elif(data.loadingScreenTip=='Barracks'):
 		tip='Barracks are costly and the only way to build an army. Focus these in your opponents bases'
+	elif(data.loadingScreenTip=='Beacon'):
+		tip='Beacons are sturdy structures but require a lot of energy to upkeep. Target the generators'
 	tipLabel=data.font.render(tip,1,(153,230,255))
 	display.blit(tipLabel,(data.width*.1,data.height*.9))
 	pygame.display.update() 
